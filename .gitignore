@@ -1,0 +1,15 @@
+/build*
+/dev
+/examples/*
+!/examples/*.cpp
+!/examples/Makefile
+!/examples/runall
+/docs/*
+!/docs/doxyfile
+.settings
+.project
+.cproject
+.pydevproject
+*.exe
+*.o
+
