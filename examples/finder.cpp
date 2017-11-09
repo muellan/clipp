@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- * demo program - part of CLIPP (command line parsing for modern C++)
+ * demo program - part of CLIPP (command line interfaces for modern C++)
  *
  * released under MIT license
  *
