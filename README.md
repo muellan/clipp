@@ -600,6 +600,8 @@ auto cli = (
         option("-f").set(f)
     )
 );
+
+cout << make_man_page(cli, "myprogram");
 ```
 
 The above example is in fact shorthand for this:
@@ -624,6 +626,8 @@ group cli{
         parameter{"-f"}.set(f)
     }.doc("activates E or F")
 };
+
+cout << make_man_page(cli, "myprogram");
 ```
 
 You can of course also fill groups one-by-one:
@@ -1846,6 +1850,7 @@ auto fmt = doc_formatting{}
     .alternative_group_separator(" | ")        //between alternative groups 
     .surround_group("(", ")")                  //surround groups with these 
     .surround_alternatives("(", ")")           //surround group of alternatives with these
+    .surround_alternative_flags("", "")        //surround alternative flags with these
     .surround_joinable("(", ")")               //surround group of joinable flags with these
     .surround_optional("[", "]")               //surround optional parameters with these
     .surround_repeat("", "...")                //surround repeatable parameters with these

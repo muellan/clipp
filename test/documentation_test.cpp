@@ -47,7 +47,8 @@ int main()
         .surround_labels("<", ">")
         .surround_optional("[", "]")
         .surround_repeat(",,,", "...")
-        .surround_alternatives("§(|", "|)§")
+        .surround_alternatives("§(§", "§)§")
+        .surround_alternative_flags("^(^", "^)^")
         .surround_group("(", ")")
         .surround_joinable("$($", "$)$")
         .max_flags_per_param_in_doc(2)
@@ -64,7 +65,7 @@ int main()
             (option("-o", "--out") & value("output file")) % "output filename",
             with_prefix("-f", option("align") >> []{} | option("noalign") >> []{} ) % "control alignment"
         ),
-         "   -o%<output file>                          output filename\n"
+         "   ^(^-o~--out^)^%<output file>              output filename\n"
          "\n"
          "   -falign|-fnoalign                         control alignment");
 
@@ -74,9 +75,9 @@ int main()
             (option("-r", "--ratio") & value("ratio")) % "compression ratio",
             (option("-m") & opt_value("lines=5")) % "merge lines (default: 5)"
         ),
-         "   -n%<count>                                number of iterations\n"
+         "   ^(^-n~--count^)^%<count>                  number of iterations\n"
          "\n"
-         "   -r%<ratio>                                compression ratio\n"
+         "   ^(^-r~--ratio^)^%<ratio>                  compression ratio\n"
          "\n"
          "   -m%<lines=5>                              merge lines (default: 5)");
 
@@ -90,7 +91,7 @@ int main()
          "\n"
          "   -c~--compress                             compress results\n"
          "\n"
-         "   -i%<line>                                 lines to be ignored");
+         "   ^(^-i~--ignore^)^%<line>                  lines to be ignored");
 
 
     test(__LINE__, fmt, group(
@@ -100,21 +101,9 @@ int main()
         ),
          "   -r~--recursive                            recurse into subdirectories\n"
          "\n"
-         "   -i%<input dir>                            sets path to input directory\n"
+         "   ^(^-i~--in^)^%<input dir>                 sets path to input directory\n"
          "\n"
-         "   -o%<output dir>                           sets path to output directory");
-
-
-    test(__LINE__, fmt, group(
-            values("directory") % "input files",
-            option("-c", "--compress") % "compress results",
-            (option("-i", "--ignore") & values("line")) % "lines to be ignored"
-        ),
-         "   ,,,<directory>...                         input files\n"
-         "\n"
-         "   -c~--compress                             compress results\n"
-         "\n"
-         "   -i%<line>                                 lines to be ignored");
+         "   ^(^-o~--out^)^%<output dir>               sets path to output directory");
 
 
     test(__LINE__, fmt, group(
@@ -275,7 +264,7 @@ int main()
             ( option("-split"  ) | option("-nosplit"))) | command("help"),
             option("-v", "--version").call([]{}) % "show version"
         ),
-         "   -o%<outfile>                              write to file instead of stdout\n"
+         "   ^(^-o~--output^)^%<outfile>               write to file instead of stdout\n"
          "\n"
          "   -v~--version                              show version");
 
@@ -457,7 +446,7 @@ int main()
             value("filename"),
             (option("-e", "--encoding") & value("enc")).doc("'utf8' or 'cp1252'")
         ),
-        "   -e%<enc>                                  'utf8' or 'cp1252'");
+        "   ^(^-e~--encoding^)^%<enc>                 'utf8' or 'cp1252'");
 
 
     test(__LINE__, fmt, group(

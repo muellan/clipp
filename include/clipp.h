@@ -5054,6 +5054,16 @@ public:
     const string& alternatives_prefix()  const noexcept { return alternPre_; }
     const string& alternatives_postfix() const noexcept { return alternPst_; }
 
+    /** @brief determnines strings surrounding alternative flags */
+    doc_formatting&
+    surround_alternative_flags(const string& prefix, const string& postfix) {
+        alternFlagPre_ = prefix;
+        alternFlagPst_ = postfix;
+        return *this;
+    }
+    const string& alternative_flags_prefix()  const noexcept { return alternFlagPre_; }
+    const string& alternative_flags_postfix() const noexcept { return alternFlagPst_; }
+
     /** @brief determnines strings surrounding non-exclusive groups */
     doc_formatting&
     surround_group(const string& prefix, const string& postfix) {
@@ -5147,24 +5157,26 @@ public:
     int alternatives_min_split_size() const noexcept { return groupSplitSize_; }
 
 private:
-    string paramSep_    = string(" ");
-    string groupSep_    = string(" ");
-    string altParamSep_ = string("|");
-    string altGroupSep_ = string(" | ");
-    string flagSep_     = string(", ");
-    string labelPre_    = string("<");
-    string labelPst_    = string(">");
-    string optionPre_   = string("[");
-    string optionPst_   = string("]");
-    string repeatPre_   = string("");
-    string repeatPst_   = string("...");
-    string groupPre_    = string("(");
-    string groupPst_    = string(")");
-    string alternPre_   = string("(");
-    string alternPst_   = string(")");
-    string joinablePre_ = string("(");
-    string joinablePst_ = string(")");
-    string emptyLabel_  = string("");
+    string paramSep_      = string(" ");
+    string groupSep_      = string(" ");
+    string altParamSep_   = string("|");
+    string altGroupSep_   = string(" | ");
+    string flagSep_       = string(", ");
+    string labelPre_      = string("<");
+    string labelPst_      = string(">");
+    string optionPre_     = string("[");
+    string optionPst_     = string("]");
+    string repeatPre_     = string("");
+    string repeatPst_     = string("...");
+    string groupPre_      = string("(");
+    string groupPst_      = string(")");
+    string alternPre_     = string("(");
+    string alternPst_     = string(")");
+    string alternFlagPre_ = string("");
+    string alternFlagPst_ = string("");
+    string joinablePre_   = string("(");
+    string joinablePst_   = string(")");
+    string emptyLabel_    = string("");
     int startCol_ = 8;
     int docCol_ = 20;
     int indentSize_ = 4;
@@ -5256,8 +5268,6 @@ private:
      *
      * @brief writes usage text for command line parameters
      *
-     * @param prefix   all that goes in front of current things to print
-     *
      *******************************************************************/
     template<class OStream>
     void print_usage(OStream& os) const
@@ -5277,7 +5287,6 @@ private:
      * @brief writes usage text for command line parameters
      *
      * @param prefix   all that goes in front of current things to print
-     * @param level    recursion depth after starting a new line
      *
      *******************************************************************/
     template<class OStream>
@@ -5451,7 +5460,7 @@ private:
 
             const bool surrAlt = n > 1 && !showopt && !cur.is_singleton();
 
-            if(surrAlt) lbl += fmt_.alternatives_prefix();
+            if(surrAlt) lbl += fmt_.alternative_flags_prefix();
             bool sep = false;
             for(int i = 0; i < n; ++i) {
                 if(sep) {
@@ -5463,7 +5472,7 @@ private:
                 lbl += flags[i];
                 sep = true;
             }
-            if(surrAlt) lbl += fmt_.alternatives_postfix();
+            if(surrAlt) lbl += fmt_.alternative_flags_postfix();
         }
         else {
              if(!p.label().empty()) {
@@ -5666,8 +5675,13 @@ public:
                   const doc_formatting& fmt = doc_formatting{},
                   const param_filter& filter = param_filter{})
     :
-        cli_(cli), fmt_{fmt}, filter_{filter}
-    {}
+        cli_(cli), fmt_{fmt}, usgFmt_{fmt}, filter_{filter}
+    {
+        //necessary, because we re-use "usage_lines" to generate
+        //labels for documented groups
+        usgFmt_.max_flags_per_param_in_usage(
+            usgFmt_.max_flags_per_param_in_doc());
+    }
 
     documentation(const group& params,
                   const param_filter& filter,
@@ -5679,7 +5693,7 @@ public:
     template<class OStream>
     inline friend OStream& operator << (OStream& os, const documentation& p) {
         printed prn = printed::nothing;
-        documentation::print_doc(os, p.cli_, p.filter_, p.fmt_, prn);
+        p.print_doc(os, p.cli_, prn);
         return os;
     }
 
@@ -5694,6 +5708,7 @@ private:
 
     const group& cli_;
     doc_formatting fmt_;
+    doc_formatting usgFmt_;
     param_filter filter_;
 
 
@@ -5703,19 +5718,16 @@ private:
      *
      *******************************************************************/
     template<class OStream>
-    static void
-    print_doc(OStream& os, const group& params,
-              const param_filter& filter,
-              const doc_formatting& fmt,
-              printed& sofar,
-              int indentLvl = 0)
+    void print_doc(OStream& os, const group& params,
+                   printed& sofar,
+                   int indentLvl = 0) const
     {
         if(params.empty()) return;
 
         //if group itself doesn't have docstring
         if(params.doc().empty()) {
             for(const auto& p : params) {
-                print_doc(os, p, filter, fmt, sofar, indentLvl);
+                print_doc(os, p, sofar, indentLvl);
             }
         }
         else { //group itself does have docstring
@@ -5724,23 +5736,23 @@ private:
 
             if(anyDocInside) { //group docstring as title, then child entries
                 if(sofar != printed::nothing) {
-                    os << string(fmt.paragraph_spacing() + 1, '\n');
+                    os << string(fmt_.paragraph_spacing() + 1, '\n');
                 }
-                auto indent = string(fmt.start_column(), ' ');
-                if(indentLvl > 0) indent += string(fmt.indent_size() * indentLvl, ' ');
+                auto indent = string(fmt_.start_column(), ' ');
+                if(indentLvl > 0) indent += string(fmt_.indent_size() * indentLvl, ' ');
                 os << indent << params.doc() << '\n';
                 sofar = printed::nothing;
                 for(const auto& p : params) {
-                    print_doc(os, p, filter, fmt, sofar, indentLvl + 1);
+                    print_doc(os, p, sofar, indentLvl + 1);
                 }
                 sofar = printed::paragraph;
             }
             else { //group label first then group docstring
-                auto lbl = usage_lines(params, fmt)
+                auto lbl = usage_lines(params, usgFmt_)
                            .ommit_outermost_group_surrounders(true).str();
 
                 str::trim(lbl);
-                print_entry(os, lbl, params.doc(), fmt, sofar, indentLvl);
+                print_entry(os, lbl, params.doc(), fmt_, sofar, indentLvl);
             }
         }
     }
@@ -5752,19 +5764,16 @@ private:
      *
      *******************************************************************/
     template<class OStream>
-    static void
-    print_doc(OStream& os, const pattern& ptrn,
-              const param_filter& filter,
-              const doc_formatting& fmt,
-              printed& sofar, int indentLvl)
+    void print_doc(OStream& os, const pattern& ptrn,
+                   printed& sofar, int indentLvl) const
     {
         if(ptrn.is_group()) {
-            print_doc(os, ptrn.as_group(), filter, fmt, sofar, indentLvl);
+            print_doc(os, ptrn.as_group(), sofar, indentLvl);
         }
         else {
             const auto& p = ptrn.as_param();
-            if(!filter(p)) return;
-            print_entry(os, param_label(p, fmt), p.doc(), fmt, sofar, indentLvl);
+            if(!filter_(p)) return;
+            print_entry(os, param_label(p, fmt_), p.doc(), fmt_, sofar, indentLvl);
         }
     }
 
