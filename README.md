@@ -353,7 +353,7 @@ auto param = required("-nof").set(file,"") |
                               // if match is in conflict with other alternative "-nof"
                               .if_conflicted( [] { /* ... */ } );   
 ```
-The handler functions can also take an int, which is set to the argument index at which it occured:
+The handler functions can also take an int, which is set to the argument index at which the event occured first:
 ```cpp
 string file = "default.txt";
 auto param = required("-nof").set(file,"") | 
@@ -501,15 +501,14 @@ You should also have a look at [actions](#actions) for more details.
 ```cpp
 int n = 1;
 
-auto optN = parameter{"-n", "-N", "--iterations", "--repeats"}
-    .required(true)
-    .doc("number of iterations (default = " + std::to_string(n) + ")")
+auto optN = parameter{"-n", "-N", "--iterations", "--repeats"}.required(true);
 
 auto valN = parameter{match::any}
     .label("times")
     .set(n)
-    .call([](string s) { if(!clipp::match::(s)) throw runtime_error{"no valid value for n was given"}; })
-    .on_error([](error e) {if(e.unmatched) cout << "-n not found!\n"; });
+    .call([](string s) { if(!str::represents_number(s)) throw runtime_error{"invalid value for 'times'"}; })
+    .on_missing([]{ cout << "value 'times' not found!\n"; })
+    .doc("number of iterations (default = " + std::to_string(n) + ")");
 
 auto cli = group{};
 cli.push_back(std::move(optN));
