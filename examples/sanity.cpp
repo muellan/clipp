@@ -20,12 +20,11 @@ int main(int argc, char* argv[])
     using std::cout;
 
 
-    auto cli = group( );
+    auto cli = group(
+        option("-a"),
+        option("-ab")
+    );
 
-    if(parse(argc, argv, cli)) {
-
-    }
-    else {
-        cout << make_man_page(cli, argv[0]) << '\n';
-    }
+    cout << "flags are " << (cli.flags_are_prefix_free() ? "" : "not ")
+         << "prefix free\n";
 }
