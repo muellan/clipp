@@ -211,7 +211,7 @@ value(is_char, "c", c);      // one character  yes       yes         no
 ```
 
 
-#### Groups 
+#### Groups
  - [group](#groups) mutually compatible parameters with parentheses and commas:
    ```cpp
    auto cli = ( option("-a"), option("-b"), option("-c") )
@@ -402,7 +402,7 @@ The repository folder "examples" contains code for most of the following example
 - [options](#options)
 - [coding styles](#coding-styles)
 - [flag strings](#flag-strings)
-- [groups](#groups)
+- [groups](#grouping)
 - [positional values](#required-positional-values)
 - [options with values](#options-with-values)
 - [options with multiple values](#options-with-multiple-values)
@@ -556,7 +556,7 @@ assert(cli.flags_are_prefix_free());
 ```
 
 
-### Groups
+### Grouping
 Groups can be nested (see [here](#nested-alternatives)) and have their own documentation string. 
 The statement ```auto cli = ( ... );``` creates a group, if there are more than two parameters/groups declared inside the parentheses.
 
