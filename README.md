@@ -507,7 +507,7 @@ auto valN = parameter{match::any}
     .label("times")
     .set(n)
     .call([](string s) { if(!str::represents_number(s)) throw runtime_error{"invalid value for 'times'"}; })
-    .on_missing([]{ cout << "value 'times' not found!\n"; })
+    .if_missing([]{ cout << "value 'times' not found!\n"; })
     .doc("number of iterations (default = " + std::to_string(n) + ")");
 
 auto cli = group{};
