@@ -212,7 +212,7 @@ value(is_char, "c", c);      // one character  yes       yes         no
 
 
 #### Groups
- - [group](#groups) mutually compatible parameters with parentheses and commas:
+ - [group](#grouping) mutually compatible parameters with parentheses and commas:
    ```cpp
    auto cli = ( option("-a"), option("-b"), option("-c") )
    ```
@@ -271,12 +271,12 @@ The easiest way to connect the command line interface to the rest of your code i
 ```cpp
 bool b = false; int i = 5; int m = 0; string x; ifstream fs;
 auto cli = ( 
-    option("-b").set(b)                      // "-b" detected -> set b to true
-    option("-m").set(m,2),                   // "-m" detected -> set m to 2
-    option("-x") & value("X", x),            // set x's value from arg string 
-    option("-i") & opt_value("i", i),        // set i's value from arg string  
-    option("-v").call( []{ cout << "v"; }),  // call function (object) / lambda
-    option("-v")( []{ cout << "v"; } ),      // same as previous line
+    option("-b").set(b)                       // "-b" detected -> set b to true
+    option("-m").set(m,2),                    // "-m" detected -> set m to 2
+    option("-x") & value("X", x),             // set x's value from arg string 
+    option("-i") & opt_value("i", i),         // set i's value from arg string  
+    option("-v").call( []{ cout << "v"; } ),  // call function (object) / lambda
+    option("-v")( []{ cout << "v"; } ),       // same as previous line
     option("-f") & value("file").call([&](string f){ fs.open(f); }),
 );
 ```
@@ -1132,7 +1132,7 @@ The combination of blocking parameters, alternatives and grouping makes it possi
 SYNOPSIS
     ./complex_nesting [-v] [-i] (copy|move) [--all] [--replace] [-f] <files>... [-r] [-h]
     ./complex_nesting [-v] [-i] compare (date|content) [-b] [-q] <files>... [-r] [-h]
-    ./complex_nesting [-v] [-i] merge diff|patch -o <outdir> [--show-conflicts] <files>... [-r] [-h]
+    ./complex_nesting [-v] [-i] merge (diff|patch) -o <outdir> [--show-conflicts] <files>... [-r] [-h]
     ./complex_nesting [-v] [-i] merge content [--git-style] [-m <marker>] -o <outdir> [--show-conflicts] <files>... [-r] [-h]
     ./complex_nesting [-v] [-i] list <files>... [-r] [-h]
 
@@ -1276,18 +1276,18 @@ Naval Fate.
 
 Usage:
   naval_fate ship new <name>...
-  naval_fate ship <name> move <x> <y> [--speed=<kn>]
+  naval_fate ship <name> move <x> <y> [--speed= <kn>]
   naval_fate ship shoot <x> <y>
   naval_fate mine (set|remove) <x> <y> [--moored|--drifting]
   naval_fate -h | --help
   naval_fate --version
 
 Options:
-  --speed=<kn>  Speed in knots [default: 10].
-  --moored      Moored (anchored) mine.
-  --drifting    Drifting mine.
-  -h --help     Show this screen.
-  --version     Show version.
+  --speed= <kn>  Speed in knots [default: 10].
+  --moored       Moored (anchored) mine.
+  --drifting     Drifting mine.
+  -h, --help     Show this screen.
+  --version      Show version.
 ```
 
 This code defines the command line interface, handles the parsing result and
@@ -1335,7 +1335,7 @@ switch(m) {
         break;
     case mode::help: {
         auto fmt = doc_formatting{}
-            .start_column(2).param_column(2).doc_column(16)
+            .start_column(2).doc_column(16)
             .max_flags_per_param_in_usage(4);
 
         cout << "Naval Fate.\n\nUsage:\n"
@@ -1491,7 +1491,7 @@ Valid input includes:
 
 #### Example 2: Listing Numbers
 ```man
-Usage:    numbers ([,] <number>)...
+Usage:    numbers ([,] [<number>])...
 ```
 
 ```cpp
@@ -1528,7 +1528,7 @@ The following definition for example, contains a subtle pitfall:
 auto cli = joinable(repeatable( option(",") , number("number", nums) ));
 //                                            ^^^ non-optional
 ```
-This will not match arguments like ```"1,"```. This is, because, if the repeat group is 'hit' by any of its child parameters, all non-optional parameters must also match wihtin the current 'repeat cycle'. So, if the parser hits the ```","``` it expects to find a number arg as well, because it is required. Only after seeing this number can it enter the next repeat cycle. Thus, the argument will not be matched, since joined matches are only valid if no error occured. Making the number optional solves the problem.
+This will not match arguments like ```"1,"```. This is, because, if the repeat group is 'hit' by any of its child parameters, all non-optional parameters must also match wihtin the current 'repeat cycle'. So, if the parser hits the ```","``` it expects to find a number arg as well, because it is blocking (positional) and required. Only after seeing this number can it enter the next repeat cycle. Thus, the argument will not be matched, since joined matches are only valid if no error occured. Making the number optional solves the problem.
 
 
 ### Custom Value Filters
