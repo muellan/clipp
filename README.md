@@ -1,6 +1,8 @@
 clipp - command line interfaces for modern C++
 ===========================================================
 
+[![Linux build status](https://travis-ci.org/muellan/clipp.svg?branch=travis)](https://travis-ci.org/muellan/clipp)
+
 Easy to use, powerful and expressive command line argument handling for C++11/14/17 contained in a **single header file**. 
 
 - options, options+value(s), positional values, positional commands, nested alternatives, decision trees, joinable flags, custom value filters, ...
