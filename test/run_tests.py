@@ -26,7 +26,7 @@ builddir   = "../build_test"
 incpaths   = ["", "../include/", "../src/"]
 macros     = ["NO_DEBUG", "NDEBUG"]
 compiler   = "g++"
-compileopt = "-std=c++14 -O3 -Wall -Wextra -Wpedantic -Wno-unknown-pragmas"
+compileopt = "-std=c++0x -Wall -Wextra -Wpedantic -Wno-unknown-pragmas"
 tuext      = "cpp"
 separator  = "-----------------------------------------------------------------"
 
