@@ -47,7 +47,7 @@ int main()
         .surround_labels("<", ">")
         .surround_optional("[", "]")
         .surround_repeat(",,,", "...")
-        .surround_alternatives("§(|", "|)§")
+        .surround_alternatives("§(§", "§)§")
         .surround_group("(", ")")
         .surround_joinable("$($", "$)$")
         .max_flags_per_param_in_doc(2)
@@ -85,7 +85,7 @@ int main()
     test(__LINE__, fmt, group(
             (option("-o", "--out") & value("output file")) % "output filename",
             with_prefix("-f", option("align") >> []{} | option("noalign") >> []{} ) % "control alignment"),
-         "   [-o%<output file>]#[-f§(|align|noalign|)§]");
+         "   [-o%<output file>]#[-f§(§align|noalign§)§]");
 
 
     test(__LINE__, fmt, group(
@@ -107,7 +107,7 @@ int main()
             required("-t") & values("target").if_missing([]{}).if_blocked([]{}),
             option("--http") | option("--ftp").if_conflicted([]{}),
             any_other()),
-         "   <file>#-t%,,,<target>...#[--§(|http|ftp|)§]#,,,[<?>]...");
+         "   <file>#-t%,,,<target>...#[--§(§http|ftp§)§]#,,,[<?>]...");
 
 
     test(__LINE__, fmt, group(
@@ -176,7 +176,7 @@ int main()
          "   ship#new%,,,<name>...\n"
          "   ship#<name>#move#<x>#<y>#[--speed=%<kn>]\n"
          "   ship#shoot%<x>%<y>\n"
-         "   mine#set|remove#<x>#<y>#[--§(|moored|drifting|)§]\n"
+         "   mine#§(§set|remove§)§#<x>#<y>#[--§(§moored|drifting§)§]\n"
          "   -h\n"
          "   --version");
 
@@ -196,7 +196,7 @@ int main()
                    & value("format")
                )),
        "   help\n"
-       "   build#new|add#,,,<file>...#[-v]#[-b%[<size=10>]]#[--§(|init|no-init|)§]\n"
+       "   build#§(§new|add§)§#,,,<file>...#[-v]#[-b%[<size=10>]]#[--§(§init|no-init§)§]\n"
        "   query#<infile>#-o%<outfile>#[-f%<format>]");
 
 
@@ -230,7 +230,7 @@ int main()
             option("-v", "--version").call([]{}) % "show version")
          ,
        "   make#<wordfile>#-dict%<dictionary>#[--progress]#[-v]\n"
-       "   find#,,,<infile>...#-dict%<dictionary>#[-o%<outfile>]#[-§(|split|nosplit|)§]#[-v]\n"
+       "   find#,,,<infile>...#-dict%<dictionary>#[-o%<outfile>]#[-§(§split|nosplit§)§]#[-v]\n"
        "   help#[-v]");
 
 
@@ -274,11 +274,11 @@ int main()
             )
         ),
         "   help\n"
-        "   build#new|add#<file>\n"
+        "   build#§(§new|add§)§#<file>\n"
         "   query#-i%<infile>#[-p]\n"
         "   info#space\n"
-        "   info#statistics#words|chars\n"
-        "   remove#a§(|ny|ll|)§#<regex>\n"
+        "   info#statistics#§(§words|chars§)§\n"
+        "   remove#a§(§ny|ll§)§#<regex>\n"
         "   modify#[-c]#[-u]#[-m%<size>]");
 
 
@@ -334,9 +334,9 @@ int main()
                 option("-h", "--help") % "show help"
             )
         ),
-         "   [-v]%[-i]#copy|move#[--all]#[--replace]#[-f]#,,,<files>...%[-r]%[-h]\n"
-         "   [-v]%[-i]#compare#date|content#[-b]#[-q]#,,,<files>...%[-r]%[-h]\n"
-         "   [-v]%[-i]#merge#§(|diff|patch|)§#-o%<outdir>#[--show-conflicts]#,,,<files>...%[-r]%[-h]\n"
+         "   [-v]%[-i]#§(§copy|move§)§#[--all]#[--replace]#[-f]#,,,<files>...%[-r]%[-h]\n"
+         "   [-v]%[-i]#compare#§(§date|content§)§#[-b]#[-q]#,,,<files>...%[-r]%[-h]\n"
+         "   [-v]%[-i]#merge#§(§diff|patch§)§#-o%<outdir>#[--show-conflicts]#,,,<files>...%[-r]%[-h]\n"
          "   [-v]%[-i]#merge#content#[--git-style]#[-m%<marker>]#-o%<outdir>#[--show-conflicts]#,,,<files>...%[-r]%[-h]\n"
          "   [-v]%[-i]#list#,,,<files>...%[-r]%[-h]");
 
@@ -349,7 +349,7 @@ int main()
 
 
     test(__LINE__, fmt, group( command("auto") | ( command("label"), value("character") )),
-         "   §(|auto^(label%<character>)|)§");
+         "   §(§auto^(label%<character>)§)§");
 
 
     test(__LINE__, fmt, group(
@@ -358,7 +358,7 @@ int main()
             option("any") % "report as soon as any matches" |
             option("all") % "report only if all match"
         ),
-        "   ,,,<file>...#-s%<expr>#[a§(|ny|ll|)§]");
+        "   ,,,<file>...#-s%<expr>#[a§(§ny|ll§)§]");
 
 
     test(__LINE__, fmt, group( value(""), option("-x"), option("-y") ),
