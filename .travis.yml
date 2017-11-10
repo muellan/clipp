@@ -99,8 +99,7 @@ script:
     # - cd docs
     # - doxygen doxyfile
     # - cd ..
-    - cd test
-    - ./run_tests.py
+    - cd test && ./run_tests.py
 
 # deploy:
 #   provider: pages
