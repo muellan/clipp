@@ -5592,7 +5592,7 @@ private:
             } else if(group.all_flagless()) {
                 prefix  = fmt_.label_prefix();
                 postfix = fmt_.label_postfix();
-            } else if(!cur.is_singleton() && isOutermost) {
+            } else if(!cur.is_singleton() || !isOutermost) {
                 prefix  = fmt_.alternatives_prefix();
                 postfix = fmt_.alternatives_postfix();
             }
