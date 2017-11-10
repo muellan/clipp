@@ -29,11 +29,11 @@ Here is the code that defines the positional value ```input file``` and the thre
 ```cpp
 #include <iostream>
 #include "clipp.h"
-using namespace clipp;
+using namespace clipp; using std::cout; using std::string;
 
 int main(int argc, char* argv[]) { 
     bool rec = false, utf16 = false;
-    std::string infile = "", fmt = "csv";
+    string infile = "", fmt = "csv";
 
     auto cli = (
         value("input file", infile),
