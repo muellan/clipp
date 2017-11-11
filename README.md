@@ -21,7 +21,7 @@ Easy to use, powerful and expressive command line argument handling for C++11/14
 Consider this command line interface:
 ```man
 SYNOPSIS
-    ./convert <input file> [-r] [-o <output format>] [-utf16]
+    convert <input file> [-r] [-o <output format>] [-utf16]
 
 OPTIONS
     -r, --recursive  convert files recursively
@@ -806,7 +806,7 @@ The call ```values("v")``` is shorthand for ```value("v").repeatable(true)```.
 Note, that the  value parameter ```line``` is repeatable, but the flag ```--ignore``` is not. So 
 something like
 ```
-    ./simplify file1 file2 --ignore 1 2 --ignore 3 4 -c
+    simplify file1 file2 --ignore 1 2 --ignore 3 4 -c
 ```
 is taken to be an error.
 However, it is possible if you make the group of ```--ignore``` and ```line``` itself repeatable:
@@ -836,12 +836,12 @@ auto cli = (
 ```
 Now both the option ```--ignore``` *and* the value parameter ```value``` are repeatable. In all of the following examples ```lines``` will be set to ```{1,2,3,4}``` and ```c``` will be set to ```true```:
 ```
-    ./simplify file1 file2 -c --ignore 1 2 3 4 
-    ./simplify file1 file2 --ignore 1 2 3 4 -c
-    ./simplify file1 file2 --ignore 1 -c --ignore 2 3 4
-    ./simplify file1 file2 --ignore 1 2 --ignore 3 4 -c
-    ./simplify file1 file2 --ignore 1 --ignore 2 -c --ignore 3 --ignore 4
-    ./simplify file1 file2 -c --ignore1 --ignore2 --ignore3 --ignore4
+    simplify file1 file2 -c --ignore 1 2 3 4 
+    simplify file1 file2 --ignore 1 2 3 4 -c
+    simplify file1 file2 --ignore 1 -c --ignore 2 3 4
+    simplify file1 file2 --ignore 1 2 --ignore 3 4 -c
+    simplify file1 file2 --ignore 1 --ignore 2 -c --ignore 3 --ignore 4
+    simplify file1 file2 -c --ignore1 --ignore2 --ignore3 --ignore4
 ```
 
 
@@ -1047,7 +1047,7 @@ auto cli = (
 
 #### merge alternatives with common prefixes in documentation
 ```man
-    format [-o <output file>] [-f(align|noalign)]
+Usage:   format [-o <output file>] [-f(align|noalign)]
 ```
 ```cpp
 auto fmt = doc_formatting{}.merge_alternative_flags_with_common_prefix(true);
@@ -1124,7 +1124,7 @@ Note:
 doc_formatting::split_alternatives(bool)             //default: true
 doc_formatting::alternatives_min_split_size(int)     //default: 3
 ```
-control whether the usage is split up into several lines if any group inside an alternative  exceeds a given minimum size.
+control if the usage is split up into several lines if any group inside an alternative exceeds a given minimum size.
 
 
 
@@ -1132,11 +1132,11 @@ control whether the usage is split up into several lines if any group inside an 
 The combination of blocking parameters, alternatives and grouping makes it possible to define interfaces with decision trees/DAGs of arbitrary complexity.
 ```man
 SYNOPSIS
-    ./complex_nesting [-v] [-i] (copy|move) [--all] [--replace] [-f] <files>... [-r] [-h]
-    ./complex_nesting [-v] [-i] compare (date|content) [-b] [-q] <files>... [-r] [-h]
-    ./complex_nesting [-v] [-i] merge (diff|patch) -o <outdir> [--show-conflicts] <files>... [-r] [-h]
-    ./complex_nesting [-v] [-i] merge content [--git-style] [-m <marker>] -o <outdir> [--show-conflicts] <files>... [-r] [-h]
-    ./complex_nesting [-v] [-i] list <files>... [-r] [-h]
+    complex_nesting [-v] [-i] (copy|move) [--all] [--replace] [-f] <files>... [-r] [-h]
+    complex_nesting [-v] [-i] compare (date|content) [-b] [-q] <files>... [-r] [-h]
+    complex_nesting [-v] [-i] merge (diff|patch) -o <outdir> [--show-conflicts] <files>... [-r] [-h]
+    complex_nesting [-v] [-i] merge content [--git-style] [-m <marker>] -o <outdir> [--show-conflicts] <files>... [-r] [-h]
+    complex_nesting [-v] [-i] list <files>... [-r] [-h]
 
 OPTIONS
     user interface options:
@@ -1463,7 +1463,7 @@ Important: in order for an argument to be matched by such expressions, no parame
 
 #### Example 1: Counting Letters
 ```man
-Usage:    counter [a|b]...
+Usage:   counter [a|b]...
 ```
 
 ```cpp
@@ -1482,18 +1482,18 @@ else
 
 Valid input includes:
 ```
-    ./counter a                               
-    ./counter b
-    ./counter ab
-    ./counter abba
-    ./counter a b baba
-    ./counter a babba abab abbbbba b a ba a
+$ ./counter a                               
+$ ./counter b
+$ ./counter ab
+$ ./counter abba
+$ ./counter a b baba
+$ ./counter a babba abab abbbbba b a ba a
     ...
 ```
 
 #### Example 2: Listing Numbers
 ```man
-Usage:    numbers ([,] [<number>])...
+Usage:   numbers ([,] [<number>])...
 ```
 
 ```cpp
@@ -1511,17 +1511,17 @@ if(parse(argc, argv, cli)) {
 
 Valid input includes:
 ```
-./numbers 1
-./numbers 1 2 3
-./numbers 1 , 2
-./numbers 1 , 2 , 3
-./numbers 1, 2, 3
-./numbers 1 ,2 ,3
-./numbers 1,2
-./numbers 1,2,3
-./numbers 1.1 , 2
-./numbers 1,2.3,4.5
-./numbers 1,2,3 4.2 5,6 2 7.1,8.23,9 
+$ ./numbers 1
+$ ./numbers 1 2 3
+$ ./numbers 1 , 2
+$ ./numbers 1 , 2 , 3
+$ ./numbers 1, 2, 3
+$ ./numbers 1 ,2 ,3
+$ ./numbers 1,2
+$ ./numbers 1,2,3
+$ ./numbers 1.1 , 2
+$ ./numbers 1,2.3,4.5
+$ ./numbers 1,2,3 4.2 5,6 2 7.1,8.23,9 
 ```
 
 **Warning:** Be careful with joinable and repeatable parameters! The resulting command line interface might be a lot less intuitive to use than you think. It can also be hard to get the "grammar" of complex parsing expressions right.
@@ -1545,7 +1545,7 @@ Two kinds of filters are supported right now that can be passed as first argumen
 
 #### Simple Predicate Example
  ```man
-Usage:  annotate auto | (label <character>)
+Usage:   annotate auto | (label <character>)
 ```
 
 ```cpp
@@ -1560,7 +1560,7 @@ auto cli = (  command("auto") | ( command("label"), value(is_char, "character", 
 
 Let's write a program that takes strings and lists all tag names (```<tag>```) contained in them:
 ```man
-Usage:  tagnames <string>...
+Usage:   tagnames <string>...
 ```
 
 ```cpp
@@ -1628,22 +1628,26 @@ Each parameter can have error handler functions/lambdas/function objects for dif
 
 #### Example:
 ```man
-    ./send <file> -t <target>... [--http|--ftp]
+Usage:   send <file> -t <target>... [--http|--ftp]
 ```
 
 ```cpp
+string filename;
+vector<string> targets;
 vector<string> wrong;
+bool http = true;
 
 auto cli = (
-    value("file")
+    value("file", filename)
         .if_missing([]{ cout << "You need to provide a source filename!\n"; } )
         .if_repeated([](int idx){ cout << "Only one source file allowed! (index " << idx << ")\n"; } )
     ,
-    required("-t") & values(match::prefix_not("-"), "target")
+    required("-t") & values(match::prefix_not("-"), "target", targets)
         .if_missing([]{ cout << "You need to provide at least one target filename!\n"; } )
-        .if_blocked([]{ cout << "Target names must not be given before the file command and the source file name!\n"; })
+        .if_blocked([]{ cout << "Target names must not be given before the source file name!\n"; })
     ,
-    option("--http") | option("--ftp")
+    option("--http").set(http,true) | 
+    option("--ftp").set(http,false) % "protocol, default is http"
         .if_conflicted([]{ cout << "You can only use one protocol at a time!\n"; } )
     ,
     any_other(wrong)
@@ -1651,9 +1655,10 @@ auto cli = (
 
 if(parse(argc, argv, cli) && wrong.empty()) {
     cout << "OK\n";
+    /* ... */
 } else {
     for(const auto& arg : wrong) cout << "'" << arg << "' is not a valid argument\n";
-    cout << "Usage:\n" << usage_lines(cli,argv[0]) << '\n';
+    cout << "Usage:" << usage_lines(cli,argv[0]) << '\n';
 }
 ```
 An error handler can either have an empty parameter list or take an ```int``` which is set to the command line argument index where the error occured first.
@@ -1901,6 +1906,7 @@ Which results in:
 ```man
 Usage:
         convert <input file> [-r] [-o <output format>] [-utf16]
+
 Parameters:
         -r, --recursive    convert files recursively
 ```
