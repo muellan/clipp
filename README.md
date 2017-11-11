@@ -1956,7 +1956,7 @@ I also wanted the ability to keep *everything* related to one option/command/val
 
 ## Requirements
   - requires a C++11 conforming compiler
-  - tested with g++ 5.3.0, g++ 5.4.1, clang++ 3.8
+  - tested with g++ 5.3.0, g++ 5.4.1, g++ 6, g++ 7, clang++ 3.8
 
 
 
