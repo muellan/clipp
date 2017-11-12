@@ -25,6 +25,7 @@
 #include <sstream>
 #include <utility>
 #include <iterator>
+#include <functional>
 
 
 /*************************************************************************//**
@@ -41,12 +42,16 @@ namespace clipp {
  * basic constants and datatype definitions
  *
  *****************************************************************************/
+#ifdef CLIPP_STRING
+using doc_string = CLIPP_STRING
+using arg_string = CLIPP_STRING
+#else
 using doc_string = std::string;
-using doc_string_list = std::vector<doc_string>;
-
-using arg_index  = int;
 using arg_string = std::string;
-using arg_list   = std::vector<std::string>;
+#endif
+
+using arg_index = int;
+using arg_list  = std::vector<arg_string>;
 
 
 
@@ -150,14 +155,14 @@ check_is_callable(long) -> std::false_type;
 
 template<class Fn, class Ret>
 constexpr auto
-check_is_callable_wihtout_arg(int) -> decltype(
+check_is_callable_without_arg(int) -> decltype(
     std::declval<Fn>()(),
     std::integral_constant<bool,
         std::is_same<Ret,typename std::result_of<Fn()>::type>::value>{} );
 
 template<class,class>
 constexpr auto
-check_is_callable_wihtout_arg(long) -> std::false_type;
+check_is_callable_without_arg(long) -> std::false_type;
 
 
 
@@ -172,12 +177,12 @@ check_is_void_callable(long) -> std::false_type;
 
 template<class Fn>
 constexpr auto
-check_is_void_callable_wihtout_arg(int) -> decltype(
+check_is_void_callable_without_arg(int) -> decltype(
     std::declval<Fn>()(), std::true_type{});
 
 template<class>
 constexpr auto
-check_is_void_callable_wihtout_arg(long) -> std::false_type;
+check_is_void_callable_without_arg(long) -> std::false_type;
 
 
 
@@ -192,7 +197,7 @@ struct is_callable<Fn, Ret(Args...)> :
 
 template<class Fn, class Ret>
 struct is_callable<Fn,Ret()> :
-    decltype(check_is_callable_wihtout_arg<Fn,Ret>(0))
+    decltype(check_is_callable_without_arg<Fn,Ret>(0))
 {};
 
 
@@ -203,7 +208,7 @@ struct is_callable<Fn, void(Args...)> :
 
 template<class Fn>
 struct is_callable<Fn,void()> :
-    decltype(check_is_void_callable_wihtout_arg<Fn>(0))
+    decltype(check_is_void_callable_without_arg<Fn>(0))
 {};
 
 
@@ -2612,10 +2617,10 @@ public:
         //-----------------------------------------------------
         class memento {
             friend class depth_first_traverser;
-            std::size_t level_;
+            int level_;
             context context_;
         public:
-            std::size_t level() const noexcept { return level_; }
+            int level() const noexcept { return level_; }
             const child* param() const noexcept { return &(*context_.cur); }
         };
 
@@ -2630,7 +2635,7 @@ public:
             return !stack_.empty();
         }
 
-        std::size_t level() const noexcept {
+        int level() const noexcept {
             return stack_.size();
         }
 
@@ -2656,20 +2661,20 @@ public:
         }
 
         /** @brief inside a group of alternatives >= minlevel */
-        bool is_alternative(std::size_t minlevel = 0) const noexcept {
+        bool is_alternative(int minlevel = 0) const noexcept {
             if(stack_.empty()) return false;
             if(minlevel > 0) minlevel -= 1;
-            if(minlevel >= stack_.size()) return false;
+            if(minlevel >= int(stack_.size())) return false;
             return std::any_of(stack_.begin() + minlevel, stack_.end(),
                 [](const context& c) { return c.parent->exclusive(); });
         }
 
         /** @brief repeatable or inside a repeatable group >= minlevel */
-        bool is_repeatable(std::size_t minlevel = 0) const noexcept {
+        bool is_repeatable(int minlevel = 0) const noexcept {
             if(stack_.empty()) return false;
             if(stack_.back().cur->repeatable()) return true;
             if(minlevel > 0) minlevel -= 1;
-            if(minlevel >= stack_.size()) return false;
+            if(minlevel >= int(stack_.size())) return false;
             return std::any_of(stack_.begin() + minlevel, stack_.end(),
                 [](const context& c) { return c.parent->repeatable(); });
         }
@@ -2842,14 +2847,14 @@ public:
         memento
         undo_point() const {
             memento m;
-            m.level_ = stack_.size();
+            m.level_ = int(stack_.size());
             if(!stack_.empty()) m.context_ = stack_.back();
             return m;
         }
 
         void undo(const memento& m) {
             if(m.level_ < 1) return;
-            if(m.level_ <= stack_.size()) {
+            if(m.level_ <= int(stack_.size())) {
                 stack_.erase(stack_.begin() + m.level_, stack_.end());
                 stack_.back() = m.context_;
             }
@@ -3894,7 +3899,7 @@ private:
     }
 
     //-----------------------------------------------------
-    void return_to_level(std::size_t level)
+    void return_to_level(int level)
     {
         if(pos_.level() <= level) return;
         while(!scopes_.empty() && pos_.level() > level) {
@@ -4272,7 +4277,7 @@ private:
     //---------------------------------------------------------------
     bool try_match_blocked(parser&& parse, const arg_string& arg)
     {
-        const auto nold = parse.args_.size();
+        const auto nold = int(parse.args_.size());
 
         parse.pos_.ignore_blocking(true);
 
@@ -5246,7 +5251,7 @@ private:
         group::depth_first_traverser pos;
         std::stack<string> separators;
         std::stack<string> postfixes;
-        std::size_t level = 0;
+        int level = 0;
         const group* outermost = nullptr;
         bool linestart = false;
         bool useOutermost = true;
