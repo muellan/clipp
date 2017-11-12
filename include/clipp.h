@@ -42,15 +42,11 @@ namespace clipp {
  * basic constants and datatype definitions
  *
  *****************************************************************************/
-#ifdef CLIPP_STRING
-using doc_string = CLIPP_STRING
-using arg_string = CLIPP_STRING
-#else
-using doc_string = std::string;
-using arg_string = std::string;
-#endif
-
 using arg_index = int;
+
+using arg_string = std::string;
+using doc_string = std::string;
+
 using arg_list  = std::vector<arg_string>;
 
 
@@ -419,28 +415,28 @@ struct make<long int> {
 template<>
 struct make<long long int> {
     static inline long long int from(const char* s) {
-        return std::atoll(s);
+        return static_cast<long long int>(std::atoll(s));
     }
 };
 
 template<>
 struct make<float> {
     static inline float from(const char* s) {
-        return std::atof(s);
+        return float(std::atof(s));
     }
 };
 
 template<>
 struct make<double> {
     static inline double from(const char* s) {
-        return std::atof(s);
+        return double(std::atof(s));
     }
 };
 
 template<>
 struct make<long double> {
     static inline long double from(const char* s) {
-        return std::strtold(s,nullptr);
+        return static_cast<long double>(std::strtold(s,nullptr);
     }
 };
 
