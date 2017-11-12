@@ -692,9 +692,9 @@ long m = 5;
 auto print_ratio = [](const char* r) { cout << "using ratio of " << r << '\n'; };
 
 auto cli = ( 
-    option("-n", "--count") & value("count", n)           % "number of iterations",
-    option("-r", "--ratio") & value("ratio", print_ratio) % "compression ratio",
-    option("-m").set(domerge) & opt_value("lines=5", m)   % "merge lines (default: 5)"
+    (option("-n", "--count") & value("count", n))           % "number of iterations",
+    (option("-r", "--ratio") & value("ratio", print_ratio)) % "compression ratio",
+    (option("-m").set(domerge) & opt_value("lines=5", m))   % "merge lines (default: 5)"
 );
 ```
 
@@ -702,16 +702,16 @@ auto cli = (
 #### Alternative Value Mapping Styles
 ```cpp
 auto cli = ( 
-    option("-n", "--count") & value("count")       % "number of iterations"     >> n,
-    option("-r", "--ratio") & value("ratio")       % "compression ratio"        >> print_ratio,
-    option("-m"           ) & opt_value("lines=5") % "merge lines (default: 5)" >> m >> domerge
+    (option("-n", "--count") & value("count") >> n                 ) % "number of iterations",
+    (option("-r", "--ratio") & value("ratio") >> print_ratio       ) % "compression ratio",
+    (option("-m"           ) & opt_value("lines=5") >> m >> domerge) % "merge lines (default: 5)" 
 );
 ```
 ```cpp
 auto cli = ( 
-    option("-n", "--count") & value("count").set(n)            % "number of iterations",
-    option("-r", "--ratio") & value("ratio").call(print_ratio) % "compression ratio",
-    option("-m").set(domerge) & opt_value("lines=5").set(m)    % "merge lines (default: 5)"
+    (option("-n", "--count") & value("count").set(n))            % "number of iterations",
+    (option("-r", "--ratio") & value("ratio").call(print_ratio)) % "compression ratio",
+    (option("-m").set(domerge) & opt_value("lines=5").set(m))    % "merge lines (default: 5)"
 );
 ```
 See [here](#coding-styles) for more on coding styles.
@@ -771,9 +771,9 @@ bool recurse = false;
 string inpath, outpath;
 
 auto cli = (
-    option("-r", "--recursive").set(recurse)               % "search in subdirectories",
-    required("-i", "--in" ) & value("input dir", inpath)   % "path to input directory",
-    required("-o", "--out") & value("output dir", outpath) % "path to output directory"
+    option("-r", "--recursive").set(recurse)                 % "search in subdirectories",
+    (required("-i", "--in" ) & value("input dir", inpath))   % "path to input directory",
+    (required("-o", "--out") & value("output dir", outpath)) % "path to output directory"
 );
 ```
 
@@ -986,20 +986,20 @@ string expr;
 bool ifany = false, ifall = false;
 
 auto cli = (
-    values("file", files)                % "input filenames",
-    required("-s") & value("expr", expr) % "string to look for",
-    option("any").set(ifany)             % "report as soon as any matches" |
-    option("all").set(ifall)             % "report only if all match"
+    values("file", files)                  % "input filenames",
+    (required("-s") & value("expr", expr)) % "string to look for",
+    option("any").set(ifany)               % "report as soon as any matches" |
+    option("all").set(ifall)               % "report only if all match"
 );
 ```
 
 If you like it more verbose you can use the function ```one_of``` instead of ```operator |```:
 ```cpp
 auto cli = (
-    values("file", files)                % "input filenames",
-    required("-s") & value("expr", expr) % "string to look for",
-    one_of( option("any").set(ifany)     % "report as soon as any matches",
-            option("all").set(ifall)     % "report only if all match" )
+    values("file", files)                  % "input filenames",
+    (required("-s") & value("expr", expr)) % "string to look for",
+    one_of( option("any").set(ifany)       % "report as soon as any matches",
+            option("all").set(ifall)       % "report only if all match" )
 );
 ```
 
@@ -1022,9 +1022,9 @@ string outfile = "a.out";
 bool align = false;
      
 auto cli = (
-    option("-o", "--out") & value("output file", outfile) % "output filename",
+    (option("-o", "--out") & value("output file", outfile)) % "output filename",
     ( option("-falign"  ).set(align,true) |
-      option("-fnoalign").set(align,false) )              % "control alignment"
+      option("-fnoalign").set(align,false) )                % "control alignment"
 );
 ```
     
@@ -1038,9 +1038,9 @@ string outfile = "a.out";
 bool align = false;
 
 auto cli = (
-    option("-o", "--out") & value("output file", outfile)  % "output filename",
+    (option("-o", "--out") & value("output file", outfile)) % "output filename",
     with_prefix("-f", option("align"  ).set(align,true) |
-                      option("noalign").set(align,false) ) % "control alignment"
+                      option("noalign").set(align,false) )  % "control alignment"
 );
 ```
 
@@ -1107,14 +1107,14 @@ auto cli = (
     | ( command("build"),
         ( command("new") | command("add")),                  
         values("file"),
-        option("-v", "--verbose")                         % "print detailed report",
-        option("-b", "--buffer") & opt_value("size=1024") % "sets buffer size in KiByte",
-        ( option("--init") | option("--no-init") )        % "do or don't initialize"
+        option("-v", "--verbose")                           % "print detailed report",
+        (option("-b", "--buffer") & opt_value("size=1024")) % "sets buffer size in KiByte",
+        ( option("--init") | option("--no-init") )          % "do or don't initialize"
     ) 
     | ( command("query"),
         value("infile"),
         required("-o", "--out") & value("outfile"),
-        option("-f", "--out-format") & value("format")    % "determine output format"
+        (option("-f", "--out-format") & value("format"))  % "determine output format"
     )
 );
 ```
@@ -1849,7 +1849,6 @@ auto fmt = doc_formatting{}
     .indent_size(4)                            //indent of documentation lines for children of a documented group
     .line_spacing(0)                           //number of empty lines after single documentation lines
     .paragraph_spacing(1)                      //number of empty lines before and after paragraphs
-    .show_required_first(true)                 //list required parameters first 
     .flag_separator(", ")                      //between flags of the same parameter
     .param_separator(" ")                      //between parameters 
     .group_separator(" ")                      //between groups (in usage)
