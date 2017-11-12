@@ -1914,8 +1914,7 @@ Parameters:
 
 
 ## Motivation
-Well, I didn't find a library that makes building simple command line interfaces simple, yet can also be used to build complex CLIs. I really don't want to write 20 lines of boilerplate just to have 3 simple command line options. I also don't want to drag along monstrosities like boost or Qt for that. 
-I wanted one header-only library that makes writing simple interfaces as simple as possible while allowing me to write complex interfaces if needed. Or put differently, I wanted a domain specific language (expressible in pure C++) that could combine (or at least approach) the readability of [docopt] with the benefits (toolability, etc.) of C++'s type system.
+Well, I didn't find a library that makes building simple command line interfaces simple, yet can also be used to build complex CLIs. I really don't want to write 20 lines of boilerplate just to have 3 simple command line options. I also don't want to drag along monstrosities like boost or Qt for that. Over time, *clipp* evolved into a domain specific language (in pure C++) that I hope can at least somewhot approach the readability of [docopt] but can leverage the benefits (toolability, etc.) of C++'s type system.
 
 
 #### Other libraries (Boost, POCO, Qt, adishavit/Argh, Taywee/args ... or 'getopt')
@@ -1972,6 +1971,7 @@ I would be delighted to hear from anyone who uses *clipp* in their project(s). I
  - improve test cases and coverage
  - add more code documentation 
  - clean up the code / make it more understandable
+ - ability to use other string classes 
 
 
 [docopt]: http://docopt.org
