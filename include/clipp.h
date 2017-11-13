@@ -5624,18 +5624,19 @@ private:
             [](const pattern& p) { return p.param_count() < 2; });
 
         if(only1ParamPerMember) {
-            if(group.exclusive())
+            if(group.exclusive()) {
                 return fmt.alternative_param_separator();
-            else
+            } else {
                 return fmt.param_separator();
+            }
         }
         else { //there is at least one large group inside
-            if(group.exclusive())
+            if(group.exclusive()) {
                 return fmt.alternative_group_separator();
-            else
+            } else {
                 return fmt.group_separator();
+            }
         }
-        return "";
     }
 };
 
