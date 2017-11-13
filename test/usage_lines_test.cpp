@@ -72,7 +72,7 @@ int main()
     test(__LINE__, fmt, group( command("-a").repeatable(true) ), "   ,,,-a...");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             value("geometry file"),
             option("-translate") & value("x") & value("y") & value("z"),
             option("-rotate") & value("azimuth") & value("polar")),
@@ -82,27 +82,27 @@ int main()
     test(__LINE__, fmt, joinable( values("string")), "   ,,,<string>...");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             (option("-o", "--out") & value("output file")) % "output filename",
             with_prefix("-f", option("align") >> []{} | option("noalign") >> []{} ) % "control alignment"),
          "   [-o%<output file>]#[-f§(§align|noalign§)§]");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             (option("-n", "--count") & value("count")) % "number of iterations",
             (option("-r", "--ratio") & value("ratio")) % "compression ratio",
             (option("-m") & opt_value("lines=5")) % "merge lines (default: 5)"),
          "   [-n%<count>]#[-r%<ratio>]#[-m%[<lines=5>]]");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             "input files" % values("file"),
             "compress results" % option("-c", "--compress"),
             "lines to be ignored" % repeatable( option("-i", "--ignore") & integers("line") )),
          "   ,,,<file>...#[-c]#,,,[-i%,,,<line>...]...");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             value("file").if_missing([]{}).if_repeated([](int){}),
             required("-t") & values("target").if_missing([]{}).if_blocked([]{}),
             option("--http") | option("--ftp").if_conflicted([]{}),
@@ -110,28 +110,28 @@ int main()
          "   <file>#-t%,,,<target>...#[--§(§http|ftp§)§]#,,,[<?>]...");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             option("-r", "--recursive") % "recurse into subdirectories",
             (required("-i", "--in" ) & value("input dir")) % "sets path to input directory",
             (required("-o", "--out") & value("output dir")) % "sets path to output directory"),
          "   [-r]#-i%<input dir>#-o%<output dir>");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             values("directory") % "input files",
             option("-c", "--compress") % "compress results",
             (option("-i", "--ignore") & values("line")) % "lines to be ignored"),
          "   ,,,<directory>...#[-c]#[-i%,,,<line>...]");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             value("infile") % "input filename",
             value("outfile") % "output filename",
             option("-s", "--split") % "split files" ),
          "   <infile>%<outfile>%[-s]");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             option("-a") % "activates a",
             option("-b") % "activates b",
             option("-c", "--noc") % "deactivates c",
@@ -139,14 +139,14 @@ int main()
          "   [-a]%[-b]%[-c]%[--hi]");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             command("make"),
             value("file") % "name of file to make",
             option("-f", "--force") % "overwrite existing file"),
          "   make%<file>%[-f]");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             option("-a") % "activates a",
             option("-b") % "activates b",
             option("-c", "--noc")   % "deactivates c",
@@ -159,7 +159,7 @@ int main()
          "   ,,,([,]%[<number>])...");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             ( command("ship"), ( ( command("new"), values("name") ) |
                 ( value("name"),
                     command("move"), value("x"), value("y"), (option("--speed=") & value("kn")) % "Speed in knots [default: 10]") |
@@ -181,7 +181,7 @@ int main()
          "   --version");
 
 
-    test(__LINE__, fmt, group( command("help")
+    test(__LINE__, fmt, ( command("help")
                | ( command("build"),
                    ( command("new") | command("add") ),
                    values("file"),
@@ -200,7 +200,7 @@ int main()
        "   query#<infile>#-o%<outfile>#[-f%<format>]");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             value("file"),
             joinable(
                 option("-r") % "open read-only",
@@ -214,16 +214,16 @@ int main()
          "   <file>#[-rbs]#$($[:vim]%[:st3]%[:atom]%[:emacs]$)$");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             (option("x") % "sets X", option("y") % "sets Y"),
             (option("a") % "activates A", option("b") % "activates B") % "documented group 1:"       ,
             "documented group 2:" % (option("-g") % "activates G", option("-h") % "activates H"),
             "activates E or F" % (option("-e"), option("-f")))
          ,
-         "   [x]%[y]#[a]%[b]#[-g]%[-h]#[-e]%[-f]");
+         "   [x]#[y]#[a]%[b]#[-g]%[-h]#[-e]%[-f]");
 
 
-    test(__LINE__, fmt, group( ( command("make"), value("wordfile"), required("-dict") & value("dictionary"), option("--progress", "-p")) | (
+    test(__LINE__, fmt, ( ( command("make"), value("wordfile"), required("-dict") & value("dictionary"), option("--progress", "-p")) | (
             command("find"), values("infile"), required("-dict") & value("dictionary"),
             (option("-o", "--output") & value("outfile"))  % "write to file instead of stdout",
             ( option("-split"  ) | option("-nosplit"))) | command("help"),
@@ -234,7 +234,7 @@ int main()
        "   help#[-v]");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             command("help") |
             ( command("build"),
                 "build commands" %
@@ -282,7 +282,7 @@ int main()
         "   modify#[-c]#[-u]#[-m%<size>]");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             value("input file"),
             option("-r", "--recursive"),
             option("-o") & value("output format"),
@@ -295,7 +295,7 @@ int main()
          "   ,,,[a|b]...");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             "user interface options:" % (
                 option("-v", "--verbose") % "show detailed output",
                 option("-i", "--interactive") % "use interactive mode"
@@ -341,18 +341,18 @@ int main()
          "   [-v]%[-i]#list#,,,<files>...%[-r]%[-h]");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             command("new"),
             value("filename"),
             (option("-e", "--encoding") & value("enc")).doc("'utf8' or 'cp1252'")
         ), "   new#<filename>#[-e%<enc>]");
 
 
-    test(__LINE__, fmt, group( command("auto") | ( command("label"), value("character") )),
+    test(__LINE__, fmt, ( command("auto") | ( command("label"), value("character") )),
          "   §(§auto^(label%<character>)§)§");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             values("file") % "input filenames",
             (required("-s") & value("expr")) % "string to look for",
             option("any") % "report as soon as any matches" |
@@ -361,7 +361,7 @@ int main()
         "   ,,,<file>...#-s%<expr>#[a§(§ny|ll§)§]");
 
 
-    test(__LINE__, fmt, group( value(""), option("-x"), option("-y") ),
+    test(__LINE__, fmt, ( value(""), option("-x"), option("-y") ),
          "   <?>%[-x]%[-y]");
 
     }
