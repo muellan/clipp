@@ -2819,7 +2819,18 @@ public:
                                         const depth_first_traverser& b)
         {
             if(a.stack_.empty() || b.stack_.empty()) return false;
-            return a.stack_.back().cur == b.stack_.back().cur;
+
+            //parents not the same -> different position
+            if(a.stack_.back().parent != b.stack_.back().parent) return false;
+
+            bool aEnd = a.stack_.back().cur == a.stack_.back().end;
+            bool bEnd = b.stack_.back().cur == b.stack_.back().end;
+            //either both at the end of the same parent => same position
+            if(aEnd && bEnd) return true;
+            //or only one at the end => not at the same position
+            if(aEnd || bEnd) return false;
+            return std::addressof(*a.stack_.back().cur) ==
+                   std::addressof(*b.stack_.back().cur);
         }
         inline friend bool operator != (const depth_first_traverser& a,
                                         const depth_first_traverser& b)
