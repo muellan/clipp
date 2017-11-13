@@ -283,6 +283,7 @@ struct make;
 template<>
 struct make<bool> {
     static inline bool from(const char* s) {
+        if(!s) return false;
         return static_cast<bool>(s);
     }
 };
@@ -290,12 +291,14 @@ struct make<bool> {
 template<>
 struct make<unsigned char> {
     static inline unsigned char from(const char* s) {
-        long long int i = std::atoll(s);
-        if(i < 0) i = 0;
-        if(sizeof(long long int) > sizeof(unsigned char) &&
-           i > static_cast<long long int>(std::numeric_limits<unsigned char>::max()))
+        if(!s) return (0);
+        for(; *s == ' '; ++s);
+        if(s[0] == '-') return (0);
+        unsigned long long int i = std::strtoull(s,nullptr,0);
+        if(sizeof(unsigned long long int) > sizeof(unsigned char) &&
+           i > static_cast<unsigned long long int>(std::numeric_limits<unsigned char>::max()))
         {
-            i = std::numeric_limits<unsigned long int>::max();
+            i = std::numeric_limits<unsigned char>::max();
         }
         return static_cast<unsigned char>(i);
     }
@@ -304,12 +307,14 @@ struct make<unsigned char> {
 template<>
 struct make<unsigned short int> {
     static inline unsigned short int from(const char* s) {
-        long long int i = std::atoll(s);
-        if(i < 0) i = 0;
-        if(sizeof(long long int) > sizeof(unsigned short int) &&
-           i > static_cast<long long int>(std::numeric_limits<unsigned short int>::max()))
+        if(!s) return (0);
+        for(; *s == ' '; ++s);
+        if(s[0] == '-') return (0);
+        unsigned long long int i = std::strtoull(s,nullptr,0);
+        if(sizeof(unsigned long long int) > sizeof(unsigned short int) &&
+           i > static_cast<unsigned long long int>(std::numeric_limits<unsigned short int>::max()))
         {
-            i = std::numeric_limits<unsigned long int>::max();
+            i = std::numeric_limits<unsigned short int>::max();
         }
         return static_cast<unsigned short int>(i);
     }
@@ -318,12 +323,14 @@ struct make<unsigned short int> {
 template<>
 struct make<unsigned int> {
     static inline unsigned int from(const char* s) {
-        long long int i = std::atoll(s);
-        if(i < 0) i = 0;
-        if(sizeof(long long int) > sizeof(unsigned int) &&
-           i > static_cast<long long int>(std::numeric_limits<unsigned int>::max()))
+        if(!s) return (0);
+        for(; *s == ' '; ++s);
+        if(s[0] == '-') return (0);
+        unsigned long long int i = std::strtoull(s,nullptr,0);
+        if(sizeof(unsigned long long int) > sizeof(unsigned int) &&
+           i > static_cast<unsigned long long int>(std::numeric_limits<unsigned int>::max()))
         {
-            i = std::numeric_limits<unsigned long int>::max();
+            i = std::numeric_limits<unsigned int>::max();
         }
         return static_cast<unsigned int>(i);
     }
@@ -332,10 +339,12 @@ struct make<unsigned int> {
 template<>
 struct make<unsigned long int> {
     static inline unsigned long int from(const char* s) {
-        long long int i = std::atoll(s);
-        if(i < 0) i = 0;
-        if(sizeof(long long int) > sizeof(unsigned long int) &&
-           i > static_cast<long long int>(std::numeric_limits<unsigned long int>::max()))
+        if(!s) return (0);
+        for(; *s == ' '; ++s);
+        if(s[0] == '-') return (0);
+        unsigned long long int i = std::strtoull(s,nullptr,0);
+        if(sizeof(unsigned long long int) > sizeof(unsigned long int) &&
+           i > static_cast<unsigned long long int>(std::numeric_limits<unsigned long int>::max()))
         {
             i = std::numeric_limits<unsigned long int>::max();
         }
@@ -346,9 +355,10 @@ struct make<unsigned long int> {
 template<>
 struct make<unsigned long long int> {
     static inline unsigned long long int from(const char* s) {
-        long long int i = std::atoll(s);
-        if(i < 0) i = 0;
-        return static_cast<unsigned long long int>(i);
+        if(!s) return (0);
+        for(; *s == ' '; ++s);
+        if(s[0] == '-') return (0);
+        return static_cast<unsigned long long int>(std::stoull(s,nullptr));
     }
 };
 
@@ -359,7 +369,7 @@ struct make<char> {
         const auto n = std::strlen(s);
         if(n == 1) return s[0];
         //parse as integer
-        long long int i = std::atoll(s);
+        long long int i = std::strtoll(s,nullptr,0);
         if(sizeof(char) < sizeof(long long int)) {
             if(i < std::numeric_limits<char>::lowest())
                 i = std::numeric_limits<char>::lowest();
@@ -373,7 +383,7 @@ struct make<char> {
 template<>
 struct make<short int> {
     static inline short int from(const char* s) {
-        long long int i = std::atoll(s);
+        long long int i = std::strtoll(s,nullptr,0);
         if(sizeof(short int) < sizeof(long long int)) {
             if(i < std::numeric_limits<short int>::lowest())
                 i = std::numeric_limits<short int>::lowest();
@@ -387,7 +397,7 @@ struct make<short int> {
 template<>
 struct make<int> {
     static inline int from(const char* s) {
-        long long int i = std::atoll(s);
+        long long int i = std::strtoll(s,nullptr,0);
         if(sizeof(int) < sizeof(long long int)) {
             if(i < std::numeric_limits<int>::lowest())
                 i = std::numeric_limits<int>::lowest();
@@ -401,7 +411,7 @@ struct make<int> {
 template<>
 struct make<long int> {
     static inline long int from(const char* s) {
-        long long int i = std::atoll(s);
+        long long int i = std::strtoll(s,nullptr,0);
         if(sizeof(long int) < sizeof(long long int)) {
             if(i < std::numeric_limits<long int>::lowest())
                 i = std::numeric_limits<long int>::lowest();
@@ -415,28 +425,28 @@ struct make<long int> {
 template<>
 struct make<long long int> {
     static inline long long int from(const char* s) {
-        return static_cast<long long int>(std::atoll(s));
+        return static_cast<long long int>(std::strtoll(s,nullptr,0));
     }
 };
 
 template<>
 struct make<float> {
     static inline float from(const char* s) {
-        return float(std::atof(s));
+        return float(std::strtof(s,nullptr));
     }
 };
 
 template<>
 struct make<double> {
     static inline double from(const char* s) {
-        return double(std::atof(s));
+        return double(std::strtod(s,nullptr));
     }
 };
 
 template<>
 struct make<long double> {
     static inline long double from(const char* s) {
-        return static_cast<long double>(std::strtold(s,nullptr);
+        return static_cast<long double>(std::strtold(s,nullptr));
     }
 };
 
