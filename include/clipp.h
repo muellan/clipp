@@ -1808,23 +1808,6 @@ public:
         flags(std::move(str), std::forward<Strings>(strs)...);
     }
 
-    /** @brief makes "flag" parameter */
-    template<class... Strings>
-    explicit
-    parameter(const char* str, Strings&&... strs):
-        parameter{arg_string(str), std::forward<Strings>(strs)...}
-    {}
-
-    /** @brief makes "flag" parameter from range of strings */
-    template<class InputIterator>
-    explicit
-    parameter(InputIterator first, InputIterator last):
-        flags_{first, last},
-        matcher_{predicate_adapter{match::none}},
-        label_{}, required_{false}
-
-    {}
-
     /** @brief makes "flag" parameter from range of strings */
     explicit
     parameter(arg_list flaglist):
