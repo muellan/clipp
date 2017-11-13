@@ -76,12 +76,10 @@ class subrange {
 public:
     using size_type = arg_string::size_type;
 
-    static constexpr size_type npos = arg_string::npos;
-
     /** @brief default: no match */
     explicit constexpr
     subrange() noexcept :
-        at_{npos}, length_{0}
+        at_{arg_string::npos}, length_{0}
     {}
 
     /** @brief match length & position within subject string */
@@ -102,7 +100,7 @@ public:
 
     /** @brief returns true, if query is a substring of the query string */
     constexpr explicit operator bool () const noexcept {
-        return at_ != npos && length_ > 0;
+        return at_ != arg_string::npos && length_ > 0;
     }
 
 private:
