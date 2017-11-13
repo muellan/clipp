@@ -19,7 +19,7 @@ struct equals {
 template<>
 struct equals<float> {
     static bool result(const float& a, const float&b) {
-        return std::abs(a-b) < 1e-4;
+        return std::abs(a-b) < 1e-4f;
     }
 };
 
@@ -33,7 +33,8 @@ struct equals<double> {
 template<>
 struct equals<long double> {
     static bool result(const long double& a, const long double&b) {
-        return std::abs(a-b) < 1e-8;
+        return std::abs(a-b) < static_cast<long double>(1e-8);
+
     }
 };
 

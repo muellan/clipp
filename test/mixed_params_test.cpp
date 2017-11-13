@@ -28,8 +28,8 @@ struct active {
            x.av != y.av || x.bv != y.bv || x.gv != y.gv) return false;
 
         using std::abs;
-        if(abs(x.cv - y.cv) > 1e-4 || abs(x.dv - y.dv) > 1e-4 ||
-           abs(x.ev - y.ev) > 1e-4 || abs(x.fv - y.fv) > 1e-4) return false;
+        if(abs(x.cv - y.cv) > 1e-4f || abs(x.dv - y.dv) > 1e-4f ||
+           abs(x.ev - y.ev) > 1e-4  || abs(x.fv - y.fv) > 1e-4) return false;
 
         return true;
     }
