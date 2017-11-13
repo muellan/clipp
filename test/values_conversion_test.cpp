@@ -63,15 +63,23 @@ void test_conv(int lineNo)
     test<T>(lineNo,  T(0),  "2", T(2) );
     test<T>(lineNo,  T(0), "66", T(66) );
 
+    test<T>(lineNo,  T(0),  "  0  ", T(0) );
+    test<T>(lineNo,  T(0),  "  1  ", T(1) );
+    test<T>(lineNo,  T(0),  "  2  ", T(2) );
+    test<T>(lineNo,  T(0), "  66  ", T(66) );
+
     constexpr auto maxv = std::numeric_limits<T>::max();
     test<T>(lineNo,  T(0), std::to_string(maxv), maxv);
+    test<T>(lineNo,  T(0), "  " + std::to_string(maxv) + "  ", maxv);
 
     if(std::is_signed<T>::value) {
         constexpr auto minv = std::numeric_limits<T>::lowest();
         test<T>(lineNo, T(0), std::to_string(minv), minv);
+        test<T>(lineNo, T(0), "  " + std::to_string(minv) + "  ", minv);
     }
     else {
         test<T>(lineNo, T(0), "-1", T(0) );
+        test<T>(lineNo, T(0), "  -1  ", T(0) );
     }
 }
 
