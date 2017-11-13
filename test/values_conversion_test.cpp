@@ -34,7 +34,6 @@ template<>
 struct equals<long double> {
     static bool result(const long double& a, const long double&b) {
         return std::abs(a-b) < static_cast<long double>(1e-8);
-
     }
 };
 
@@ -86,6 +85,31 @@ void test_conv(int lineNo)
 
 
 //-------------------------------------------------------------------
+template<class T, class Wide, bool = (sizeof(Wide) > sizeof(T))>
+struct test_clamp {
+    static void in(int lineNo) {
+        constexpr auto maxv = std::numeric_limits<T>::max();
+        test<T>(lineNo,  T(0), std::to_string(maxv), maxv);
+        test<T>(lineNo,  T(0), "  " + std::to_string(maxv) + "  ", maxv);
+
+        test<T>(lineNo,  T(0), std::to_string(Wide(maxv)+1), maxv);
+        test<T>(lineNo,  T(0), "  " + std::to_string(Wide(maxv)+1) + "  ", maxv);
+
+        if(std::is_signed<T>::value) {
+            constexpr auto minv = std::numeric_limits<T>::lowest();
+            test<T>(lineNo, T(0), std::to_string(Wide(minv)-1), minv);
+            test<T>(lineNo, T(0), "  " + std::to_string(Wide(minv)-1) + "  ", minv);
+        }
+    }
+};
+
+template<class T, class Wide>
+struct test_clamp<T,Wide,false> {
+    static void in(int) {}
+};
+
+
+//-------------------------------------------------------------------
 int main()
 {
     try {
@@ -118,6 +142,11 @@ int main()
         test<char>(__LINE__, 0, "a", 'a');
         test<char>(__LINE__, 0, "11", 11);
         test<char>(__LINE__, 0, "65", 65);
+        test<char>(__LINE__, 0, "127", 127);
+        test<char>(__LINE__, 0, "128", 127);
+        test<char>(__LINE__, 0, "-1", -1);
+        test<char>(__LINE__, 0, "-128", -128);
+        test<char>(__LINE__, 0, "-129", -128);
 
         test<std::string>(__LINE__, "", "",  "");
         test<std::string>(__LINE__, "", " ", " ");
@@ -126,6 +155,20 @@ int main()
         test<std::string>(__LINE__, "", "a", "a");
         test<std::string>(__LINE__, "", "ab", "ab");
         test<std::string>(__LINE__, "", "abc", "abc");
+
+        using wide_ui_t = unsigned long long int;
+        test_clamp<unsigned char,wide_ui_t>::in( __LINE__ );
+        test_clamp<unsigned short int,wide_ui_t>::in( __LINE__ );
+        test_clamp<unsigned int,wide_ui_t>::in( __LINE__ );
+        test_clamp<unsigned long int,wide_ui_t>::in( __LINE__ );
+        test_clamp<unsigned long long int,wide_ui_t>::in( __LINE__ );
+
+        using wide_i_t  = long long int;
+        test_clamp<char,wide_i_t>::in(__LINE__);
+        test_clamp<short int,wide_i_t>::in( __LINE__ );
+        test_clamp<int,wide_i_t>::in( __LINE__ );
+        test_clamp<long int,wide_i_t>::in( __LINE__ );
+        test_clamp<long long int,wide_i_t>::in( __LINE__ );
 
     }
     catch(std::exception& e) {

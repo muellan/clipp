@@ -288,6 +288,43 @@ fwd_to_unsigned_int(const char*& s)
 
 /*************************************************************************//**
  *
+ * @brief value limits clamping
+ *
+ *****************************************************************************/
+template<class T, class V, bool = (sizeof(V) > sizeof(T))>
+struct limits_clamped {
+    static T from(const V& v) {
+        if(v > V(std::numeric_limits<T>::max())) {
+            return std::numeric_limits<T>::max();
+        }
+        if(v < V(std::numeric_limits<T>::lowest())) {
+            return std::numeric_limits<T>::lowest();
+        }
+        return T(v);
+    }
+};
+
+template<class T, class V>
+struct limits_clamped<T,V,false> {
+    static T from(const V& v) { return T(v); }
+};
+
+
+/*************************************************************************//**
+ *
+ * @brief returns value of v as a T, clamped at T's maximum
+ *
+ *****************************************************************************/
+template<class T, class V>
+inline T clamped_on_limits(const V& v) {
+    return limits_clamped<T,V>::from(v);
+}
+
+
+
+
+/*************************************************************************//**
+ *
  * @brief type conversion helpers
  *
  *****************************************************************************/
@@ -306,13 +343,7 @@ template<>
 struct make<unsigned char> {
     static inline unsigned char from(const char* s) {
         if(!fwd_to_unsigned_int(s)) return (0);
-        unsigned long long int i = std::strtoull(s,nullptr,10);
-        if(sizeof(unsigned long long int) > sizeof(unsigned char) &&
-           i > static_cast<unsigned long long int>(std::numeric_limits<unsigned char>::max()))
-        {
-            i = std::numeric_limits<unsigned char>::max();
-        }
-        return static_cast<unsigned char>(i);
+        return clamped_on_limits<unsigned char>(std::stoull(s));
     }
 };
 
@@ -320,13 +351,7 @@ template<>
 struct make<unsigned short int> {
     static inline unsigned short int from(const char* s) {
         if(!fwd_to_unsigned_int(s)) return (0);
-        unsigned long long int i = std::strtoull(s,nullptr,10);
-        if(sizeof(unsigned long long int) > sizeof(unsigned short int) &&
-           i > static_cast<unsigned long long int>(std::numeric_limits<unsigned short int>::max()))
-        {
-            i = std::numeric_limits<unsigned short int>::max();
-        }
-        return static_cast<unsigned short int>(i);
+        return clamped_on_limits<unsigned short int>(std::stoull(s));
     }
 };
 
@@ -334,13 +359,7 @@ template<>
 struct make<unsigned int> {
     static inline unsigned int from(const char* s) {
         if(!fwd_to_unsigned_int(s)) return (0);
-        unsigned long long int i = std::strtoull(s,nullptr,10);
-        if(sizeof(unsigned long long int) > sizeof(unsigned int) &&
-           i > static_cast<unsigned long long int>(std::numeric_limits<unsigned int>::max()))
-        {
-            i = std::numeric_limits<unsigned int>::max();
-        }
-        return static_cast<unsigned int>(i);
+        return clamped_on_limits<unsigned int>(std::stoull(s));
     }
 };
 
@@ -348,13 +367,7 @@ template<>
 struct make<unsigned long int> {
     static inline unsigned long int from(const char* s) {
         if(!fwd_to_unsigned_int(s)) return (0);
-        unsigned long long int i = std::strtoull(s,nullptr,10);
-        if(sizeof(unsigned long long int) > sizeof(unsigned long int) &&
-           i > static_cast<unsigned long long int>(std::numeric_limits<unsigned long int>::max()))
-        {
-            i = std::numeric_limits<unsigned long int>::max();
-        }
-        return static_cast<unsigned long int>(i);
+        return clamped_on_limits<unsigned long int>(std::stoull(s));
     }
 };
 
@@ -362,7 +375,7 @@ template<>
 struct make<unsigned long long int> {
     static inline unsigned long long int from(const char* s) {
         if(!fwd_to_unsigned_int(s)) return (0);
-        return (std::stoull(s,nullptr));
+        return clamped_on_limits<unsigned long long int>(std::stoull(s));
     }
 };
 
@@ -373,84 +386,56 @@ struct make<char> {
         const auto n = std::strlen(s);
         if(n == 1) return s[0];
         //parse as integer
-        long long int i = std::strtoll(s,nullptr,10);
-        if(sizeof(char) < sizeof(long long int)) {
-            if(i < std::numeric_limits<char>::lowest())
-                i = std::numeric_limits<char>::lowest();
-            else if(i > std::numeric_limits<char>::max())
-                i = std::numeric_limits<char>::max();
-        }
-        return static_cast<char>(i);
+        return clamped_on_limits<char>(std::stoll(s));
     }
 };
 
 template<>
 struct make<short int> {
     static inline short int from(const char* s) {
-        long long int i = std::strtoll(s,nullptr,10);
-        if(sizeof(short int) < sizeof(long long int)) {
-            if(i < std::numeric_limits<short int>::lowest())
-                i = std::numeric_limits<short int>::lowest();
-            else if(i > std::numeric_limits<short int>::max())
-                i = std::numeric_limits<short int>::max();
-        }
-        return static_cast<short int>(i);
+        return clamped_on_limits<short int>(std::stoll(s));
     }
 };
 
 template<>
 struct make<int> {
     static inline int from(const char* s) {
-        long long int i = std::strtoll(s,nullptr,10);
-        if(sizeof(int) < sizeof(long long int)) {
-            if(i < std::numeric_limits<int>::lowest())
-                i = std::numeric_limits<int>::lowest();
-            else if(i > std::numeric_limits<int>::max())
-                i = std::numeric_limits<int>::max();
-        }
-        return static_cast<int>(i);
+        return clamped_on_limits<int>(std::stoll(s));
     }
 };
 
 template<>
 struct make<long int> {
     static inline long int from(const char* s) {
-        long long int i = std::strtoll(s,nullptr,10);
-        if(sizeof(long int) < sizeof(long long int)) {
-            if(i < std::numeric_limits<long int>::lowest())
-                i = std::numeric_limits<long int>::lowest();
-            else if(i > std::numeric_limits<long int>::max())
-                i = std::numeric_limits<long int>::max();
-        }
-        return static_cast<long int>(i);
+        return clamped_on_limits<long int>(std::stoll(s));
     }
 };
 
 template<>
 struct make<long long int> {
     static inline long long int from(const char* s) {
-        return (std::strtoll(s,nullptr,10));
+        return (std::stoll(s));
     }
 };
 
 template<>
 struct make<float> {
     static inline float from(const char* s) {
-        return (std::strtof(s,nullptr));
+        return (std::stof(s));
     }
 };
 
 template<>
 struct make<double> {
     static inline double from(const char* s) {
-        return (std::strtod(s,nullptr));
+        return (std::stod(s));
     }
 };
 
 template<>
 struct make<long double> {
     static inline long double from(const char* s) {
-        return (std::strtold(s,nullptr));
+        return (std::stold(s));
     }
 };
 
@@ -5636,9 +5621,7 @@ private:
     group_separator(const group& group, const doc_formatting& fmt)
     {
         const bool only1ParamPerMember = std::all_of(group.begin(), group.end(),
-            [&fmt](const pattern& p) {
-                return p.param_count() < 2;
-            });
+            [](const pattern& p) { return p.param_count() < 2; });
 
         if(only1ParamPerMember) {
             if(group.exclusive())
