@@ -29,13 +29,15 @@ struct test_location
 };
 
 
+
 /*************************************************************************//**
  *
  * @brief returns wrapped/nested variants of the input command line interface
  *
  *****************************************************************************/
-std::vector<clipp::group>
-wrapped_variants(const clipp::group& cli)
+template<class CLI>
+std::vector<CLI>
+wrapped_variants(const CLI& cli)
 {
     using namespace clipp;
     return {
@@ -71,10 +73,11 @@ wrapped_variants(const clipp::group& cli)
  *        the original input CLI
  *
  *****************************************************************************/
+template<class CLI>
 void run_wrapped_variants(
     const test_location& info,
     const std::initializer_list<const char*>& args,
-    const clipp::group& cli,
+    const CLI& cli,
     std::function<void()> initialize,
     std::function<bool()> valid)
 {
@@ -114,10 +117,11 @@ void run_wrapped_variants(
  * @brief runs CLI validity test
  *
  *****************************************************************************/
+template<class CLI>
 void run_test(
     const test_location& info,
     const std::initializer_list<const char*>& args,
-    const clipp::group& cli,
+    const CLI& cli,
     std::function<bool()> valid)
 {
     using std::cout;

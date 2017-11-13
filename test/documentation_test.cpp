@@ -61,7 +61,7 @@ int main()
         .split_alternatives(true);
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             (option("-o", "--out") & value("output file")) % "output filename",
             with_prefix("-f", option("align") >> []{} | option("noalign") >> []{} ) % "control alignment"
         ),
@@ -70,7 +70,7 @@ int main()
          "   -falign|-fnoalign                         control alignment");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             (option("-n", "--count") & value("count")) % "number of iterations",
             (option("-r", "--ratio") & value("ratio")) % "compression ratio",
             (option("-m") & opt_value("lines=5")) % "merge lines (default: 5)"
@@ -82,7 +82,7 @@ int main()
          "   -m%<lines=5>                              merge lines (default: 5)");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             "input files" % values("file"),
             "compress results" % option("-c", "--compress"),
             "lines to be ignored" % repeatable( option("-i", "--ignore") & integers("line") )
@@ -94,7 +94,7 @@ int main()
          "   ^(^-i~--ignore^)^%<line>                  lines to be ignored");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             option("-r", "--recursive") % "recurse into subdirectories",
             (required("-i", "--in" ) & value("input dir")) % "sets path to input directory",
             (required("-o", "--out") & value("output dir")) % "sets path to output directory"
@@ -106,7 +106,7 @@ int main()
          "   ^(^-o~--out^)^%<output dir>               sets path to output directory");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             value("infile") % "input filename",
             value("outfile") % "output filename",
             option("-s", "--split") % "split files"
@@ -118,7 +118,7 @@ int main()
          "   -s~--split                                split files");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             option("-a") % "activates a",
             option("-b") % "activates b",
             option("-c", "--noc") % "deactivates c",
@@ -133,7 +133,7 @@ int main()
          "   --hi                                      says hi");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             command("make"),
             value("file") % "name of file to make",
             option("-f", "--force") % "overwrite existing file"
@@ -143,7 +143,7 @@ int main()
          "   -f~--force                                overwrite existing file");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             option("-a") % "activates a",
             option("-b") % "activates b",
             option("-c", "--noc")   % "deactivates c",
@@ -158,7 +158,7 @@ int main()
          "   --hi                                      says hi");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             ( command("ship"), ( ( command("new"), values("name") ) |
                 ( value("name"),
                     command("move"), value("x"), value("y"), (option("--speed=") & value("kn")) % "Speed in knots [default: 10]") |
@@ -184,7 +184,7 @@ int main()
          "   --version                                 Show version.");
 
 
-    test(__LINE__, fmt, group( command("help")
+    test(__LINE__, fmt, ( command("help")
                | ( command("build"),
                    ( command("new") | command("add") ),
                    values("file"),
@@ -208,7 +208,7 @@ int main()
          "   -f~--out-format                           determine output format");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             value("file"),
             joinable(
                 option("-r") % "open read-only",
@@ -229,7 +229,7 @@ int main()
          "   :vim%:st3%:atom%:emacs                    editor(s) to use; multiple possible");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             (option("x") % "sets X", option("y") % "sets Y"),
             (option("a") % "activates A", option("b") % "activates B") % "documented group 1:"       ,
             "documented group 2:" % (option("-g") % "activates G", option("-h") % "activates H"),
@@ -258,7 +258,7 @@ int main()
          "   -e%-f                                     activates E or F");
 
 
-    test(__LINE__, fmt, group( ( command("make"), value("wordfile"), required("-dict") & value("dictionary"), option("--progress", "-p")) | (
+    test(__LINE__, fmt, ( ( command("make"), value("wordfile"), required("-dict") & value("dictionary"), option("--progress", "-p")) | (
             command("find"), values("infile"), required("-dict") & value("dictionary"),
             (option("-o", "--output") & value("outfile"))  % "write to file instead of stdout",
             ( option("-split"  ) | option("-nosplit"))) | command("help"),
@@ -269,7 +269,7 @@ int main()
          "   -v~--version                              show version");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             command("help") |
             ( command("build"),
                 "build commands" %
@@ -349,7 +349,7 @@ int main()
          "       -m~--memlimit                         max. size in RAM");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             "user interface options:" % (
                 option("-v", "--verbose") % "show detailed output",
                 option("-i", "--interactive") % "use interactive mode"
@@ -441,7 +441,7 @@ int main()
          "       -h~--help                             show help");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             command("new"),
             value("filename"),
             (option("-e", "--encoding") & value("enc")).doc("'utf8' or 'cp1252'")
@@ -449,7 +449,7 @@ int main()
         "   ^(^-e~--encoding^)^%<enc>                 'utf8' or 'cp1252'");
 
 
-    test(__LINE__, fmt, group(
+    test(__LINE__, fmt, (
             values("file") % "input filenames",
             (required("-s") & value("expr")) % "string to look for",
             option("any") % "report as soon as any matches" |

@@ -22,8 +22,8 @@ struct active {
 
     friend bool operator == (const active& a, const active& b) noexcept {
         return std::equal(begin(a.xs), end(a.xs), begin(b.xs),
-            [](double a, double b) {
-                return std::abs(a - b) < 1e-5;
+            [](double x, double y) {
+                return std::abs(x - y) < 1e-5;
             });
     }
 };

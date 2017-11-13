@@ -23,10 +23,35 @@ from sets import Set
 
 #default settings
 builddir   = "../build_test"
-incpaths   = ["", "../include/", "../src/"]
+incpaths   = ["", "../include/"]
 macros     = ["NO_DEBUG", "NDEBUG"]
 compiler   = "g++"
-compileopt = "-std=c++0x -Wall -Wextra -Wpedantic -Wno-unknown-pragmas"
+compileopt = ("-std=c++0x -Wall -Wextra -Wpedantic -Wno-unknown-pragmas"
+    " -fdiagnostics-color=always "
+    " -Wformat=2 "
+    " -Wall -Wextra -Wpedantic "
+    " -Wcast-align -Wcast-qual "
+    " -Wconversion "
+    " -Wctor-dtor-privacy "
+    " -Wdisabled-optimization "
+    " -Wdouble-promotion "
+    " -Winit-self "
+    " -Wlogical-op "
+    " -Wmissing-include-dirs "
+    " -Wno-sign-conversion "
+    " -Wnoexcept "
+    " -Wold-style-cast "
+    " -Woverloaded-virtual "
+    " -Wredundant-decls "
+    " -Wshadow "
+    " -Wstrict-aliasing=1 "
+    " -Wstrict-null-sentinel "
+    " -Wstrict-overflow=5 "
+    " -Wswitch-default "
+    " -Wundef "
+    " -Wno-unknown-pragmas "
+    " -Wuseless-cast ")
+
 tuext      = "cpp"
 separator  = "-----------------------------------------------------------------"
 

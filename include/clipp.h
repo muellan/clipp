@@ -364,7 +364,7 @@ template<>
 struct make<unsigned long long int> {
     static inline unsigned long long int from(const char* s) {
         if(!fwd_to_unsigned_int(s)) return (0);
-        return static_cast<unsigned long long int>(std::stoull(s,nullptr));
+        return (std::stoull(s,nullptr));
     }
 };
 
@@ -431,28 +431,28 @@ struct make<long int> {
 template<>
 struct make<long long int> {
     static inline long long int from(const char* s) {
-        return static_cast<long long int>(std::strtoll(s,nullptr,10));
+        return (std::strtoll(s,nullptr,10));
     }
 };
 
 template<>
 struct make<float> {
     static inline float from(const char* s) {
-        return float(std::strtof(s,nullptr));
+        return (std::strtof(s,nullptr));
     }
 };
 
 template<>
 struct make<double> {
     static inline double from(const char* s) {
-        return double(std::strtod(s,nullptr));
+        return (std::strtod(s,nullptr));
     }
 };
 
 template<>
 struct make<long double> {
     static inline long double from(const char* s) {
-        return static_cast<long double>(std::strtold(s,nullptr));
+        return (std::strtold(s,nullptr));
     }
 };
 
@@ -1675,7 +1675,7 @@ private:
 class prefix {
 public:
     explicit
-    prefix(arg_string prefix): prefix_{std::move(prefix)} {}
+    prefix(arg_string p): prefix_{std::move(p)} {}
 
     bool operator () (const arg_string& s) const {
         return s.find(prefix_) == 0;
@@ -1696,7 +1696,7 @@ private:
 class prefix_not {
 public:
     explicit
-    prefix_not(arg_string prefix): prefix_{std::move(prefix)} {}
+    prefix_not(arg_string p): prefix_{std::move(p)} {}
 
     bool operator () (const arg_string& s) const {
         return s.find(prefix_) != 0;
@@ -1827,8 +1827,8 @@ public:
 
     /** @brief makes "flag" parameter from range of strings */
     explicit
-    parameter(arg_list flags):
-        flags_{std::move(flags)},
+    parameter(arg_list flaglist):
+        flags_{std::move(flaglist)},
         matcher_{predicate_adapter{match::none}},
         label_{}, required_{false}
     {}
@@ -2429,6 +2429,7 @@ class group :
 
         child_t(const child_t& src): m_{}, type_{src.type_} {
             switch(type_) {
+                default:
                 case type::param: new(&m_)child_t{src.m_.param}; break;
                 case type::group: new(&m_)child_t{src.m_.group}; break;
             }
@@ -2436,6 +2437,7 @@ class group :
 
         child_t(child_t&& src) noexcept : m_{}, type_{src.type_} {
             switch(type_) {
+                default:
                 case type::param: new(&m_)child_t{std::move(src.m_.param)}; break;
                 case type::group: new(&m_)child_t{std::move(src.m_.group)}; break;
             }
@@ -2445,6 +2447,7 @@ class group :
             destroy_content();
             type_ = src.type_;
             switch(type_) {
+                default:
                 case type::param: new(&m_)child_t{src.m_.param}; break;
                 case type::group: new(&m_)child_t{src.m_.group}; break;
             }
@@ -2455,6 +2458,7 @@ class group :
             destroy_content();
             type_ = src.type_;
             switch(type_) {
+                default:
                 case type::param: new(&m_)child_t{std::move(src.m_.param)}; break;
                 case type::group: new(&m_)child_t{std::move(src.m_.group)}; break;
             }
@@ -2569,6 +2573,7 @@ class group :
     private:
         void destroy_content() {
             switch(type_) {
+                default:
                 case type::param: m_.param.~Param(); break;
                 case type::group: m_.group.~Group(); break;
             }
@@ -2648,7 +2653,7 @@ public:
         }
 
         int level() const noexcept {
-            return stack_.size();
+            return int(stack_.size());
         }
 
         bool is_first_in_group() const noexcept {
@@ -4177,9 +4182,9 @@ public:
 
 private:
     struct miss_candidate {
-        miss_candidate(dfs_traverser pos, arg_index index,
+        miss_candidate(dfs_traverser p, arg_index idx,
                        bool firstInRepeatGroup = false):
-            pos{std::move(pos)}, index{index},
+            pos{std::move(p)}, index{idx},
             startsRepeatGroup{firstInRepeatGroup}
         {}
 

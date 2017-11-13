@@ -50,7 +50,7 @@ void test(int lineNo,
     active m2;
     auto cli2 = (
         option("a").set(m2.a),
-        group(
+        (
             required("b").set(m2.b) &
             required("c").set(m2.c) &
             required("d").set(m2.d) &
