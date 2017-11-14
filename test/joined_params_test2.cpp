@@ -20,8 +20,8 @@ struct counters {
 
     int a = 0, b = 0;
 
-    friend bool operator == (const counters& a, const counters& b) noexcept {
-        return (a.a == b.a && a.b == b.b);
+    friend bool operator == (const counters& x, const counters& y) noexcept {
+        return (x.a == y.a && x.b == y.b);
     }
 };
 
