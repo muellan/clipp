@@ -292,7 +292,6 @@ print separator
 
 if allpass:
     print "All tests passed."
-    sys.exit(0)
 else:
     print "Some tests failed."
     sys.exit(1)
