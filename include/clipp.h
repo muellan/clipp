@@ -642,6 +642,7 @@ private:
 
 namespace str {
 
+
 /*************************************************************************//**
  *
  * @brief converts string to value of target type 'T'
@@ -1591,7 +1592,7 @@ alphabetic(const arg_string& s) {
 /*************************************************************************//**
  *
  * @brief predicate that returns the first substring match within the input
- *        string that represents a number
+ *        string that rmeepresents a number
  *        (with at maximum one decimal point and digit separators)
  *
  *****************************************************************************/
@@ -1607,7 +1608,7 @@ public:
         exp_{exponentSeparator}
     {}
 
-    subrange operator () (arg_string s) const {
+    subrange operator () (const arg_string& s) const {
         return str::first_number_match(s, separator_, decpoint_, exp_);
     }
 
@@ -1630,8 +1631,32 @@ public:
     explicit
     integers(char digitSeparator = ' '): separator_{digitSeparator} {}
 
-    subrange operator () (arg_string s) const {
+    subrange operator () (const arg_string& s) const {
         return str::first_integer_match(s, separator_);
+    }
+
+private:
+    char separator_;
+};
+
+
+
+/*************************************************************************//**
+ *
+ * @brief predicate that returns true if the input string represents
+ *        a non-negative integer (with optional digit separators)
+ *
+ *****************************************************************************/
+class positive_integers {
+public:
+    explicit
+    positive_integers(char digitSeparator = ' '): separator_{digitSeparator} {}
+
+    subrange operator () (const arg_string& s) const {
+        auto match = str::first_integer_match(s, separator_);
+        if(!match) return subrange{};
+        if(s[match.at()] == '-') return subrange{};
+        return match;
     }
 
 private:
@@ -1652,8 +1677,8 @@ public:
     explicit
     substring(arg_string str): str_{std::move(str)} {}
 
-    subrange operator () (const arg_string& arg) const {
-        return str::substring_match(arg, str_);
+    subrange operator () (const arg_string& s) const {
+        return str::substring_match(s, str_);
     }
 
 private:
@@ -1702,6 +1727,9 @@ private:
     arg_string prefix_;
 };
 
+
+/** @brief alias for prefix_not */
+using noprefix = prefix_not;
 
 
 
