@@ -19,6 +19,7 @@ from os import path
 from os import system
 from sys import stdout
 from sys import argv
+from sys import exit
 from sets import Set
 
 #default settings
@@ -164,7 +165,7 @@ if len(argv) > 1:
                 print "  -d, --show-dependecies            show all resolved includes during compilation"
                 print "  -c, --compiler (gcc|clang|msvc)   select compiler"
                 print "  --continue-on-fail                continue running regardless of failed builds or tests";
-                exit()
+                sys.exit(0)
             elif arg == "--clean":
                 if os.path.exists(builddir):
                     shutil.rmtree(builddir)
@@ -184,7 +185,7 @@ if len(argv) > 1:
 # get compiler-specific strings
 if compilers[compiler] is None:
     print "ERROR: compiler " + compiler + " not supported"
-    exit()
+    sys.exit(1)
 
 compileexec = compilers[compiler]["exe"]
 compileopts = compilers[compiler]["flags"]
@@ -207,7 +208,7 @@ for p in paths:
 
 if len(sources) < 1:
     print "ERROR: no source files found"
-    exit()
+    sys.exit(1)
 
 # make build directory
 if not os.path.exists(builddir):
@@ -253,7 +254,7 @@ for source in sources:
                         break
                 else:
                     print "ERROR: dependency " + dep + " could not be found!"
-                    exit()
+                    sys.exit(1)
 
         if doCompile:
             stdout.write("compiling > ")
@@ -271,7 +272,7 @@ for source in sources:
             if not path.exists(artifact):
                 print "FAILED!"
                 allpass = False
-                if haltOnFail: exit();
+                if haltOnFail: sys.exit(1);
 
         #execute test; backslashes make sure that it works with cmd.exe
         if onwindows:
@@ -291,6 +292,8 @@ print separator
 
 if allpass:
     print "All tests passed."
+    sys.exit(0)
 else:
     print "Some tests failed."
+    sys.exit(1)
 
