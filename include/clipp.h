@@ -84,8 +84,8 @@ public:
 
     /** @brief match length & position within subject string */
     explicit constexpr
-    subrange(size_type position, size_type length) noexcept :
-        at_{position}, length_{length}
+    subrange(size_type pos, size_type len) noexcept :
+        at_{pos}, length_{len}
     {}
 
     /** @brief position of the match within the subject string */
@@ -761,7 +761,7 @@ longest_common_prefix(const InputRange& strs)
     using std::end;
 
     using item_t = typename std::decay<decltype(*begin(strs))>::type;
-    using size_t = typename std::decay<decltype(begin(strs)->size())>::type;
+    using str_size_t = typename std::decay<decltype(begin(strs)->size())>::type;
 
     const auto n = size_t(distance(begin(strs), end(strs)));
     if(n < 1) return "";
@@ -773,8 +773,8 @@ longest_common_prefix(const InputRange& strs)
                     return a.size() < b.size(); })->size();
 
     //check each character until we find a mismatch
-    for(size_t i = 0; i < m; ++i) {
-        for(size_t j = 1; j < n; ++j) {
+    for(str_size_t i = 0; i < m; ++i) {
+        for(str_size_t j = 1; j < n; ++j) {
             if(strs[j][i] != strs[j-1][i])
                 return strs[0].substr(0, i);
         }
@@ -3987,8 +3987,8 @@ struct select_values {
 class match_t {
 public:
     match_t() = default;
-    match_t(arg_string str, scoped_dfs_traverser pos):
-        str_{std::move(str)}, pos_{std::move(pos)}
+    match_t(arg_string s, scoped_dfs_traverser p):
+        str_{std::move(s)}, pos_{std::move(p)}
     {}
 
     const arg_string& str() const noexcept { return str_; }
@@ -4126,17 +4126,17 @@ public:
         friend class parser;
 
         explicit
-        arg_mapping(arg_index index, arg_string s,
+        arg_mapping(arg_index idx, arg_string s,
                     const dfs_traverser& match)
         :
-            index_{index}, arg_{std::move(s)}, match_{match},
+            index_{idx}, arg_{std::move(s)}, match_{match},
             repeat_{0}, startsRepeatGroup_{false},
             blocked_{false}, conflict_{false}
         {}
 
         explicit
-        arg_mapping(arg_index index, arg_string s) :
-            index_{index}, arg_{std::move(s)}, match_{},
+        arg_mapping(arg_index idx, arg_string s) :
+            index_{idx}, arg_{std::move(s)}, match_{},
             repeat_{0}, startsRepeatGroup_{false},
             blocked_{false}, conflict_{false}
         {}
@@ -4180,8 +4180,8 @@ public:
     class missing_event {
     public:
         explicit
-        missing_event(const parameter* param, arg_index after):
-            param_{param}, aftIndex_{after}
+        missing_event(const parameter* p, arg_index after):
+            param_{p}, aftIndex_{after}
         {}
 
         const parameter* param() const noexcept { return param_; }
@@ -4680,8 +4680,8 @@ public:
     /** @brief default: empty redult */
     parsing_result() = default;
 
-    parsing_result(arg_mappings arg2param, missing_events missing):
-        arg2param_{std::move(arg2param)}, missing_{std::move(missing)}
+    parsing_result(arg_mappings arg2param, missing_events misses):
+        arg2param_{std::move(arg2param)}, missing_{std::move(misses)}
     {}
 
     //-----------------------------------------------------
@@ -5916,8 +5916,8 @@ public:
     public:
         using string = doc_string;
 
-        section(string title, string content):
-            title_{std::move(title)}, content_{std::move(content)}
+        section(string stitle, string scontent):
+            title_{std::move(stitle)}, content_{std::move(scontent)}
         {}
 
         const string& title()   const noexcept { return title_; }
