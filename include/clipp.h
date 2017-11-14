@@ -1032,30 +1032,30 @@ set(T& target) {
 
 
 /*************************************************************************//**
-*
-* @brief makes function object that sets a bool to true
-*
-*****************************************************************************/
+ *
+ * @brief makes function object that sets a bool to true
+ *
+ *****************************************************************************/
 inline detail::assign_value<bool>
 set(bool& target) {
     return detail::assign_value<bool>{target,true};
 }
 
 /*************************************************************************//**
-*
-* @brief makes function object that sets a bool to false
-*
-*****************************************************************************/
+ *
+ * @brief makes function object that sets a bool to false
+ *
+ *****************************************************************************/
 inline detail::assign_value<bool>
 unset(bool& target) {
     return detail::assign_value<bool>{target,false};
 }
 
 /*************************************************************************//**
-*
-* @brief makes function object that flips the value of a ref-captured bool
-*
-*****************************************************************************/
+ *
+ * @brief makes function object that flips the value of a ref-captured bool
+ *
+ *****************************************************************************/
 inline detail::flip_bool
 flip(bool& b) {
     return detail::flip_bool(b);
@@ -1066,10 +1066,10 @@ flip(bool& b) {
 
 
 /*************************************************************************//**
-*
-* @brief makes function object that increments using operator ++
-*
-*****************************************************************************/
+ *
+ * @brief makes function object that increments using operator ++
+ *
+ *****************************************************************************/
 template<class T>
 inline detail::increment<T>
 increment(T& target) {
@@ -1077,10 +1077,10 @@ increment(T& target) {
 }
 
 /*************************************************************************//**
-*
-* @brief makes function object that decrements using operator --
-*
-*****************************************************************************/
+ *
+ * @brief makes function object that decrements using operator --
+ *
+ *****************************************************************************/
 template<class T>
 inline detail::increment_by<T>
 increment(T& target, T by) {
@@ -1088,10 +1088,10 @@ increment(T& target, T by) {
 }
 
 /*************************************************************************//**
-*
-* @brief makes function object that increments by a fixed amount using operator +=
-*
-*****************************************************************************/
+ *
+ * @brief makes function object that increments by a fixed amount using operator +=
+ *
+ *****************************************************************************/
 template<class T>
 inline detail::decrement<T>
 decrement(T& target) {
