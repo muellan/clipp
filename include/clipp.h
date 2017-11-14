@@ -2396,16 +2396,16 @@ class group :
         child_t(const child_t& src): m_{}, type_{src.type_} {
             switch(type_) {
                 default:
-                case type::param: new(&m_)child_t{src.m_.param}; break;
-                case type::group: new(&m_)child_t{src.m_.group}; break;
+                case type::param: new(&m_)data{src.m_.param}; break;
+                case type::group: new(&m_)data{src.m_.group}; break;
             }
         }
 
         child_t(child_t&& src) noexcept : m_{}, type_{src.type_} {
             switch(type_) {
                 default:
-                case type::param: new(&m_)child_t{std::move(src.m_.param)}; break;
-                case type::group: new(&m_)child_t{std::move(src.m_.group)}; break;
+                case type::param: new(&m_)data{std::move(src.m_.param)}; break;
+                case type::group: new(&m_)data{std::move(src.m_.group)}; break;
             }
         }
 
@@ -2414,8 +2414,8 @@ class group :
             type_ = src.type_;
             switch(type_) {
                 default:
-                case type::param: new(&m_)child_t{src.m_.param}; break;
-                case type::group: new(&m_)child_t{src.m_.group}; break;
+                case type::param: new(&m_)data{src.m_.param}; break;
+                case type::group: new(&m_)data{src.m_.group}; break;
             }
             return *this;
         }
@@ -2425,8 +2425,8 @@ class group :
             type_ = src.type_;
             switch(type_) {
                 default:
-                case type::param: new(&m_)child_t{std::move(src.m_.param)}; break;
-                case type::group: new(&m_)child_t{std::move(src.m_.group)}; break;
+                case type::param: new(&m_)data{std::move(src.m_.param)}; break;
+                case type::group: new(&m_)data{std::move(src.m_.group)}; break;
             }
             return *this;
         }
