@@ -22,35 +22,53 @@ from sys import argv
 from sets import Set
 
 #default settings
-builddir   = "../build_test"
-incpaths   = ["", "../include/"]
-macros     = ["NO_DEBUG", "NDEBUG"]
-compiler   = "g++"
-compileopt = ("-std=c++0x -Wall -Wextra -Wpedantic -Wno-unknown-pragmas"
-    " -fdiagnostics-color=always "
-    " -Wformat=2 "
-    " -Wall -Wextra -Wpedantic "
-    " -Wcast-align -Wcast-qual "
-    " -Wconversion "
-    " -Wctor-dtor-privacy "
-    " -Wdisabled-optimization "
-    " -Wdouble-promotion "
-    " -Winit-self "
-    " -Wlogical-op "
-    " -Wmissing-include-dirs "
-    " -Wno-sign-conversion "
-    " -Wnoexcept "
-    " -Wold-style-cast "
-    " -Woverloaded-virtual "
-    " -Wredundant-decls "
-    " -Wshadow "
-    " -Wstrict-aliasing=1 "
-    " -Wstrict-null-sentinel "
-    " -Wstrict-overflow=5 "
-    " -Wswitch-default "
-    " -Wundef "
-    " -Wno-unknown-pragmas "
-    " -Wuseless-cast ")
+builddir    = "../build_test"
+incpaths    = ["", "../include/"]
+macros      = ["NO_DEBUG", "NDEBUG"]
+compiler    = "gcc"
+
+gccflags = ("-std=c++0x -Wall -Wextra -Wpedantic -Wno-unknown-pragmas"
+                    " -Wno-unknown-warning"
+                    " -Wno-unknown-warning-option"
+                    " -fdiagnostics-color=always "
+                    " -Wformat=2 "
+                    " -Wall -Wextra -Wpedantic "
+                    " -Wcast-align -Wcast-qual "
+                    " -Wconversion "
+                    " -Wctor-dtor-privacy "
+                    " -Wdisabled-optimization "
+                    " -Wdouble-promotion "
+                    " -Winit-self "
+                    " -Wlogical-op "
+                    " -Wmissing-include-dirs "
+                    " -Wno-sign-conversion "
+                    " -Wnoexcept "
+                    " -Wold-style-cast "
+                    " -Woverloaded-virtual "
+                    " -Wredundant-decls "
+                    " -Wshadow "
+                    " -Wstrict-aliasing=1 "
+                    " -Wstrict-null-sentinel "
+                    " -Wstrict-overflow=5 "
+                    " -Wswitch-default "
+                    " -Wundef "
+                    " -Wno-unknown-pragmas "
+                    " -Wuseless-cast ")
+
+#available compilers
+compilers = {
+    "gcc"   : {"exe": "g++",
+               "flags" : gccflags,
+               "macro" : "-D", "incpath" : "-I", "out" : "-o"}
+    ,
+    "clang" : {"exe": "clang++",
+               "flags" : gccflags,
+               "macro" : "-D", "incpath" : "-I", "out" : "-o"}
+    ,
+    "msvc" : {"exe": "cl",
+               "flags" : (" /W4 "),
+               "macro" : "/D", "incpath" : "/I", "out" : "/Fe"}
+}
 
 tuext      = "cpp"
 separator  = "-----------------------------------------------------------------"
@@ -125,52 +143,55 @@ allpass = True
 
 # process input args
 if len(argv) > 1:
+    next = 0
     for i in range(1,len(argv)):
-        arg = argv[i]
-        if arg == "-h" or arg == "--help":
-            print "Usage:"
-            print "  " + argv[0] + \
-                " [--help]" \
-                " [--clean]" \
-                " [-r]" \
-                " [-d]" \
-                " [-c <compiler>]" \
-                " [-o <compiler-options>]" \
-                " [-m <macro>]..." \
-                " [-i <include-path>]..." \
-                " [--continue-on-fail]" \
-                " [<directory|file>...]"
-            print ""
-            print "Options:"
-            print "  -h, --help                         print this screen"
-            print "  --clean                            do a clean re-build; removes entire build directory"
-            print "  -r, --recompile                    recompile all source files before running"
-            print "  -d, --show-dependecies             show all resolved includes during compilation"
-            print "  -c, --compiler <executable>        specify compiler executable"
-            print "  -o, --compiler-options <options>   specify compiler options"
-            print "  -m, --macro <macro>                add macro definition"
-            print "  -i, --include <path>               add include path"
-            print "  --continue-on-fail                 continue running regardless of failed builds or tests";
-            exit()
-        elif arg == "--clean":
-            if os.path.exists(builddir):
-                shutil.rmtree(builddir)
-        elif arg == "-r" or arg == "--recompile":
-            recompile = True
-        elif arg == "-d" or arg == "--show-dependencies":
-            showDependencies = True
-        elif arg == "--continue-on-fail":
-            haltOnFail = False
-        elif arg == "-c" or arg == "--compiler":
-            if i+1 < len(argv): compiler = argv[i+1]
-        elif arg == "-o" or arg == "--compiler-options":
-            if i+1 < len(argv): compileopt = argv[i+1]
-        elif arg == "-i" or arg == "--include":
-            if i+1 < len(argv): incpats.add(argv[i+1])
-        elif arg == "-m" or arg == "--macro":
-            if i+1 < len(argv): macros.add(argv[i+1])
-        else:
-            paths.append(arg)
+        if i >= next:
+            arg = argv[i]
+            if arg == "-h" or arg == "--help":
+                print "Usage:"
+                print "  " + argv[0] + \
+                    " [--help]" \
+                    " [--clean]" \
+                    " [-r]" \
+                    " [-d]" \
+                    " [-c (gcc|clang|msvc)]" \
+                    " [--continue-on-fail]" \
+                    " [<directory|file>...]"
+                print ""
+                print "Options:"
+                print "  -h, --help                        print this screen"
+                print "  --clean                           do a clean re-build; removes entire build directory"
+                print "  -r, --recompile                   recompile all source files before running"
+                print "  -d, --show-dependecies            show all resolved includes during compilation"
+                print "  -c, --compiler (gcc|clang|msvc)   select compiler"
+                print "  --continue-on-fail                continue running regardless of failed builds or tests";
+                exit()
+            elif arg == "--clean":
+                if os.path.exists(builddir):
+                    shutil.rmtree(builddir)
+            elif arg == "-r" or arg == "--recompile":
+                recompile = True
+            elif arg == "-d" or arg == "--show-dependencies":
+                showDependencies = True
+            elif arg == "--continue-on-fail":
+                haltOnFail = False
+            elif arg == "-c" or arg == "--compiler":
+                if i+1 < len(argv):
+                    compiler = argv[i+1]
+                    next = i + 2
+            else:
+                paths.append(arg)
+
+# get compiler-specific strings
+if compilers[compiler] is None:
+    print "ERROR: compiler " + compiler + " not supported"
+    exit()
+
+compileexec = compilers[compiler]["exe"]
+compileopts = compilers[compiler]["flags"]
+compilemacr = compilers[compiler]["macro"]
+compileinc  = compilers[compiler]["incpath"]
+compileout  = compilers[compiler]["out"]
 
 # gather source file names
 if len(paths) < 1:
@@ -198,14 +219,13 @@ if not os.path.exists(builddir):
 print separator
 
 # compile and run tests
-compilecmd = compiler + " " + compileopt
+compilecmd = compileexec + " " + compileopts
 for m in macros:
-    if m != "": compilecmd = compilecmd + " -D" + m
+    if m != "": compilecmd = compilecmd + " " + compilemacr + m
 
 for ip in incpaths:
-    if ip != "": compilecmd = compilecmd + " -I " + ip
+    if ip != "": compilecmd = compilecmd + " " + compileinc + ip
 
-#print compilecmd
 
 for source in sources:
     res1 = testrxp.match(source)
@@ -248,7 +268,7 @@ for source in sources:
                  if dep.endswith("." + tuext):
                      tus = tus + " " + dep
 
-            system(compilecmd + " " + tus + " -o " + artifact)
+            system(compilecmd + " " + tus + " " + compileout + " " + artifact)
             if not path.exists(artifact):
                 print "FAILED!"
                 allpass = False
