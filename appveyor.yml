@@ -17,8 +17,7 @@ clone_folder: c:\projects\clipp
 install:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 
-build:
-  mode: Script
+build: off
 
 test_script:
   - cd test
