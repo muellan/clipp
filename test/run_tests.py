@@ -23,12 +23,15 @@ from sys import exit
 from sets import Set
 
 #default settings
-builddir    = "../build_test"
-incpaths    = ["", "../include/"]
-macros      = ["NO_DEBUG", "NDEBUG"]
-compiler    = "gcc"
+builddir = "../build_test"
+incpaths = ["", "../include/"]
+macros   = [] # ["NO_DEBUG", "NDEBUG"]
+compiler = "gcc"
+valgrind = "valgrind --error-exitcode=1"
 
-gccflags = ("-std=c++0x -Wall -Wextra -Wpedantic -Wno-unknown-pragmas"
+gccflags = ("-std=c++0x -O0 -g "
+                    " -Wall -Wextra -Wpedantic "
+                    " -Wno-unknown-pragmas"
                     " -Wno-unknown-warning"
                     " -Wno-unknown-warning-option"
                     " -Wformat=2 "
@@ -59,15 +62,21 @@ gccflags = ("-std=c++0x -Wall -Wextra -Wpedantic -Wno-unknown-pragmas"
 compilers = {
     "gcc"   : {"exe": "g++",
                "flags" : gccflags,
-               "macro" : "-D", "incpath" : "-I", "out" : "-o "
+               "macro" : "-D", "incpath" : "-I",
+               "obj" : "",
+               "link" : "-o "
     },
     "clang" : {"exe": "clang++",
                "flags" : gccflags,
-               "macro" : "-D", "incpath" : "-I", "out" : "-o "
+               "macro" : "-D", "incpath" : "-I",
+               "obj" : "",
+               "link" : "-o "
     },
     "msvc" : {"exe": "cl",
-              "flags" : (" /W4 /EHsc "),
-              "macro" : "/D:", "incpath" : "/I:", "out" : "/link /out:"
+              "flags" : " /W4 /EHsc ",
+              "macro" : "/D:", "incpath" : "/I:",
+              "obj" : "/Foc:",
+              "link" : "/link /out:"
     }
 }
 
@@ -144,6 +153,8 @@ showDependencies = False
 haltOnFail = True
 recompile = False
 allpass = True
+useValgrind = False
+doClean = False
 
 # process input args
 if len(argv) > 1:
@@ -156,10 +167,11 @@ if len(argv) > 1:
                 print "  " + argv[0] + \
                     " [--help]" \
                     " [--clean]" \
+                    " [-c (gcc|clang|msvc)]" \
                     " [-r]" \
                     " [-d]" \
-                    " [-c (gcc|clang|msvc)]" \
                     " [--continue-on-fail]" \
+                    " [--valgrind]" \
                     " [<directory|file>...]"
                 print ""
                 print "Options:"
@@ -168,17 +180,19 @@ if len(argv) > 1:
                 print "  -r, --recompile                   recompile all source files before running"
                 print "  -d, --show-dependecies            show all resolved includes during compilation"
                 print "  -c, --compiler (gcc|clang|msvc)   select compiler"
+                print "  --valgrind                        run test through valgrind"
                 print "  --continue-on-fail                continue running regardless of failed builds or tests";
                 exit(0)
             elif arg == "--clean":
-                if os.path.exists(builddir):
-                    shutil.rmtree(builddir)
+                doClean = True
             elif arg == "-r" or arg == "--recompile":
                 recompile = True
             elif arg == "-d" or arg == "--show-dependencies":
                 showDependencies = True
             elif arg == "--continue-on-fail":
                 haltOnFail = False
+            elif arg == "--valgrind":
+                useValgrind = True
             elif arg == "-c" or arg == "--compiler":
                 if i+1 < len(argv):
                     compiler = argv[i+1]
@@ -198,7 +212,14 @@ compileexec = compilers[compiler]["exe"]
 compileopts = compilers[compiler]["flags"]
 macroOpt    = compilers[compiler]["macro"]
 includeOpt  = compilers[compiler]["incpath"]
-binoutOpt   = compilers[compiler]["out"]
+objOutOpt   = compilers[compiler]["obj"]
+linkOpt     = compilers[compiler]["link"]
+
+if onwindows:
+    builddir = builddir.replace("/", "\\")
+
+builddir = builddir + "_" + compiler
+
 
 # gather source file names
 if len(paths) < 1:
@@ -218,6 +239,10 @@ if len(sources) < 1:
     exit(1)
 
 # make build directory
+if doClean:
+    if os.path.exists(builddir):
+        shutil.rmtree(builddir)
+
 if not os.path.exists(builddir):
     os.makedirs(builddir)
     print separator
@@ -282,7 +307,14 @@ for source in sources:
 
             if onwindows: tus = tus.replace("/", "\\")
 
-            compilecall = compilecmd + " " + tus + " " + binoutOpt + artifact
+            compilecall = compilecmd
+
+            # object file output
+            if objOutOpt != "":
+                objfile = builddir + pathsep + sname + ".o"
+                compilecall = compilecall + " " + objOutOpt + objfile
+
+            compilecall = compilecall + " " + tus + " " + linkOpt + artifact
 
             system(compilecall)
             if not path.exists(artifact):
@@ -292,14 +324,20 @@ for source in sources:
 
         stdout.write("running > ")
         stdout.flush()
-        # runres = system(artifact)
-        runres = 0
+        runres = system(artifact)
+
+        if runres == 0 and useValgrind:
+            stdout.write("valgrind > ")
+            stdout.flush()
+            runres = system(valgrind + " " + artifact)
+
         if runres == 0:
-            print "passed."
+            print "passed"
         else:
             print "FAILED!"
             allpass = False
             if haltOnFail : exit(1)
+
 
 print separator
 
