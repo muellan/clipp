@@ -11,29 +11,29 @@
 #include "testing.h"
 
 //-------------------------------------------------------------------
-template<class T>
+template<class T, bool = std::is_arithmetic<T>::value,
+                  bool = std::is_floating_point<T>::value>
 struct equals {
-    static bool result(const T& a, const T&b) { return a == b; }
-};
-
-template<>
-struct equals<float> {
-    static bool result(const float& a, const float&b) {
-        return std::abs(a-b) < 1e-4f;
+    static bool result(const T& a, const T&b) {
+        return a == b;
     }
 };
 
-template<>
-struct equals<double> {
-    static bool result(const double& a, const double&b) {
-        return std::abs(a-b) < 1e-8;
+template<class T>
+struct equals<T,true,false> {
+    static bool result(const T& a, const T&b) {
+        if(std::isinf(a) && std::isinf(b)) return true;
+        if(std::isinf(a) || std::isinf(b)) return false;
+        return a == b;
     }
 };
 
-template<>
-struct equals<long double> {
-    static bool result(const long double& a, const long double&b) {
-        return std::abs(a-b) < static_cast<long double>(1e-8);
+template<class T>
+struct equals<T,true,true> {
+    static bool result(const T& a, const T&b) {
+        if(std::isinf(a) && std::isinf(b)) return true;
+        if(std::isinf(a) || std::isinf(b)) return false;
+        return std::abs(a-b) < T(1e-4);
     }
 };
 
