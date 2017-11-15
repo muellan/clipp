@@ -11,6 +11,16 @@
 #include "testing.h"
 
 //-------------------------------------------------------------------
+#if defined(_MSC_VER)
+#if _MSC_VER < 1800
+namespace std {
+  template <typename T>
+  bool isinf(const T &x) { return !_finite(x); }
+}
+#endif
+#endif
+
+//-------------------------------------------------------------------
 template<class T, bool = std::is_arithmetic<T>::value,
                   bool = std::is_floating_point<T>::value>
 struct equals {
@@ -22,8 +32,15 @@ struct equals {
 template<class T>
 struct equals<T,true,false> {
     static bool result(const T& a, const T&b) {
-        if(std::isinf(a) && std::isinf(b)) return true;
-        if(std::isinf(a) || std::isinf(b)) return false;
+        #if defined(_MSC_VER)
+            bool ainf = a == std::numeric_limits<T>::infinity();
+            bool binf = b == std::numeric_limits<T>::infinity();
+            if(ainf && binf) return true;
+            if(ainf || binf) return false;
+        #else
+            if(std::isinf(a) && std::isinf(b)) return true;
+            if(std::isinf(a) || std::isinf(b)) return false;
+        #endif
         return a == b;
     }
 };
