@@ -116,7 +116,7 @@ int main()
 
         m = active{}; m.e = true;
         test(__LINE__, {"-e"}, m);
-        m = active{}; m.e = true; m.ev = 2.3f;
+        m = active{}; m.e = true; m.ev = 2.3;
         test(__LINE__, {"-e", "2.3"}, m);
         test(__LINE__, {"-e2.3"}, m);
         test(__LINE__, {"-e2", ".3"}, m);
@@ -170,8 +170,8 @@ int main()
         m.b = true; m.bv = 12;
         m.c = true; m.cv = -0.12f;
         m.d = true; m.dv = 2.3f;
-        m.e = true; m.ev = 3.4f;
-        m.f = true; m.fv = 5.6f;
+        m.e = true; m.ev = 3.4;
+        m.f = true; m.fv = 5.6;
         m.g = true; m.gv = "x-y.z";
         m.h = true;
         m.i = true;
