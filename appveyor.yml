@@ -1,0 +1,24 @@
+version: {build}
+
+# branches:
+#   only:
+#     - master
+#     - production
+#   except:
+#     - gh-pages
+
+image: Visual Studio 2017
+
+platform: 
+  - x64
+
+clone_folder: c:\projects\clipp
+
+install:
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+
+test_script:
+  - cd test
+  - python run_tests.py -c msvc --clean
+
+
