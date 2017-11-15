@@ -714,7 +714,7 @@ inline bool
 has_prefix(const std::basic_string<C,T,A>& subject,
            const std::basic_string<C,T,A>& prefix)
 {
-    if(prefix.size() >= subject.size()) return false;
+    if(prefix.size() > subject.size()) return false;
     return subject.find(prefix) == 0;
 }
 
@@ -730,7 +730,7 @@ inline bool
 has_postfix(const std::basic_string<C,T,A>& subject,
             const std::basic_string<C,T,A>& postfix)
 {
-    if(postfix.size() >= subject.size()) return false;
+    if(postfix.size() > subject.size()) return false;
     return (subject.size() - postfix.size()) == subject.find(postfix);
 }
 
@@ -911,15 +911,15 @@ first_number_match(std::basic_string<C,T,A> s,
         else {
             sep = false;
             if(s[j] == decimalPoint) {
-                //only one decimal point allowed
-                if(!point) point = true; else break;
+                //only one decimal point before exponent allowed
+                if(!point && exp == string_t::npos) point = true; else break;
             }
             else if(std::tolower(s[j]) == std::tolower(exponential)) {
                 //only one exponent separator allowed
                 if(exp == string_t::npos) exp = j; else break;
             }
             else if(exp != string_t::npos && (exp+1) == j) {
-                //place one after the exponent separator
+                //only sign or digit after exponent separator
                 if(s[j] != '+' && s[j] != '-' && !std::isdigit(s[j])) break;
             }
             else if(!std::isdigit(s[j])) {
