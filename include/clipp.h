@@ -4557,21 +4557,26 @@ private:
         //go through all exclusive groups of matching pattern
         for(const auto& m : match.stack()) {
             if(m.parent->exclusive()) {
-                for(auto i = missCand_.rbegin(); i != missCand_.rend(); ++i) {
-                    for(const auto& c : i->pos.stack()) {
+                for(auto i = int(missCand_.size())-1; i >= 0; --i) {
+                    bool removed = false;
+                    for(const auto& c : missCand_[i].pos.stack()) {
                         //sibling within same exclusive group => discard
                         if(c.parent == m.parent && c.cur != m.cur) {
-                            missCand_.erase(prev(i.base()));
+                            missCand_.erase(missCand_.begin() + i);
                             if(missCand_.empty()) return;
+                            removed = true;
                             break;
                         }
                     }
                     //remove miss candidates only within current repeat cycle
-                    if(i->startsRepeatGroup) break;
+                    if(i > 0 && removed) {
+                        if(missCand_[i-1].startsRepeatGroup) break;
+                    } else {
+                        if(missCand_[i].startsRepeatGroup) break;
+                    }
                 }
             }
         }
-
     }
 
     //-----------------------------------------------------
