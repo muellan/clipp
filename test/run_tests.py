@@ -252,6 +252,10 @@ print separator
 
 # compile and run tests
 compilecmd = compileexec + " " + compileopts
+print "compiler call: "
+print compilecmd
+print separator
+
 for m in macros:
     if onwindows: m = m.replace("/", "\\")
     if m != "": compilecmd = compilecmd + " " + macroOpt + m

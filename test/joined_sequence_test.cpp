@@ -24,10 +24,10 @@ struct active {
     char a = ' ', b = ' ', c = ' ';
     std::string s = "";
 
-    friend bool operator == (const active& a, const active& b) noexcept {
-        return (a.i == b.i &&
-                a.a == b.a && a.b == b.b && a.c == b.c &&
-                a.s == b.s);
+    friend bool operator == (const active& x, const active& y) noexcept {
+        return (x.i == y.i &&
+                x.a == y.a && x.b == y.b && x.c == y.c &&
+                x.s == y.s);
     }
 };
 
