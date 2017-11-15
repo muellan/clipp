@@ -59,15 +59,16 @@ gccflags = ("-std=c++0x -Wall -Wextra -Wpedantic -Wno-unknown-pragmas"
 compilers = {
     "gcc"   : {"exe": "g++",
                "flags" : gccflags,
-               "macro" : "-D", "incpath" : "-I", "out" : "-o"}
-    ,
+               "macro" : "-D", "incpath" : "-I", "out" : "-o "
+    },
     "clang" : {"exe": "clang++",
                "flags" : gccflags,
-               "macro" : "-D", "incpath" : "-I", "out" : "-o"}
-    ,
+               "macro" : "-D", "incpath" : "-I", "out" : "-o "
+    },
     "msvc" : {"exe": "cl",
-               "flags" : (" /W4 "),
-               "macro" : "/D", "incpath" : "/I", "out" : "/Fe"}
+              "flags" : (" /W4 /EHsc "),
+              "macro" : "/D:", "incpath" : "/I:", "out" : "/link /out:"
+    }
 }
 
 tuext      = "cpp"
@@ -131,7 +132,10 @@ def dependencies(source, searchpaths = [], sofar = Set()):
 onwindows = os.name == "nt"
 
 artifactext = ""
-if onwindows: artifactext = ".exe"
+pathsep = "/"
+if onwindows:
+    artifactext = ".exe"
+    pathsep = "\\"
 
 paths = []
 sources = []
@@ -165,7 +169,7 @@ if len(argv) > 1:
                 print "  -d, --show-dependecies            show all resolved includes during compilation"
                 print "  -c, --compiler (gcc|clang|msvc)   select compiler"
                 print "  --continue-on-fail                continue running regardless of failed builds or tests";
-                sys.exit(0)
+                exit(0)
             elif arg == "--clean":
                 if os.path.exists(builddir):
                     shutil.rmtree(builddir)
@@ -183,15 +187,18 @@ if len(argv) > 1:
                 paths.append(arg)
 
 # get compiler-specific strings
-if compilers[compiler] is None:
+if compiler not in compilers.keys():
     print "ERROR: compiler " + compiler + " not supported"
-    sys.exit(1)
+    print "choose one of:"
+    for key in compilers.keys():
+        print "    " + key
+    exit(1)
 
 compileexec = compilers[compiler]["exe"]
 compileopts = compilers[compiler]["flags"]
-compilemacr = compilers[compiler]["macro"]
-compileinc  = compilers[compiler]["incpath"]
-compileout  = compilers[compiler]["out"]
+macroOpt    = compilers[compiler]["macro"]
+includeOpt  = compilers[compiler]["incpath"]
+binoutOpt   = compilers[compiler]["out"]
 
 # gather source file names
 if len(paths) < 1:
@@ -208,7 +215,7 @@ for p in paths:
 
 if len(sources) < 1:
     print "ERROR: no source files found"
-    sys.exit(1)
+    exit(1)
 
 # make build directory
 if not os.path.exists(builddir):
@@ -221,13 +228,17 @@ print separator
 # compile and run tests
 compilecmd = compileexec + " " + compileopts
 for m in macros:
-    if m != "": compilecmd = compilecmd + " " + compilemacr + m
+    if onwindows: m = m.replace("/", "\\")
+    if m != "": compilecmd = compilecmd + " " + macroOpt + m
 
 for ip in incpaths:
-    if ip != "": compilecmd = compilecmd + " " + compileinc + ip
+    if onwindows: ip = ip.replace("/", "\\")
+    if ip != "": compilecmd = compilecmd + " " + includeOpt + ip
 
 
 for source in sources:
+    if onwindows: source = source.replace("/", "\\")
+
     res1 = testrxp.match(source)
     res2 = testrxp.match(path.basename(source))
     if res1 is not None and res2 is not None:
@@ -235,7 +246,8 @@ for source in sources:
         sname = res2.group(1)
         stdout.write("testing " + tname + " > checking depdendencies > ")
         stdout.flush()
-        artifact = builddir + "/" + sname + artifactext
+        artifact = builddir + pathsep + sname + artifactext
+        if onwindows: artifact = artifact.replace("/", "\\")
 
         srcdeps = dependencies(source, incpaths)
 
@@ -254,7 +266,7 @@ for source in sources:
                         break
                 else:
                     print "ERROR: dependency " + dep + " could not be found!"
-                    sys.exit(1)
+                    exit(1)
 
         if doCompile:
             stdout.write("compiling > ")
@@ -268,31 +280,33 @@ for source in sources:
                  if dep.endswith("." + tuext):
                      tus = tus + " " + dep
 
-            system(compilecmd + " " + tus + " " + compileout + " " + artifact)
+            if onwindows: tus = tus.replace("/", "\\")
+
+            compilecall = compilecmd + " " + tus + " " + binoutOpt + artifact
+
+            system(compilecall)
             if not path.exists(artifact):
                 print "FAILED!"
                 allpass = False
-                if haltOnFail: sys.exit(1);
-
-        #execute test; backslashes make sure that it works with cmd.exe
-        if onwindows:
-            artifact = artifact.replace("/", "\\")
+                if haltOnFail: exit(1);
 
         stdout.write("running > ")
         stdout.flush()
-        runres = system(artifact)
+        # runres = system(artifact)
+        runres = 0
         if runres == 0:
             print "passed."
         else:
             print "FAILED!"
             allpass = False
-            if haltOnFail : exit()
+            if haltOnFail : exit(1)
 
 print separator
 
 if allpass:
     print "All tests passed."
+    exit(0)
 else:
     print "Some tests failed."
-    sys.exit(1)
+    exit(1)
 

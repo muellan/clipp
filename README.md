@@ -12,6 +12,7 @@ Easy to use, powerful and expressive command line argument handling for C++11/14
 - ### [Overview (short examples)](#quick-overview)
 - ### [Detailed Examples](#examples)
 - #### [Why yet another library for parsing command line arguments?](#motivation) / [Design goals](#design-goals)
+- #### [Requirements / Compilers](requirements)
 
 
 
@@ -1953,8 +1954,12 @@ I also wanted the ability to keep *everything* related to one option/command/val
 
 
 ## Requirements
-  - requires a C++11 conforming compiler
-  - tested with g++ 5.3.0, g++ 5.4.1, g++ 6, g++ 7, clang++ 3.8
+  - requires a mostly C++11 conforming compiler
+
+### Compilers, clipp compiles with
+  - g++ 5.3.0, g++ 5.4.1, g++ 6, g++ 7
+  - clang++ 3.8
+  - MSVC 14.11.25503 (compiler 19.11.25547)
 
 
 
