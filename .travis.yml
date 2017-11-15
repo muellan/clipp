@@ -82,29 +82,29 @@ matrix:
       - MATRIX_EVAL="CC=clang-3.9 && CXX=clang++-3.9"
       - TEST_COMPILER="clang"
 
-  # - os: linux
-  #   addons:
-  #     apt:
-  #       sources:
-  #         - llvm-toolchain-trusty-4.0
-  #       packages:
-  #         - clang-4.0
-  #         - valgrind
-  #   env:
-  #     - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
-  #     - TEST_COMPILER="clang"
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - llvm-toolchain-trusty-4.0
+        packages:
+          - clang-4.0
+          # - valgrind
+    env:
+      - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
+      - TEST_COMPILER="clang"
 
-  # - os: linux
-  #   addons:
-  #     apt:
-  #       sources:
-  #         - llvm-toolchain-trusty-5.0
-  #       packages:
-  #         - clang-5.0
-  #         - valgrind
-  #   env:
-  #     - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
-  #     - TEST_COMPILER="clang"
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - llvm-toolchain-trusty-5.0
+        packages:
+          - clang-5.0
+          # - valgrind
+    env:
+      - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+      - TEST_COMPILER="clang"
 
 
 before_install:
