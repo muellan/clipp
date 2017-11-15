@@ -1958,7 +1958,7 @@ I also wanted the ability to keep *everything* related to one option/command/val
 
 ### Compilers, clipp compiles with
   - g++ 5.3.0, g++ 5.4.1, g++ 6, g++ 7
-  - clang++ 3.8
+  - clang++ 3.8, clang++ 3.9, clang++ 4.0, clang++ 5.0
   - MSVC 14.11.25503 (compiler 19.11.25547)
 
 
@@ -1976,7 +1976,7 @@ I would be delighted to hear from anyone who uses *clipp* in their project(s). I
  - improve test cases and coverage
  - add more code documentation 
  - clean up the code / make it more understandable
- - ability to use other string classes 
+ - add the ability to use other string classes 
 
 
 [docopt]: http://docopt.org
