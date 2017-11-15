@@ -2427,14 +2427,14 @@ class group :
     public:
 
         explicit
-        child_t(const Param&  v)         : m_{v},            type_{type::param} {}
-        child_t(      Param&& v) noexcept: m_{std::move(v)}, type_{type::param} {}
+        child_t(const Param&  v)          : m_{v},            type_{type::param} {}
+        child_t(      Param&& v) noexcept : m_{std::move(v)}, type_{type::param} {}
 
         explicit
-        child_t(const Group&  g)         : m_{g},            type_{type::group} {}
-        child_t(      Group&& g) noexcept: m_{std::move(g)}, type_{type::group} {}
+        child_t(const Group&  g)          : m_{g},            type_{type::group} {}
+        child_t(      Group&& g) noexcept : m_{std::move(g)}, type_{type::group} {}
 
-        child_t(const child_t& src): m_{}, type_{src.type_} {
+        child_t(const child_t& src): type_{src.type_} {
             switch(type_) {
                 default:
                 case type::param: new(&m_)data{src.m_.param}; break;
@@ -2442,7 +2442,7 @@ class group :
             }
         }
 
-        child_t(child_t&& src) noexcept : m_{}, type_{src.type_} {
+        child_t(child_t&& src) noexcept : type_{src.type_} {
             switch(type_) {
                 default:
                 case type::param: new(&m_)data{std::move(src.m_.param)}; break;
@@ -2587,7 +2587,7 @@ class group :
         }
 
         union data {
-            data(): param{} {}
+            data() {}
 
             data(const Param&  v)          : param{v} {}
             data(      Param&& v) noexcept : param{std::move(v)} {}
