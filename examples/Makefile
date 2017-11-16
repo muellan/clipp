@@ -4,7 +4,7 @@ INCLUDE  = ../include
 FILTER   = *
 SOURCES  = $(wildcard $(FILTER).cpp)
 EXECS    = $(notdir $(SOURCES:.cpp=))
-FLAGS    = -I $(INCLUDE) -std=c++11 -Wall
+FLAGS    = -I $(INCLUDE) -std=c++11 -Wall -Wextra -Wpedantic -g -O0
 
 .PHONY: all clean
 

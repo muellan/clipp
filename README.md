@@ -557,6 +557,7 @@ auto cli = with_prefixes_short_long("-", "--",
 auto cli = ( /* your command line interface here */ );
 assert(cli.flags_are_prefix_free());
 ```
+Note that identical flags will not trigger an error.
 
 
 ### Grouping
@@ -1603,7 +1604,7 @@ tag names:
 
 ### Sanity Checks
 
-Check, if no flag occurs as prefix of any other flag:
+Check, if no flag occurs as prefix of any other flag (identical flags will be ignored):
 ```cpp
 auto cli = ( /* command line interface definition */);
 
