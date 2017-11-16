@@ -90,6 +90,9 @@ deprxp = [re.compile('^\s*#pragma\s+test\s+needs\(\s*"(.+\..+)"\s*\)\s*$'),
 
 testrxp = re.compile('(.+)\.' + tuext)
 
+
+
+# support functions
 def dependencies(source, searchpaths = [], sofar = Set()):
     """ return set of dependencies for a C++ source file
         the following dependency definitions are recocnized:
@@ -135,6 +138,7 @@ def dependencies(source, searchpaths = [], sofar = Set()):
 
     active.add(source)
     return active
+
 
 
 # initialize
@@ -200,6 +204,8 @@ if len(argv) > 1:
             else:
                 paths.append(arg)
 
+
+
 # get compiler-specific strings
 if compiler not in compilers.keys():
     print "ERROR: compiler " + compiler + " not supported"
@@ -221,6 +227,7 @@ if onwindows:
 builddir = builddir + "_" + compiler
 
 
+
 # gather source file names
 if len(paths) < 1:
     paths = [os.getcwd()]
@@ -238,6 +245,8 @@ if len(sources) < 1:
     print "ERROR: no source files found"
     exit(1)
 
+
+
 # make build directory
 if doClean:
     if os.path.exists(builddir):
@@ -249,6 +258,8 @@ if not os.path.exists(builddir):
     print "C L E A N  B U I L D"
 
 print separator
+
+
 
 # compile and run tests
 compilecmd = compileexec + " " + compileopts

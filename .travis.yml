@@ -28,10 +28,10 @@ matrix:
           - ubuntu-toolchain-r-test
         packages:
           - g++-5
-          # - valgrind
     env:
-        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-        - TEST_COMPILER="gcc"
+      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+      - TEST_COMPILER="gcc"
+      - TEST_SCRIPT_FLAGS=""
     
   - os: linux
     addons:
@@ -40,10 +40,10 @@ matrix:
           - ubuntu-toolchain-r-test
         packages:
           - g++-6
-          # - valgrind
     env:
       - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
       - TEST_COMPILER="gcc"
+      - TEST_SCRIPT_FLAGS=""
 
   - os: linux
     addons:
@@ -52,10 +52,11 @@ matrix:
           - ubuntu-toolchain-r-test
         packages:
           - g++-7
-          # - valgrind
+          - valgrind
     env:
       - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
       - TEST_COMPILER="gcc"
+      - TEST_SCRIPT_FLAGS="--valgrind"
 
   - os: linux
     addons:
@@ -65,10 +66,10 @@ matrix:
           - llvm-toolchain-precise-3.8
         packages:
           - clang-3.8
-          # - valgrind
     env:
       - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
       - TEST_COMPILER="clang"
+      - TEST_SCRIPT_FLAGS=""
 
   - os: linux
     addons:
@@ -77,10 +78,10 @@ matrix:
           - llvm-toolchain-trusty-3.9
         packages:
           - clang-3.9
-          # - valgrind
     env:
       - MATRIX_EVAL="CC=clang-3.9 && CXX=clang++-3.9"
       - TEST_COMPILER="clang"
+      - TEST_SCRIPT_FLAGS=""
 
   - os: linux
     addons:
@@ -89,10 +90,10 @@ matrix:
           - llvm-toolchain-trusty-4.0
         packages:
           - clang-4.0
-          # - valgrind
     env:
       - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
       - TEST_COMPILER="clang"
+      - TEST_SCRIPT_FLAGS=""
 
   - os: linux
     addons:
@@ -101,10 +102,10 @@ matrix:
           - llvm-toolchain-trusty-5.0
         packages:
           - clang-5.0
-          # - valgrind
     env:
       - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
       - TEST_COMPILER="clang"
+      - TEST_SCRIPT_FLAGS=""
 
 
 before_install:
@@ -116,7 +117,7 @@ script:
     # - doxygen doxyfile
     # - cd ..
     # - cd test && ./run_tests.py -c $TEST_COMPILER --valgrind
-    - cd test && ./run_tests.py -c $TEST_COMPILER 
+    - cd test && ./run_tests.py -c $TEST_COMPILER $TEST_SCRIPT_FLAGS
 
 # deploy:
 #   provider: pages
