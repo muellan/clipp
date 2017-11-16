@@ -665,6 +665,8 @@ template<class C, class T, class A>
 inline void
 trimr(std::basic_string<C,T,A>& s)
 {
+    if(s.empty()) return;
+
     s.erase(
         std::find_if_not(s.rbegin(), s.rend(),
                          [](char c) { return std::isspace(c);} ).base(),
@@ -681,6 +683,8 @@ template<class C, class T, class A>
 inline void
 triml(std::basic_string<C,T,A>& s)
 {
+    if(s.empty()) return;
+
     s.erase(
         s.begin(),
         std::find_if_not(s.begin(), s.end(),
@@ -700,6 +704,23 @@ trim(std::basic_string<C,T,A>& s)
 {
     triml(s);
     trimr(s);
+}
+
+
+/*************************************************************************//**
+ *
+ * @brief removes all whitespaces from string
+ *
+ *****************************************************************************/
+template<class C, class T, class A>
+inline void
+remove_ws(std::basic_string<C,T,A>& s)
+{
+    if(s.empty()) return;
+
+    s.erase(std::remove_if(s.begin(), s.end(),
+                           [](char c) { return std::isspace(c); }),
+            s.end() );
 }
 
 
@@ -1980,12 +2001,8 @@ private:
     //---------------------------------------------------------------
     void add_flags(arg_string str) {
         //empty flags are not allowed
-        if(str.empty()) return;
-        str::trim(str);
-        //spaces within flags are not allowed
-        auto i = str.find(' ');
-        if(i != arg_string::npos) str.erase(i);
-        flags_.push_back(std::move(str));
+        str::remove_ws(str);
+        if(!str.empty()) flags_.push_back(std::move(str));
     }
 
     //---------------------------------------------------------------
