@@ -1825,20 +1825,22 @@ public:
     template<class... Strings>
     explicit
     parameter(arg_string str, Strings&&... strs):
-        flags_{std::move(str), std::forward<Strings>(strs)...},
+        flags_{},
         matcher_{predicate_adapter{match::none}},
         label_{}, required_{false}
     {
-        flags(std::move(str), std::forward<Strings>(strs)...);
+        add_flags(std::move(str), std::forward<Strings>(strs)...);
     }
 
     /** @brief makes "flag" parameter from range of strings */
     explicit
-    parameter(arg_list flaglist):
-        flags_{std::move(flaglist)},
+    parameter(const arg_list& flaglist):
+        flags_{},
         matcher_{predicate_adapter{match::none}},
         label_{}, required_{false}
-    {}
+    {
+        add_flags(flaglist);
+    }
 
     //-----------------------------------------------------
     /** @brief makes "value" parameter with custom match predicate
@@ -1976,7 +1978,7 @@ public:
 
 private:
     //---------------------------------------------------------------
-    void flags(arg_string str) {
+    void add_flags(arg_string str) {
         //empty flags are not allowed
         if(str.empty()) return;
         str::trim(str);
@@ -1986,12 +1988,19 @@ private:
         flags_.push_back(std::move(str));
     }
 
+    //---------------------------------------------------------------
+    void add_flags(const arg_list& strs) {
+        if(strs.empty()) return;
+        flags_.reserve(flags_.size() + strs.size());
+        for(const auto& s : strs) add_flags(s);
+    }
+
     template<class String1, class String2, class... Strings>
     void
-    flags(String1&& s1, String2&& s2, Strings&&... ss) {
+    add_flags(String1&& s1, String2&& s2, Strings&&... ss) {
         flags_.reserve(2 + sizeof...(ss));
-        flags(std::forward<String1>(s1));
-        flags(std::forward<String2>(s2), std::forward<Strings>(ss)...);
+        add_flags(std::forward<String1>(s1));
+        add_flags(std::forward<String2>(s2), std::forward<Strings>(ss)...);
     }
 
     arg_list flags_;
