@@ -14,7 +14,7 @@
 #include <clipp.h>
 
 
-int main(int argc, char* argv[])
+int main()
 {
     using namespace clipp;
     using std::cout;
