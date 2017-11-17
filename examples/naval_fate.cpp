@@ -86,6 +86,7 @@ int main(int argc, char* argv[])
 
     if(parse(argc, argv, navalcli)) {
         switch(selected) {
+            default:
             case mode::none:
                 break;
             case mode::help: {

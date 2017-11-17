@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
         option("bob")([](std::string s) { cout << s; }),
 
         //for_each_occurence("-x arg", call_lambda(arg));
-        option("-x") & values("X")([&](const char* s) { x = std::atof(s); }),
+        option("-x") & values("X")([&](const char* s) { x = std::stof(s); }),
 
         //if(parsing_error_on("-z") call_lambda(get_errors())
         required("-z").if_missing([](){ cout << "-z is missing\n"; }),
