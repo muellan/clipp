@@ -13,6 +13,7 @@
 
 import re
 import os
+import glob
 import shutil
 import ntpath
 from os import path
@@ -28,6 +29,7 @@ incpaths = ["", "../include/"]
 macros   = [] # ["NO_DEBUG", "NDEBUG"]
 compiler = "gcc"
 valgrind = "valgrind --error-exitcode=1"
+gcov     = "gcov -l "
 
 gccflags = ("-std=c++0x -O0 -g "
                     " -Wall -Wextra -Wpedantic "
@@ -64,18 +66,21 @@ compilers = {
                "flags" : gccflags,
                "macro" : "-D", "incpath" : "-I",
                "obj" : "",
+               "cov" : "-fprofile-arcs -ftest-coverage",
                "link" : "-o "
     },
     "clang" : {"exe": "clang++",
                "flags" : gccflags,
                "macro" : "-D", "incpath" : "-I",
                "obj" : "",
+               "cov" : "-fprofile-arcs -ftest-coverage",
                "link" : "-o "
     },
     "msvc" : {"exe": "cl",
               "flags" : " /W4 /EHsc ",
               "macro" : "/D:", "incpath" : "/I:",
               "obj" : "/Foc:",
+              "cov" : "",
               "link" : "/link /out:"
     }
 }
@@ -158,6 +163,7 @@ haltOnFail = True
 recompile = False
 allpass = True
 useValgrind = False
+useGcov = False
 doClean = False
 
 # process input args
@@ -176,6 +182,7 @@ if len(argv) > 1:
                     " [-d]" \
                     " [--continue-on-fail]" \
                     " [--valgrind]" \
+                    " [--gcov]" \
                     " [<directory|file>...]"
                 print ""
                 print "Options:"
@@ -185,6 +192,7 @@ if len(argv) > 1:
                 print "  -d, --show-dependecies            show all resolved includes during compilation"
                 print "  -c, --compiler (gcc|clang|msvc)   select compiler"
                 print "  --valgrind                        run test through valgrind"
+                print "  --gcov                            run test through gcov"
                 print "  --continue-on-fail                continue running regardless of failed builds or tests";
                 exit(0)
             elif arg == "--clean":
@@ -197,6 +205,8 @@ if len(argv) > 1:
                 haltOnFail = False
             elif arg == "--valgrind":
                 useValgrind = True
+            elif arg == "--gcov":
+                useGcov = True
             elif arg == "-c" or arg == "--compiler":
                 if i+1 < len(argv):
                     compiler = argv[i+1]
@@ -220,6 +230,10 @@ macroOpt    = compilers[compiler]["macro"]
 includeOpt  = compilers[compiler]["incpath"]
 objOutOpt   = compilers[compiler]["obj"]
 linkOpt     = compilers[compiler]["link"]
+coverageOpt = compilers[compiler]["cov"]
+
+if useGcov:
+    compileopts = compileopts + " " + coverageOpt
 
 if onwindows:
     builddir = builddir.replace("/", "\\")
@@ -249,8 +263,10 @@ if len(sources) < 1:
 
 # make build directory
 if doClean:
-    if os.path.exists(builddir):
-        shutil.rmtree(builddir)
+    if os.path.exists(builddir): shutil.rmtree(builddir)
+    for f in glob.glob("*.gcov"): os.remove(f)
+    for f in glob.glob("*.gcda"): os.remove(f)
+    for f in glob.glob("*.gcno"): os.remove(f)
 
 if not os.path.exists(builddir):
     os.makedirs(builddir)
@@ -342,9 +358,12 @@ for source in sources:
         runres = system(artifact)
 
         if runres == 0 and useValgrind:
-            stdout.write("valgrind > ")
-            stdout.flush()
+            print "valgrind > "
             runres = system(valgrind + " " + artifact)
+
+        if runres == 0 and useGcov:
+            stdout.write("gcov > ")
+            system(gcov + " " + source)
 
         if runres == 0:
             print "passed"
