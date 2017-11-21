@@ -38,6 +38,8 @@
 #include <vector>
 
 #include <clipp.h>
+
+
 int main(int argc, char* argv[])
 {
     using namespace clipp;
