@@ -507,7 +507,7 @@ class increment
 {
 public:
     explicit constexpr
-    increment(T& target) noexcept : t_{&target} {}
+    increment(T& target) noexcept : t_{std::addressof(target)} {}
 
     void operator () () const {
         if(t_) ++(*t_);
@@ -529,7 +529,7 @@ class decrement
 {
 public:
     explicit constexpr
-    decrement(T& target) noexcept : t_{&target} {}
+    decrement(T& target) noexcept : t_{std::addressof(target)} {}
 
     void operator () () const {
         if(t_) --(*t_);
@@ -552,7 +552,7 @@ class increment_by
 public:
     explicit constexpr
     increment_by(T& target, T by) noexcept :
-        t_{&target}, by_{std::move(by)}
+        t_{std::addressof(target)}, by_{std::move(by)}
     {}
 
     void operator () () const {
@@ -617,7 +617,7 @@ template<>
 class map_arg_to<bool>
 {
 public:
-    map_arg_to(bool& target): t_{std::addressof(target)} {}
+    map_arg_to(bool& target): t_{&target} {}
 
     void operator () (const char* s) const {
         if(t_ && s) *t_ = true;
@@ -626,6 +626,7 @@ public:
 private:
     bool* t_;
 };
+
 
 } // namespace detail
 
