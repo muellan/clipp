@@ -1,5 +1,6 @@
 /build*
 /dev
+/issues
 /examples/*
 !/examples/*.cpp
 !/examples/Makefile
