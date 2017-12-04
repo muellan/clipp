@@ -4800,7 +4800,9 @@ void sanitize_args(arg_list& args)
     if(args.empty()) return;
 
     for(auto i = begin(args)+1; i != end(args); ++i) {
-        if(i->find('.') == 0 && i != begin(args)) {
+        if(i != begin(args) && i->size() > 1 &&
+            i->find('.') == 0 && std::isdigit((*i)[1]) )
+        {
             //find trailing digits in previous arg
             using std::prev;
             auto& prv = *prev(i);
