@@ -4617,24 +4617,27 @@ private:
         auto npos = match.base();
         if(npos.is_alternative()) npos.skip_alternatives();
         ++npos;
-
+        //need to add potential misses if:
+        //either new repeat group was started
         const auto newRepGroup = match.repeat_group();
-
         if(newRepGroup) {
             if(pos_.start_of_repeat_group()) {
                 for_each_potential_miss(std::move(npos),
-                                        [&,this](const dfs_traverser& pos) {
-                    //inside repeatable group?
-                    if(newRepGroup == pos.repeat_group()) {
-                        missCand_.emplace_back(pos, index_, true);
-                    }
-                });
-
+                    [&,this](const dfs_traverser& pos) {
+                        //only add candidates within repeat group
+                        if(newRepGroup == pos.repeat_group()) {
+                            missCand_.emplace_back(pos, index_, true);
+                        }
+                    });
             }
         }
-        else {
+        //... or an optional blocking param was hit
+        else if(match->blocking() && !match->required() &&
+            npos.level() >= match.base().level())
+        {
             for_each_potential_miss(std::move(npos),
                 [&,this](const dfs_traverser& pos) {
+                    //only add new candidates
                     if(std::find_if(missCand_.begin(), missCand_.end(),
                         [&](const miss_candidate& c){
                             return &(*c.pos) == &(*pos);
@@ -4652,7 +4655,8 @@ private:
     static void
     for_each_potential_miss(dfs_traverser pos, Action&& action)
     {
-        while(pos) {
+        const auto level = pos.level();
+        while(pos && pos.level() >= level) {
             if(pos->is_group() ) {
                 const auto& g = pos->as_group();
                 if(g.all_optional() || (g.exclusive() && g.any_optional())) {
@@ -6169,7 +6173,7 @@ void print(OStream& os, const group& g, int level = 0);
  *
  *****************************************************************************/
 template<class OStream>
-void print(OStream& os, const pattern& param, int level)
+void print(OStream& os, const pattern& param, int level = 0)
 {
     if(param.is_group()) {
         print(os, param.as_group(), level);

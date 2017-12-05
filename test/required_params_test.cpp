@@ -86,11 +86,7 @@ void test(int lineNo,
 
     run_wrapped_variants({ __FILE__, lineNo }, args, cli,
               [&]{ v = active{}; m = errors{}; },
-              [&]{
-                  std::cout << matches << '\n' << v << "\n----------\n"
-                            << missing << '\n' << m << std::endl;
-                  return v == matches && m == missing;
-              });
+              [&]{ return v == matches && m == missing; });
 }
 
 
@@ -98,27 +94,24 @@ void test(int lineNo,
 int main()
 {
     try {
+
         test(__LINE__, {""}, active{0,0,0,0, 0,0,0,0}, errors{1,1,1,1, 1,1,0,1});
 
-        //one flag: 1st flag string
         test(__LINE__, {"-a"}, active{1,0,0,0, 0,0,0,0}, errors{0,1,1,1, 1,1,0,1});
         test(__LINE__, {"-b"}, active{0,1,0,0, 0,0,0,0}, errors{1,0,1,1, 1,1,0,1});
         test(__LINE__, {"-c"}, active{0,0,1,0, 0,0,0,0}, errors{1,1,0,1, 1,1,0,1});
         test(__LINE__, {"-d"}, active{0,0,0,1, 0,0,0,0}, errors{1,1,1,0, 1,1,0,1});
 
-        //one flag: 2nd flag string
         test(__LINE__, {"--aaa"}, active{1,0,0,0, 0,0,0,0}, errors{0,1,1,1, 1,1,0,1});
         test(__LINE__, {"--bee"}, active{0,1,0,0, 0,0,0,0}, errors{1,0,1,1, 1,1,0,1});
         test(__LINE__, {"--cee"}, active{0,0,1,0, 0,0,0,0}, errors{1,1,0,1, 1,1,0,1});
         test(__LINE__, {"--dee"}, active{0,0,0,1, 0,0,0,0}, errors{1,1,1,0, 1,1,0,1});
 
-        //one flag + value: 1st flag string
         test(__LINE__, {"-a", "2"}, active{1,0,0,0, 2,0,0,0}, errors{0,1,1,1, 0,1,0,1});
         test(__LINE__, {"-b", "2"}, active{0,1,0,0, 0,2,0,0}, errors{1,0,1,1, 1,0,0,1});
         test(__LINE__, {"-c", "2"}, active{0,0,1,0, 0,0,2,0}, errors{1,1,0,1, 1,1,0,1});
         test(__LINE__, {"-d", "2"}, active{0,0,0,1, 0,0,0,2}, errors{1,1,1,0, 1,1,0,0});
 
-        //one flag + value: 2nd flag string
         test(__LINE__, {"--aaa", "2"}, active{1,0,0,0, 2,0,0,0}, errors{0,1,1,1, 0,1,0,1});
         test(__LINE__, {"--bee", "2"}, active{0,1,0,0, 0,2,0,0}, errors{1,0,1,1, 1,0,0,1});
         test(__LINE__, {"--cee", "2"}, active{0,0,1,0, 0,0,2,0}, errors{1,1,0,1, 1,1,0,1});
@@ -129,14 +122,14 @@ int main()
         test(__LINE__, {"-a", "2", "-d", "3"}, active{1,0,0,1, 2,0,0,3}, errors{0,1,1,0, 0,1,0,0});
         test(__LINE__, {"-b", "2", "-c", "3"}, active{0,1,1,0, 0,2,3,0}, errors{1,0,0,1, 1,0,0,1});
         test(__LINE__, {"-b", "2", "-d", "3"}, active{0,1,0,1, 0,2,0,3}, errors{1,0,1,0, 1,0,0,0});
-        test(__LINE__, {"-c", "2", "-d", "3"}, active{0,0,2,3, 0,0,2,3}, errors{1,1,0,0, 1,1,0,0});
+        test(__LINE__, {"-c", "2", "-d", "3"}, active{0,0,1,1, 0,0,2,3}, errors{1,1,0,0, 1,1,0,0});
 
         test(__LINE__, {"-b", "3", "-a", "2"}, active{1,1,0,0, 2,3,0,0}, errors{0,0,1,1, 0,0,0,1});
         test(__LINE__, {"-c", "3", "-a", "2"}, active{1,0,1,0, 2,0,3,0}, errors{0,1,0,1, 0,1,0,1});
         test(__LINE__, {"-d", "3", "-a", "2"}, active{1,0,0,1, 2,0,0,3}, errors{0,1,1,0, 0,1,0,0});
         test(__LINE__, {"-c", "3", "-b", "2"}, active{0,1,1,0, 0,2,3,0}, errors{1,0,0,1, 1,0,0,1});
         test(__LINE__, {"-d", "3", "-b", "2"}, active{0,1,0,1, 0,2,0,3}, errors{1,0,1,0, 1,0,0,0});
-        test(__LINE__, {"-d", "3", "-c", "2"}, active{0,0,2,3, 0,0,2,3}, errors{1,1,0,0, 1,1,0,0});
+        test(__LINE__, {"-d", "3", "-c", "2"}, active{0,0,1,1, 0,0,2,3}, errors{1,1,0,0, 1,1,0,0});
 
         test(__LINE__, {"-a", "2", "-b", "3", "-c", "4"}, active{1,1,1,0, 2,3,4,0}, errors{0,0,0,1, 0,0,0,1});
         test(__LINE__, {"-b", "3", "-c", "4", "-d", "5"}, active{0,1,1,1, 0,3,4,5}, errors{1,0,0,0, 1,0,0,0});

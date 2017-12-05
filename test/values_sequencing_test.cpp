@@ -39,6 +39,12 @@ struct active {
                 x.j == y.j && x.k == y.k &&
                 std::equal(begin(x.v), end(x.v), begin(y.v)));
     }
+
+    template<class OStream>
+    friend OStream& operator << (OStream& os, const active& x) {
+        return os << x.a <<' '<< x.ie <<' '<< x.je <<' '<< x.ke <<' '
+                  << x.ve <<' '<< x.i <<' '<< x.j <<' '<< x.k;
+    }
 };
 
 
@@ -133,6 +139,9 @@ int main()
         test(__LINE__, {"-d", "2", "3"},           active{1, 0,0,0,0, 0,0,0,{2,3}});
         test(__LINE__, {"-d", "2", "3", "4"},      active{1, 0,0,0,0, 0,0,0,{2,3,4}});
         test(__LINE__, {"-d", "2", "3", "4", "5"}, active{1, 0,0,0,0, 0,0,0,{2,3,4, 5}});
+
+        test(__LINE__, {"-c", "2", "-d", "3"}, active{1, 0,0,0,0, 2,0,0,{3}});
+        test(__LINE__, {"-d", "3", "-c", "2"}, active{1, 0,0,0,0, 2,0,0,{3}});
 
         test(__LINE__, {"-e"},                     active{1, 0,0,0,0, 0,0,0,{}});
         test(__LINE__, {"-e", "2"},                active{1, 0,0,0,0, 2,0,0,{}});

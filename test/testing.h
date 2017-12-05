@@ -98,7 +98,6 @@ void run_wrapped_variants(
 //             << " in file " << info.file << " in line " << info.line
 //             << " with variant " << variant << '\n'
 //             << "==============================================\n";
-
 //        clipp::debug::print(cout, wrappedCli);
 //        auto res = clipp::parse(args, wrappedCli);
 //        cout << "----------------------------------------------\n";
