@@ -343,7 +343,7 @@ template<>
 struct make<unsigned char> {
     static inline unsigned char from(const char* s) {
         if(!fwd_to_unsigned_int(s)) return (0);
-        return clamped_on_limits<unsigned char>(std::stoull(s));
+        return clamped_on_limits<unsigned char>(std::strtoull(s,nullptr,10));
     }
 };
 
@@ -351,7 +351,7 @@ template<>
 struct make<unsigned short int> {
     static inline unsigned short int from(const char* s) {
         if(!fwd_to_unsigned_int(s)) return (0);
-        return clamped_on_limits<unsigned short int>(std::stoull(s));
+        return clamped_on_limits<unsigned short int>(std::strtoull(s,nullptr,10));
     }
 };
 
@@ -359,7 +359,7 @@ template<>
 struct make<unsigned int> {
     static inline unsigned int from(const char* s) {
         if(!fwd_to_unsigned_int(s)) return (0);
-        return clamped_on_limits<unsigned int>(std::stoull(s));
+        return clamped_on_limits<unsigned int>(std::strtoull(s,nullptr,10));
     }
 };
 
@@ -367,7 +367,7 @@ template<>
 struct make<unsigned long int> {
     static inline unsigned long int from(const char* s) {
         if(!fwd_to_unsigned_int(s)) return (0);
-        return clamped_on_limits<unsigned long int>(std::stoull(s));
+        return clamped_on_limits<unsigned long int>(std::strtoull(s,nullptr,10));
     }
 };
 
@@ -375,7 +375,7 @@ template<>
 struct make<unsigned long long int> {
     static inline unsigned long long int from(const char* s) {
         if(!fwd_to_unsigned_int(s)) return (0);
-        return clamped_on_limits<unsigned long long int>(std::stoull(s));
+        return clamped_on_limits<unsigned long long int>(std::strtoull(s,nullptr,10));
     }
 };
 
@@ -386,56 +386,56 @@ struct make<char> {
         const auto n = std::strlen(s);
         if(n == 1) return s[0];
         //parse as integer
-        return clamped_on_limits<char>(std::stoll(s));
+        return clamped_on_limits<char>(std::strtoll(s,nullptr,10));
     }
 };
 
 template<>
 struct make<short int> {
     static inline short int from(const char* s) {
-        return clamped_on_limits<short int>(std::stoll(s));
+        return clamped_on_limits<short int>(std::strtoll(s,nullptr,10));
     }
 };
 
 template<>
 struct make<int> {
     static inline int from(const char* s) {
-        return clamped_on_limits<int>(std::stoll(s));
+        return clamped_on_limits<int>(std::strtoll(s,nullptr,10));
     }
 };
 
 template<>
 struct make<long int> {
     static inline long int from(const char* s) {
-        return clamped_on_limits<long int>(std::stoll(s));
+        return clamped_on_limits<long int>(std::strtoll(s,nullptr,10));
     }
 };
 
 template<>
 struct make<long long int> {
     static inline long long int from(const char* s) {
-        return (std::stoll(s));
+        return (std::strtoll(s,nullptr,10));
     }
 };
 
 template<>
 struct make<float> {
     static inline float from(const char* s) {
-        return (std::stof(s));
+        return (std::strtof(s,nullptr));
     }
 };
 
 template<>
 struct make<double> {
     static inline double from(const char* s) {
-        return (std::stod(s));
+        return (std::strtod(s,nullptr));
     }
 };
 
 template<>
 struct make<long double> {
     static inline long double from(const char* s) {
-        return (std::stold(s));
+        return (std::strtold(s,nullptr));
     }
 };
 
