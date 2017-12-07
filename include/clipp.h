@@ -3857,24 +3857,38 @@ public:
                 //discard other alternatives
                 match.pos_.skip_alternatives();
             }
-            //if current param is not repeatable, go directly to next
-            if(!match->repeatable() && !match->is_group()) {
-                curMatched_ = false;
-                ++match.pos_;
-            }
-            else {
-                curMatched_ = true;
-            }
 
-            if(match.pos_.level() > pos_.level()) {
-                scopes_.push(pos_.undo_point());
-                pos_ = std::move(match.pos_);
+            if(is_last_in_current_scope(match.pos_)) {
+                //if current param is not repeatable -> back to previous scope
+                if(!match->repeatable() && !match->is_group()) {
+                    curMatched_ = false;
+                    pos_ = std::move(match.pos_);
+                    if(!scopes_.empty()) pos_.undo(scopes_.top());
+                }
+                else { //stay at match position
+                    curMatched_ = true;
+                    pos_ = std::move(match.pos_);
+                }
             }
-            else if(match.pos_.level() < pos_.level()) {
-                return_to_level(match.pos_.level());
-            }
-            else {
-                pos_ = std::move(match.pos_);
+            else { //not last in current group
+                //if current param is not repeatable, go directly to next
+                if(!match->repeatable() && !match->is_group()) {
+                    curMatched_ = false;
+                    ++match.pos_;
+                } else {
+                    curMatched_ = true;
+                }
+
+                if(match.pos_.level() > pos_.level()) {
+                    scopes_.push(pos_.undo_point());
+                    pos_ = std::move(match.pos_);
+                }
+                else if(match.pos_.level() < pos_.level()) {
+                    return_to_level(match.pos_.level());
+                }
+                else {
+                    pos_ = std::move(match.pos_);
+                }
             }
             posAfterLastMatch_ = pos_;
         }
@@ -3888,6 +3902,16 @@ public:
     }
 
 private:
+    //-----------------------------------------------------
+    bool is_last_in_current_scope(const dfs_traverser& pos)
+    {
+        if(scopes_.empty()) return pos.is_last_in_path();
+        //check if we would leave the current scope on ++
+        auto p = pos;
+        ++p;
+        return p.level() < scopes_.top().level();
+    }
+
     //-----------------------------------------------------
     void check_repeat_group_start(const scoped_dfs_traverser& newMatch)
     {
@@ -6107,6 +6131,16 @@ inline doc_string doc_label(const parameter& p)
     if(!p.flags().empty()) return p.flags().front();
     if(!p.label().empty()) return p.label();
     return doc_string{"<?>"};
+}
+
+inline doc_string doc_label(const group&)
+{
+    return "<group>";
+}
+
+inline doc_string doc_label(const pattern& p)
+{
+    return p.is_group() ? doc_label(p.as_group()) : doc_label(p.as_param());
 }
 
 

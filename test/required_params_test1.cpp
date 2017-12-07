@@ -71,17 +71,23 @@ void test(int lineNo,
     active v;
     errors m;
     auto cli = (
+        option("-r") & opt_value("R")
+        ,
         required("-a", "--aaa").set(v.a).if_missing(set(m.a))
             & value("I", v.av).if_missing(set(m.av))
         ,
         required("-b", "--bee").set(v.b).if_missing(set(m.b))
             & value("J", v.bv).if_missing(set(m.bv))
         ,
+        option("-s") & opt_value("S")
+        ,
         required("-c", "--cee").set(v.c).if_missing(set(m.c))
             & opt_value("K", v.cv).if_missing(set(m.cv))
         ,
         required("-d", "--dee").set(v.d).if_missing(set(m.d))
             & value("L", v.dv).if_missing(set(m.dv))
+        ,
+        option("-t") & value("T")
     );
 
     run_wrapped_variants({ __FILE__, lineNo }, args, cli,
@@ -145,6 +151,24 @@ int main()
         test(__LINE__, {"-d", "5", "-c", "4", "-b", "3", "-a", "2"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
         test(__LINE__, {"-d", "5", "-a", "2", "-c", "4", "-b", "3"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
         test(__LINE__, {"-c", "4", "-a", "2", "-d", "5", "-b", "3"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
+
+        test(__LINE__, {"-r", "R", "-a", "2", "-b", "3", "-c", "4", "-d", "5"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
+        test(__LINE__, {"-c", "4", "-r", "R", "-b", "3", "-a", "2", "-d", "5"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
+        test(__LINE__, {"-d", "5", "-c", "4", "-r", "R", "-b", "3", "-a", "2"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
+        test(__LINE__, {"-d", "5", "-a", "2", "-c", "4", "-r", "R", "-b", "3"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
+        test(__LINE__, {"-c", "4", "-a", "2", "-d", "5", "-b", "3", "-r", "R"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
+
+        test(__LINE__, {"-s", "S", "-a", "2", "-b", "3", "-c", "4", "-d", "5"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
+        test(__LINE__, {"-c", "4", "-s", "S", "-b", "3", "-a", "2", "-d", "5"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
+        test(__LINE__, {"-d", "5", "-c", "4", "-s", "S", "-b", "3", "-a", "2"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
+        test(__LINE__, {"-d", "5", "-a", "2", "-c", "4", "-s", "S", "-b", "3"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
+        test(__LINE__, {"-c", "4", "-a", "2", "-d", "5", "-b", "3", "-s", "S"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
+
+        test(__LINE__, {"-t", "T", "-a", "2", "-b", "3", "-c", "4", "-d", "5"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
+        test(__LINE__, {"-c", "4", "-t", "T", "-b", "3", "-a", "2", "-d", "5"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
+        test(__LINE__, {"-d", "5", "-c", "4", "-t", "T", "-b", "3", "-a", "2"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
+        test(__LINE__, {"-d", "5", "-a", "2", "-c", "4", "-t", "T", "-b", "3"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
+        test(__LINE__, {"-c", "4", "-a", "2", "-d", "5", "-b", "3", "-t", "T"}, active{1,1,1,1, 2,3,4,5}, errors{0,0,0,0, 0,0,0,0});
 
     }
     catch(std::exception& e) {
