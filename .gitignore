@@ -11,6 +11,8 @@
 .project
 .cproject
 .pydevproject
+tags
+*.out
 *.exe
 *.o
 
