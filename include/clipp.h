@@ -4321,7 +4321,6 @@ public:
         //skipping of blocking & required patterns is not allowed
         if(!blocked_ && !pos_.matched() && pos_->required() && pos_->blocking()) {
             blocked_ = true;
-            return false;
         }
 
         add_nomatch(arg);
