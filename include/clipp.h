@@ -1,7 +1,7 @@
 /*****************************************************************************
  *  ___  _    _   ___ ___
  * |  _|| |  | | | _ \ _ \   CLIPP - command line interfaces for modern C++
- * | |_ | |_ | | |  _/  _/   version 1.0.9
+ * | |_ | |_ | | |  _/  _/   version 1.1.0
  * |___||___||_| |_| |_|     https://github.com/muellan/clipp
  *
  * Licensed under the MIT License <http://opensource.org/licenses/MIT>.
@@ -1841,6 +1841,7 @@ class parameter :
     public detail::token<parameter>,
     public detail::action_provider<parameter>
 {
+    /** @brief adapts a 'match_predicate' to the 'match_function' interface */
     class predicate_adapter {
     public:
         explicit
@@ -2441,6 +2442,24 @@ inline parameter
 any_other(Targets&&... tgts)
 {
     return parameter{match::any}
+        .target(std::forward<Targets>(tgts)...)
+        .required(false).blocking(false).repeatable(true);
+}
+
+
+
+/*************************************************************************//**
+ *
+ * @brief makes catch-all value parameter with custom filter
+ *
+ *****************************************************************************/
+template<class Filter, class... Targets, class = typename std::enable_if<
+    traits::is_callable<Filter,bool(const char*)>::value ||
+    traits::is_callable<Filter,subrange(const char*)>::value>::type>
+inline parameter
+any(Filter&& filter, Targets&&... tgts)
+{
+    return parameter{std::forward<Filter>(filter)}
         .target(std::forward<Targets>(tgts)...)
         .required(false).blocking(false).repeatable(true);
 }
@@ -4083,10 +4102,10 @@ private:
  *        candidate parameters are traversed using a scoped DFS traverser
  *
  *****************************************************************************/
-template<class Predicate>
+template<class ParamSelector>
 match_t
 full_match(scoped_dfs_traverser pos, const arg_string& arg,
-           const Predicate& select)
+           const ParamSelector& select)
 {
     if(arg.empty()) return match_t{};
 
@@ -4114,10 +4133,10 @@ full_match(scoped_dfs_traverser pos, const arg_string& arg,
  *        candidate parameters are traversed using a scoped DFS traverser
  *
  *****************************************************************************/
-template<class Predicate>
+template<class ParamSelector>
 match_t
 prefix_match(scoped_dfs_traverser pos, const arg_string& arg,
-             const Predicate& select)
+             const ParamSelector& select)
 {
     if(arg.empty()) return match_t{};
 
@@ -4150,10 +4169,10 @@ prefix_match(scoped_dfs_traverser pos, const arg_string& arg,
  *        candidate parameters are traversed using a scoped DFS traverser
  *
  *****************************************************************************/
-template<class Predicate>
+template<class ParamSelector>
 match_t
 partial_match(scoped_dfs_traverser pos, const arg_string& arg,
-              const Predicate& select)
+              const ParamSelector& select)
 {
     if(arg.empty()) return match_t{};
 
@@ -4402,7 +4421,7 @@ private:
     /** @brief try to find a parameter/pattern that matches 'arg' */
     bool try_match(const arg_string& arg)
     {
-        //Note: flag-params will always take precedence over value-params
+        //Note: flag-params will take precedence over value-params
         if(try_match_full(arg, detail::select_flags{})) return true;
         if(try_match_joined_flags(arg)) return true;
         if(try_match_joined_sequence(arg, detail::select_flags{})) return true;
@@ -4413,20 +4432,28 @@ private:
     }
 
     //---------------------------------------------------------------
-    template<class Predicate>
-    bool try_match_full(const arg_string& arg, const Predicate& select)
+    /**
+     * @brief try to match full argument
+     * @param select : predicate that candidate parameters must satisfy
+     */
+    template<class ParamSelector>
+    bool try_match_full(const arg_string& arg, const ParamSelector& select)
     {
         auto match = detail::full_match(pos_, arg, select);
-
         if(!match) return false;
-
         add_match(match);
         return true;
     }
 
     //---------------------------------------------------------------
-    template<class Predicate>
-    bool try_match_joined_sequence(arg_string arg, const Predicate& acceptFirst)
+    /**
+     * @brief try to match argument as blocking sequence of parameters
+     * @param select : predicate that a parameter matching the prefix of
+     *                 'arg' must satisfy
+     */
+    template<class ParamSelector>
+    bool try_match_joined_sequence(arg_string arg,
+                                   const ParamSelector& acceptFirst)
     {
         auto fstMatch = detail::prefix_match(pos_, arg, acceptFirst);
 
@@ -4464,7 +4491,7 @@ private:
             }
 
         }
-
+        //if arg not fully covered => discard temporary matches
         if(!arg.empty() || matches.empty()) return false;
 
         for(const auto& m : matches) add_match(m);
@@ -4472,46 +4499,46 @@ private:
     }
 
     //-----------------------------------------------------
+    /** @brief try to match 'arg' as a concatenation of joinable flags */
     bool try_match_joined_flags(const arg_string& arg)
     {
-        return try_match_joined([&](const group& g) {
-            if(try_match_joined(g, arg, detail::select_flags{},
-                                g.common_flag_prefix()) )
-            {
-                return true;
-            }
-            return false;
+        return find_join_group(pos_, [&](const group& g) {
+            return try_match_joined(g, arg, detail::select_flags{},
+                                    g.common_flag_prefix());
         });
     }
 
     //---------------------------------------------------------------
+    /** @brief try to match 'arg' as a concatenation of joinable parameters */
     bool try_match_joined_params(const arg_string& arg)
     {
-        return try_match_joined([&](const group& g) {
-            if(try_match_joined(g, arg, detail::select_all{}) ) {
-                return true;
-            }
-            return false;
+        return find_join_group(pos_, [&](const group& g) {
+            return try_match_joined(g, arg, detail::select_all{});
         });
     }
 
     //-----------------------------------------------------
-    template<class Predicate>
+    /** @brief try to match 'arg' as concatenation of joinable parameters
+     *         that are all contaied within one group
+     */
+    template<class ParamSelector>
     bool try_match_joined(const group& joinGroup, arg_string arg,
-                          const Predicate& pred,
+                          const ParamSelector& select,
                           const arg_string& prefix = "")
     {
+        //temporary parser with 'joinGroup' as top-level group
         parser parse {joinGroup};
+        //records temporary matches
         std::vector<match_t> matches;
 
         while(!arg.empty()) {
-            auto match = detail::prefix_match(parse.pos_, arg, pred);
+            auto match = detail::prefix_match(parse.pos_, arg, select);
 
             if(!match) return false;
 
             arg.erase(0, match.str().size());
             //make sure prefix is always present after the first match
-            //ensures that, e.g., flags "-a" and "-b" will be found in "-ab"
+            //so that, e.g., flags "-a" and "-b" will be found in "-ab"
             if(!arg.empty() && !prefix.empty() && arg.find(prefix) != 0 &&
                 prefix != match.str())
             {
@@ -4533,20 +4560,21 @@ private:
     }
 
     //-----------------------------------------------------
-    template<class Predicate>
-    bool try_match_joined(const Predicate& pred)
+    template<class GroupSelector>
+    bool find_join_group(const scoped_dfs_traverser& start,
+                         const GroupSelector& accept) const
     {
-        if(pos_ && pos_.parent().joinable()) {
-            const auto& g = pos_.parent();
-            if(pred(g)) return true;
+        if(start && start.parent().joinable()) {
+            const auto& g = start.parent();
+            if(accept(g)) return true;
             return false;
         }
 
-        auto pos = pos_;
+        auto pos = start;
         while(pos) {
             if(pos->is_group() && pos->as_group().joinable()) {
                 const auto& g = pos->as_group();
-                if(pred(g)) return true;
+                if(accept(g)) return true;
                 pos.next_sibling();
             }
             else {
