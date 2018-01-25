@@ -3579,14 +3579,9 @@ operator & (group a, group b)
  *        where all single char flag params ("-a", "b", ...) are joinable
  *
  *****************************************************************************/
-inline group&
-joinable(group& param) {
-    return param.joinable(true);
-}
-
-inline group&&
-joinable(group&& param) {
-    return std::move(param.joinable(true));
+inline group
+joinable(group g) {
+    return g.joinable(true);
 }
 
 //-------------------------------------------------------------------
@@ -3676,16 +3671,16 @@ with_prefix(const arg_string& prefix, parameter&& p) {
 
 //-------------------------------------------------------------------
 inline group&
-with_prefix(const arg_string& prefix, group& params)
+with_prefix(const arg_string& prefix, group& g)
 {
-    for(auto& p : params) {
+    for(auto& p : g) {
         if(p.is_group()) {
             with_prefix(prefix, p.as_group());
         } else {
             with_prefix(prefix, p.as_param());
         }
     }
-    return params;
+    return g;
 }
 
 
@@ -3726,16 +3721,16 @@ with_prefixes_short_long(const arg_string& shortpfx, const arg_string& longpfx,
 inline group&
 with_prefixes_short_long(const arg_string& shortFlagPrefix,
                          const arg_string& longFlagPrefix,
-                         group& params)
+                         group& g)
 {
-    for(auto& p : params) {
+    for(auto& p : g) {
         if(p.is_group()) {
             with_prefixes_short_long(shortFlagPrefix, longFlagPrefix, p.as_group());
         } else {
             with_prefixes_short_long(shortFlagPrefix, longFlagPrefix, p.as_param());
         }
     }
-    return params;
+    return g;
 }
 
 
@@ -5356,17 +5351,17 @@ class usage_lines
 public:
     using string = doc_string;
 
-    usage_lines(const group& params, string prefix = "",
+    usage_lines(const group& cli, string prefix = "",
                 const doc_formatting& fmt = doc_formatting{})
     :
-        params_(params), fmt_(fmt), prefix_(std::move(prefix))
+        cli_(cli), fmt_(fmt), prefix_(std::move(prefix))
     {
         if(!prefix_.empty()) prefix_ += ' ';
         if(fmt_.start_column() > 0) prefix_.insert(0, fmt.start_column(), ' ');
     }
 
-    usage_lines(const group& params, const doc_formatting& fmt):
-        usage_lines(params, "", fmt)
+    usage_lines(const group& cli, const doc_formatting& fmt):
+        usage_lines(cli, "", fmt)
     {}
 
     usage_lines& ommit_outermost_group_surrounders(bool yes) {
@@ -5389,7 +5384,7 @@ public:
 
 
 private:
-    const group& params_;
+    const group& cli_;
     doc_formatting fmt_;
     string prefix_;
     bool ommitOutermostSurrounders_ = false;
@@ -5424,10 +5419,10 @@ private:
     void print_usage(OStream& os) const
     {
         context cur;
-        cur.pos = params_.begin_dfs();
+        cur.pos = cli_.begin_dfs();
         cur.linestart = true;
         cur.level = cur.pos.level();
-        cur.outermost = &params_;
+        cur.outermost = &cli_;
 
         print_usage(os, cur, prefix_);
     }
@@ -5651,33 +5646,33 @@ private:
      * @brief prints flags in one group in a merged fashion
      *
      *******************************************************************/
-    string joined_label(const group& params, const context& cur) const
+    string joined_label(const group& g, const context& cur) const
     {
         if(!fmt_.merge_alternative_flags_with_common_prefix() &&
            !fmt_.merge_joinable_with_common_prefix()) return "";
 
-        const bool flagsonly = std::all_of(params.begin(), params.end(),
+        const bool flagsonly = std::all_of(g.begin(), g.end(),
             [](const pattern& p){
                 return p.is_param() && !p.as_param().flags().empty();
             });
 
         if(!flagsonly) return "";
 
-        const bool showOpt = params.all_optional() &&
-            !(ommitOutermostSurrounders_ && cur.outermost == &params);
+        const bool showOpt = g.all_optional() &&
+            !(ommitOutermostSurrounders_ && cur.outermost == &g);
 
-        auto pfx = params.common_flag_prefix();
+        auto pfx = g.common_flag_prefix();
         if(pfx.empty()) return "";
 
         const auto n = pfx.size();
-        if(params.exclusive() &&
+        if(g.exclusive() &&
            fmt_.merge_alternative_flags_with_common_prefix())
         {
             string lbl;
             if(showOpt) lbl += fmt_.optional_prefix();
             lbl += pfx + fmt_.alternatives_prefix();
             bool first = true;
-            for(const auto& p : params) {
+            for(const auto& p : g) {
                 if(p.is_param()) {
                     if(first)
                         first = false;
@@ -5691,10 +5686,10 @@ private:
             return lbl;
         }
         //no alternatives, but joinable flags
-        else if(params.joinable() &&
+        else if(g.joinable() &&
             fmt_.merge_joinable_with_common_prefix())
         {
-            const bool allSingleChar = std::all_of(params.begin(), params.end(),
+            const bool allSingleChar = std::all_of(g.begin(), g.end(),
                 [&](const pattern& p){
                     return p.is_param() &&
                         p.as_param().flags().front().substr(n).size() == 1;
@@ -5704,7 +5699,7 @@ private:
                 string lbl;
                 if(showOpt) lbl += fmt_.optional_prefix();
                 lbl += pfx;
-                for(const auto& p : params) {
+                for(const auto& p : g) {
                     if(p.is_param())
                         lbl += p.as_param().flags().front().substr(n);
                 }
@@ -5833,11 +5828,11 @@ public:
             usgFmt_.max_flags_per_param_in_doc());
     }
 
-    documentation(const group& params,
+    documentation(const group& cli,
                   const param_filter& filter,
                   const doc_formatting& fmt = doc_formatting{})
     :
-        documentation(params, fmt, filter)
+        documentation(cli, fmt, filter)
     {}
 
     template<class OStream>
@@ -5868,20 +5863,20 @@ private:
      *
      *******************************************************************/
     template<class OStream>
-    void print_doc(OStream& os, const group& params,
+    void print_doc(OStream& os, const group& cli,
                    printed& sofar,
                    int indentLvl = 0) const
     {
-        if(params.empty()) return;
+        if(cli.empty()) return;
 
         //if group itself doesn't have docstring
-        if(params.doc().empty()) {
-            for(const auto& p : params) {
+        if(cli.doc().empty()) {
+            for(const auto& p : cli) {
                 print_doc(os, p, sofar, indentLvl);
             }
         }
         else { //group itself does have docstring
-            bool anyDocInside = std::any_of(params.begin(), params.end(),
+            bool anyDocInside = std::any_of(cli.begin(), cli.end(),
                 [](const pattern& p){ return !p.doc().empty(); });
 
             if(anyDocInside) { //group docstring as title, then child entries
@@ -5890,19 +5885,19 @@ private:
                 }
                 auto indent = string(fmt_.start_column(), ' ');
                 if(indentLvl > 0) indent += string(fmt_.indent_size() * indentLvl, ' ');
-                os << indent << params.doc() << '\n';
+                os << indent << cli.doc() << '\n';
                 sofar = printed::nothing;
-                for(const auto& p : params) {
+                for(const auto& p : cli) {
                     print_doc(os, p, sofar, indentLvl + 1);
                 }
                 sofar = printed::paragraph;
             }
             else { //group label first then group docstring
-                auto lbl = usage_lines(params, usgFmt_)
+                auto lbl = usage_lines(cli, usgFmt_)
                            .ommit_outermost_group_surrounders(true).str();
 
                 str::trim(lbl);
-                print_entry(os, lbl, params.doc(), fmt_, sofar, indentLvl);
+                print_entry(os, lbl, cli.doc(), fmt_, sofar, indentLvl);
             }
         }
     }
@@ -6122,13 +6117,13 @@ private:
  *
  *****************************************************************************/
 inline man_page
-make_man_page(const group& params,
+make_man_page(const group& cli,
               doc_string progname = "",
               const doc_formatting& fmt = doc_formatting{})
 {
     man_page man;
-    man.append_section("SYNOPSIS", usage_lines(params,progname,fmt).str());
-    man.append_section("OPTIONS", documentation(params,fmt).str());
+    man.append_section("SYNOPSIS", usage_lines(cli,progname,fmt).str());
+    man.append_section("OPTIONS", documentation(cli,fmt).str());
     return man;
 }
 
