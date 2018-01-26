@@ -51,11 +51,11 @@ int main(int argc, char* argv[])
         switch(selected) {
             case mode::make:
                 cout << "make new dictionary " << dict << " from wordfile(s) ";
-                for(const auto& s : input) cout << s << ' '; cout << '\n';
+                for(const auto& s : input) { cout << s << ' '; } cout << '\n';
                 break;
             case mode::find:
                 cout << "find words from dictionary " <<  dict << " in files ";
-                for(const auto& s : input) cout << s << ' '; cout << '\n';
+                for(const auto& s : input) { cout << s << ' '; } cout << '\n';
                 cout << "output: ";
                 if(split) cout << "splitted ";
                 cout << "to ";

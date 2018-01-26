@@ -136,18 +136,20 @@ There are two kinds of building blocks for command line interfaces: parameters a
 ```cpp
 bool a = false, f = false;
 string s; vector<string> vs;
-auto cli = (                             // matches   required  positional  repeatable
-    command("push"),                     // exactly    yes       yes         no
-    required("-f", "--file").set(f),     // exactly    yes       no          no
-    option("-a", "--all", "-A").set(a),  // exactly    no        no          no
+auto cli = (                             // matches  required  positional  repeatable
+    command("push"),                     // exactly      yes       yes         no
+    required("-f", "--file").set(f),     // exactly      yes       no          no
+    option("-a", "--all", "-A").set(a),  // exactly      no        no          no
                                                   
-    value("file", s),                    // any arg    yes       yes         no
-    values("file", vs),                  // any arg    yes       yes         yes
-    opt_value("file", s),                // any arg    no        yes         no
-    opt_values("file", vs),              // any arg    no        yes         yes
+    value("file", s),                    // any arg      yes       yes         no
+    values("file", vs),                  // any arg      yes       yes         yes
+    opt_value("file", s),                // any arg      no        yes         no
+    opt_values("file", vs),              // any arg      no        yes         yes
     
     //"catch all" parameter - useful for error handling
-    any_other(vs)                        // any arg    no        no          yes
+    any_other(vs)                        // any arg      no        no          yes
+    //catches arguments that fulfill a predicate and aren't matched by other parameters
+    any(predicate, vs)                   // predicate    no        no          yes
 );
 ```
 The functions above are convenience factories:
@@ -161,10 +163,10 @@ auto r1 = required("-f", "--file").set(f);
 // is equivalent to:
 auto r2 = parameter{"-f", "--file"}.required(true).set(f);
 ```
- * a required parameter has to match at least one command line argument 
- * a repeatable parameter can match any number of arguments
- * non-positional (=non-blocking) parameters can match arguments in any order
- * a positional (blocking) parameter defines a "stop point", i.e., until it matches all parameters following it are not allowed to match; once it matched, all parameters preceding it (wihtin the current group) will become unreachable 
+ - a required parameter has to match at least one command line argument 
+ - a repeatable parameter can match any number of arguments
+ - non-positional (=non-blocking) parameters can match arguments in any order
+ - a positional (blocking) parameter defines a "stop point", i.e., until it matches all parameters following it are not allowed to match; once it matched, all parameters preceding it (wihtin the current group) will become unreachable 
 
 ##### [Flags + Values](#options-with-values)
 If you want parameters to be matched in sequence, you can tie them together using either ```operator &``` or the grouping function ```in_sequence```:
@@ -188,7 +190,6 @@ auto cli = (
     option("-l") & values("lines", ls)
 );
 ```
-
 
 ##### [Filtering Value Parameters](#value-filters)
 Value parameters use a filter function to test if they are allowed to match an argument string. The default filter ```match::nonempty``` that is used by ```value```, ```values```, ```opt_value``` and ```opt_values``` will match any non-empty argument string. 
@@ -296,6 +297,7 @@ settings cmdline_settings(int argc, char* argv[]) {
 }
 ```
 
+
 #### Generating Documentation ([see also here](#documentation-generation))
 Docstrings for groups and for parameters can either be set with the member function ```doc``` or with ```operator %```:
 ```cpp
@@ -341,6 +343,7 @@ auto fmt = doc_formatting{}.start_column(2);
 cout << make_man_page(cli, "progname", fmt) << '\n'; 
 ```
 
+
 #### (Error) Event Handlers ([see here](#error-handling), [and here](#per-parameter-parsing-report))
 Each parameter can have event handler functions attached to it. These are invoked once for each argument that is mapped to the parameter (or once per missing event):
 ```cpp
@@ -366,6 +369,21 @@ auto param = required("-nof").set(file,"") |
                               .if_blocked   ( [] (int argIdx) { /* ... */ } )
                               .if_conflicted( [] (int argIdx) { /* ... */ } );
 ```
+
+
+#### Special Cases
+If we give ```-f -b``` or ```-b -f -a``` as command line arguments for the following CLI, an error will be reported, since the value after ```-f``` is not optional: 
+```cpp
+auto cli = (  option("-a"),  option("-f") & value("filename"),  option("-b")  );
+```
+This behavior is fine for most use cases. 
+But what if we want our program to take any string as a filename, because our filenames might also collide with flag names? We can make the value parameter [greedy](#greedy-parameters) with ```operator !```. This way, the next string after ```-f``` will always be matched with highest priority as soon as ```-f``` was given:
+```cpp
+auto cli = (  option("-a"),  option("-f") & !value("filename"),   option("-b")  );
+                                        //  ^~~~~~ 
+```
+Be **very careful** with greedy parameters! 
+
 
 
 #### Parsing Result Analysis
@@ -419,10 +437,11 @@ The repository folder "examples" contains code for most of the following example
 - [complex nestings](#complex-nestings)
 - [example from docopt](#an-example-from-docopt)
 - [value filters](#value-filters)
+- [greedy parameters](#greedy-parameters)
 - [generalized joinable parameters](#generalized-joinable-parameters)
 - [custom value filters](#custom-value-filters)
 - [sanity checks](#sanity-checks)
-- [error handling](#error-handling)
+- [basic error handling](#basic-error-handling)
 - [parsing](#parsing)
 - [documentation generation](#documentation-generation)
 - [documentation filtering](#documentation-filtering)
@@ -711,9 +730,9 @@ auto cli = (
 ```
 ```cpp
 auto cli = ( 
-    (option("-n", "--count") & value("count").set(n))            % "number of iterations",
-    (option("-r", "--ratio") & value("ratio").call(print_ratio)) % "compression ratio",
-    (option("-m").set(domerge) & opt_value("lines=5").set(m))    % "merge lines (default: 5)"
+    (option("-n", "--count") & value("count").set(n))         % "number of iterations",
+    (option("-r", "--ratio") & value("ratio")(print_ratio))   % "compression ratio",
+    (option("-m").set(domerge) & opt_value("lines=5").set(m)) % "merge lines (default: 5)"
 );
 ```
 See [here](#coding-styles) for more on coding styles.
@@ -919,7 +938,7 @@ OPTIONS
         -b      use backup file
         -s      use swap file
 
-        :vi, :st3, :atom, :emacs
+        :vim, :st3, :atom, :emacs
                 editor(s) to use; multiple possible        
 ```
 
@@ -945,17 +964,14 @@ auto cli = (
     ) % "editor(s) to use; multiple possible"
 );
 ```
-- Flags of parameters that take values cannot be joined with other flags.
 - Flags can be joined regardless of their length (second group in the example). 
-- Flags can only be joined if they have a non-empty common prefix (otherwise it would be too easy to confuse them with value parameters).
-- The common prefix (```-``` or ```:``` in the example) must be given at least
+- If the flags have a common prefix (```-``` or ```:``` in the example) it must be given at least
   once as leading prefix in the command line argument.
 - Allowed args for the first group are:
   ```-r```, ```-b```, ```-s```, ```-rb```, ```-br```, ```-rs```, ```-sr```, 
   ```-sb```, ```-bs```, ```-rbs```, ```-rsb```, ...
 - Allowed args for the second group are:
-  ```:vim```, ```:vim:atom```, ```:emacs:st3```, ...
-
+  ```:vim```, ```:vim:atom```, ```:emacs:st3```, ```:vimatom```, ...
 
 #### More Examples
 
@@ -1092,6 +1108,7 @@ SYNOPSIS
 OPTIONS
         -v, --verbose
                 print detailed report
+
         -b, --buffer [<size=1024>]
                 sets buffer size in KiByte
 
@@ -1318,15 +1335,18 @@ auto shipmove = (
 auto shipshoot = ( command("shoot").set(selected,mode::shipshoot),
                    coordinates );
 
+auto mines = ( 
+    command("mine"),
+    (command("set"   ).set(selected,mode::mineset) | 
+     command("remove").set(selected,mode::minerem) ),
+    coordinates,
+    (option("--moored"  ).set(drift,false) % "Moored (anchored) mine." | 
+     option("--drifting").set(drift,true)  % "Drifting mine."          )
+);
+
 auto navalcli = (
-       ( command("ship"), ( shipnew | shipmove | shipshoot ) )
-     | ( command("mine"),
-        (   command("set"   ).set(selected,mode::mineset)
-          | command("remove").set(selected,mode::minerem) ),
-        coordinates,
-        (   option("--moored"  ).set(drift,false) % "Moored (anchored) mine."
-          | option("--drifting").set(drift,true)  % "Drifting mine."          )
-    )
+    ( command("ship"), ( shipnew | shipmove | shipshoot ) )
+    | mines,
     | command("-h", "--help").set(selected,mode::help)     % "Show this screen."
     | command("--version")([]{ cout << "version 1.0\n"; }) % "Show version."
 );
@@ -1355,12 +1375,13 @@ switch(m) {
 
 
 
+
 ### Value Filters
 If a parameter doesn't have flags, i.e. it is a value-parameter, a filter function will be used to test if it matches an argument string. The default filter is ```clipp::match::nonempty``` which will match any non-empty argument string. 
 If you want more control over what is matched, you can use some other predefined filters or you can write your own ones (see [here](#custom-value-filters)).
 
 ```man
-Usage:   exec [-n <times>] [-l <line>...] [-r <ratio>] [-f <term>]
+Usage:   exec [-n <times>] [-l <line>...] [-b <ratio>] [-f <term>]
 ```
 
 ```cpp
@@ -1410,6 +1431,15 @@ auto p = parameter{ match::length{1,5} }
 ```
 There are a couple of predefined filters in ```namespace clipp::match```, but you can of course write your own ones (see [here](#custom-value-filters)).
 
+Here is another example that makes sure we don't catch any value starting with "-" as a filename:
+```cpp
+auto cli = (  
+    option("-a")  
+    option("-f") & value(match::prefix_not("-"), "filename"),
+    option("-b")  
+);
+```
+
 ```cpp
 namespace clipp {
 namespace match {
@@ -1448,13 +1478,62 @@ namespace match {
   };
 
   class length {
-      explicit numbers(size_t exact);
-      explicit numbers(size_t min, size_t max);
+      explicit length(size_t exact);
+      explicit length(size_t min, size_t max);
       subrange operator () (const string& arg);
   };
 
 } }
 ```
+
+
+
+### Greedy Parameters
+
+By default, the parser tries to identify a command line argument (in that order) as
+ - a single flag
+ - a concatenation of multiple, _joinable_ flags (in any order)
+ - a concatenation of a _joinable_ flag sequence in the order defined in the CLI code
+ - a single value parameter
+ - a concatenation of a _joinable_ flag/value sequence in the order defined in the CLI code
+ - a concatenation of _joinable_ flags & values in no particular order
+
+If no match was found, the parser tries the same list again without any restrictions imposed by blocking (positional) parameters, conflicting alternatives, etc. If this leads to any match, an error will be reported. This way, _potential_, but illegal matches can be found and, e.g., conflicting alternatives can be reported.
+
+Consider this CLI:
+```cpp
+auto cli = (  option("-a"),  option("-f") & value("filename"),  option("-b")  );
+```
+If we give ```-f -b``` or ```-b -f -a``` as command line arguments, an error will be reported, since the value after ```-f``` is not optional. 
+
+This behavior is fine for most use cases. 
+But what if we want our program to take any string as a filename, because our filenames might also collide with flag names? We can make the ```filename``` value parameter greedy, so that the next string after ```-f``` will always be matched with highest priority as soon as ```-f``` was given:
+```cpp
+auto cli = (  option("-a"),  option("-f") & greedy(value("filename")),  option("-b")  );
+```
+or using ```operator !```:
+```cpp
+auto cli = (  option("-a"),  option("-f") & !value("filename"),   option("-b")  );
+```
+
+Now, every string coming after an ```-f``` will be used as filename. 
+
+If we don't want just *any* kind of match accepted, but still retain a higher priority for a value parameter, we could use a [value filter](#value-filters):
+```cpp
+auto cli = (  
+    (   command("A"),
+        option("-f") & !value(match::prefix_not("-"), "filename"),
+        option("-b")  
+    ) |
+    (   command("B"),
+        option("-x")  
+    )
+);
+```
+This way, the command line arguments ```A -f B``` will set the filename to "B" and produce no conflict error between the alternative commands ```A``` and ```B``` but ```A -f -b``` will still give an error.
+
+Note, that there is an inherent decision problem: either we want the ```filename``` value to match no matter what, or we won't get proper error handling if someone forgets to specify a filename and gives ```A -f -b``` Also, there might be interfaces where we really want to catch something like ```A -f B``` as a command conflict.
+
 
 
 
@@ -1620,7 +1699,7 @@ assert( cli.common_flag_prefix() == "-" );
 
 
 
-### Error Handling
+### Basic Error Handling
 
 Each parameter can have error handler functions/lambdas/function objects for different fail cases attached to it:
  - ```if_repeated``` is raised each time an argument is mapped to a parameter regardless of that parameter's repeatability setting
@@ -1639,12 +1718,14 @@ vector<string> targets;
 vector<string> wrong;
 bool http = true;
 
+auto istarget = match::prefix_not("-");
+
 auto cli = (
     value("file", filename)
         .if_missing([]{ cout << "You need to provide a source filename!\n"; } )
         .if_repeated([](int idx){ cout << "Only one source file allowed! (index " << idx << ")\n"; } )
     ,
-    required("-t") & values(match::prefix_not("-"), "target", targets)
+    required("-t") & values(istarget, "target", targets)
         .if_missing([]{ cout << "You need to provide at least one target filename!\n"; } )
         .if_blocked([]{ cout << "Target names must not be given before the source file name!\n"; })
     ,

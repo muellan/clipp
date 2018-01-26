@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 
     if(parse(argc, argv, cli)) {
         cout << "find '" << expr << "' in files: ";
-        for(const auto& f : files) cout << "'" << f << "' "; cout << '\n';
+        for(const auto& f : files) { cout << "'" << f << "' "; } cout << '\n';
         if(ifany) cout << "using 'any' mode\n";
         if(ifall) cout << "using 'all' mode\n";
     }

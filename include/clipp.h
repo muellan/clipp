@@ -1633,6 +1633,40 @@ alphabetic(const arg_string& s) {
 
 /*************************************************************************//**
  *
+ * @brief predicate that returns false if the argument string is
+ *        equal to any string from the exclusion list
+ *
+ *****************************************************************************/
+class none_of
+{
+public:
+    none_of(arg_list strs):
+        excluded_{std::move(strs)}
+    {}
+
+    template<class... Strings>
+    none_of(arg_string str, Strings&&... strs):
+        excluded_{std::move(str), std::forward<Strings>(strs)...}
+    {}
+
+    template<class... Strings>
+    none_of(const char* str, Strings&&... strs):
+        excluded_{arg_string(str), std::forward<Strings>(strs)...}
+    {}
+
+    bool operator () (const arg_string& arg) const {
+        return (std::find(begin(excluded_), end(excluded_), arg)
+                == end(excluded_));
+    }
+
+private:
+    arg_list excluded_;
+};
+
+
+
+/*************************************************************************//**
+ *
  * @brief predicate that returns the first substring match within the input
  *        string that rmeepresents a number
  *        (with at maximum one decimal point and digit separators)
@@ -1861,7 +1895,7 @@ public:
     parameter():
         flags_{},
         matcher_{predicate_adapter{match::none}},
-        label_{}, required_{false}
+        label_{}, required_{false}, greedy_{false}
     {}
 
     /** @brief makes "flag" parameter */
@@ -1870,7 +1904,7 @@ public:
     parameter(arg_string str, Strings&&... strs):
         flags_{},
         matcher_{predicate_adapter{match::none}},
-        label_{}, required_{false}
+        label_{}, required_{false}, greedy_{false}
     {
         add_flags(std::move(str), std::forward<Strings>(strs)...);
     }
@@ -1880,7 +1914,7 @@ public:
     parameter(const arg_list& flaglist):
         flags_{},
         matcher_{predicate_adapter{match::none}},
-        label_{}, required_{false}
+        label_{}, required_{false}, greedy_{false}
     {
         add_flags(flaglist);
     }
@@ -1893,7 +1927,7 @@ public:
     parameter(match_predicate filter):
         flags_{},
         matcher_{predicate_adapter{std::move(filter)}},
-        label_{}, required_{false}
+        label_{}, required_{false}, greedy_{false}
     {}
 
     /** @brief makes "value" parameter with custom match function
@@ -1903,7 +1937,7 @@ public:
     parameter(match_function filter):
         flags_{},
         matcher_{std::move(filter)},
-        label_{}, required_{false}
+        label_{}, required_{false}, greedy_{false}
     {}
 
 
@@ -1918,6 +1952,21 @@ public:
     parameter&
     required(bool yes) noexcept {
         required_ = yes;
+        return *this;
+    }
+
+
+    //---------------------------------------------------------------
+    /** @brief returns if a parameter should match greedily */
+    bool
+    greedy() const noexcept {
+        return greedy_;
+    }
+
+    /** @brief determines if a parameter should match greedily */
+    parameter&
+    greedy(bool yes) noexcept {
+        greedy_ = yes;
         return *this;
     }
 
@@ -2046,6 +2095,7 @@ private:
     match_function matcher_;
     doc_string label_;
     bool required_ = false;
+    bool greedy_ = false;
 };
 
 
@@ -3393,6 +3443,39 @@ using pattern = group::child;
 
 /*************************************************************************//**
  *
+ * @brief apply an action to all parameters in a group
+ *
+ *****************************************************************************/
+template<class Action>
+void for_all_params(group& g, Action&& action)
+{
+    for(auto& p : g) {
+        if(p.is_group()) {
+            for_all_params(p.as_group(), action);
+        }
+        else {
+            action(p.as_param());
+        }
+    }
+}
+
+template<class Action>
+void for_all_params(const group& g, Action&& action)
+{
+    for(auto& p : g) {
+        if(p.is_group()) {
+            for_all_params(p.as_group(), action);
+        }
+        else {
+            action(p.as_param());
+        }
+    }
+}
+
+
+
+/*************************************************************************//**
+ *
  * @brief makes a group of parameters and/or groups
  *
  *****************************************************************************/
@@ -3654,6 +3737,23 @@ repeatable(group p1, P2 p2, Ps... ps)
 {
     return group{std::move(p1), std::move(p2),
                  std::move(ps)...}.repeatable(true);
+}
+
+
+
+/*************************************************************************//**
+ *
+ * @brief makes a parameter greedy (match with top priority)
+ *
+ *****************************************************************************/
+inline parameter
+greedy(parameter p) {
+    return p.greedy(true);
+}
+
+inline parameter
+operator ! (parameter p) {
+    return greedy(p);
 }
 
 
@@ -4416,12 +4516,23 @@ private:
     /** @brief try to find a parameter/pattern that matches 'arg' */
     bool try_match(const arg_string& arg)
     {
-        //Note: flag-params will take precedence over value-params
+        //match greedy parameters before everything else
+        if(pos_->is_param() && pos_->blocking() && pos_->as_param().greedy()) {
+            const auto match = pos_->as_param().match(arg);
+            if(match && match.length() == arg.size()) {
+                add_match(detail::match_t{arg,pos_});
+                return true;
+            }
+        }
+
+        //try flags first (alone, joinable or strict sequence)
         if(try_match_full(arg, detail::select_flags{})) return true;
         if(try_match_joined_flags(arg)) return true;
         if(try_match_joined_sequence(arg, detail::select_flags{})) return true;
+        //try value params (alone or strict sequence)
         if(try_match_full(arg, detail::select_values{})) return true;
         if(try_match_joined_sequence(arg, detail::select_all{})) return true;
+        //try joinable params + values in any order
         if(try_match_joined_params(arg)) return true;
         return false;
     }

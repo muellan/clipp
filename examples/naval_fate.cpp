@@ -68,15 +68,18 @@ int main(int argc, char* argv[])
     auto shipshoot = ( command("shoot").set(selected,mode::shipshoot),
                        coordinates );
 
+    auto mines = ( 
+        command("mine"),
+        (command("set"   ).set(selected,mode::mineset) | 
+         command("remove").set(selected,mode::minerem) ),
+        coordinates,
+        (option("--moored"  ).set(drift,false) % "Moored (anchored) mine." | 
+         option("--drifting").set(drift,true)  % "Drifting mine."          )
+    );
+
     auto navalcli = (
-           ( command("ship"), ( shipnew | shipmove | shipshoot ) )
-         | ( command("mine"),
-            (   command("set"   ).set(selected,mode::mineset)
-              | command("remove").set(selected,mode::minerem) ),
-            coordinates,
-            (   option("--moored"  ).set(drift,false) % "Moored (anchored) mine."
-              | option("--drifting").set(drift,true)  % "Drifting mine."          )
-        )
+        ( command("ship"), ( shipnew | shipmove | shipshoot ) )
+        | mines
         | command("-h", "--help").set(selected,mode::help)     % "Show this screen."
         | command("--version")([]{ cout << "version 1.0\n"; }) % "Show version."
     );
