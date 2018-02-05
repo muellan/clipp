@@ -1225,6 +1225,9 @@ public:
     template<class Target>
     Derived&
     set(Target& t) {
+        static_assert(!std::is_pointer<Target>::value,
+                      "parameter target type must not be a pointer");
+
         return call(clipp::set(t));
     }
 
@@ -1351,6 +1354,9 @@ public:
         >::type>
     Derived&
     target(T& t) {
+        static_assert(!std::is_pointer<T>::value,
+                      "parameter target type must not be a pointer");
+
         set(t);
         return *static_cast<Derived*>(this);
     }
