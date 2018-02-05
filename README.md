@@ -296,6 +296,12 @@ settings cmdline_settings(int argc, char* argv[]) {
     return s;
 }
 ```
+Note that the target must either be:
+ - a fundamental type (```int, long int, float, double, ...```)
+ - a type that is convertible from ```const char*```
+ - a callable entity: function, function object / lambda
+   that either has an empty parameter list or exactly one parameter that is
+   convertible from ```const char*```
 
 
 #### Generating Documentation ([see also here](#documentation-generation))
@@ -412,6 +418,28 @@ for(const auto& m : res) {
     cout << '\n';
 }
 ```
+
+#### Writing Your Own Convenience Factories
+Sometimes it can make your CLI code more expressive and increase maintainability, if you create your own factory functions for making parameters:
+```cpp
+//value that can only connect to one object with automatic default value documentation
+template<class Target>
+clipp::parameter
+documented_value(const std::string& name, Target& tgt, const std::string& docstr) {
+    using std::to_string;
+    return clipp::value(name,tgt).doc(docstr + "(default: " + to_string(tgt) + ")");
+}
+```
+```cpp
+//value that only matches strings without prefix '-'
+template<class Target, class... Targets>
+clipp::parameter
+nodash_value(std::string label, Target&& tgt, Targets&&... tgts) {
+    return clipp::value(clipp::match::prefix_not{"-"}, std::move(label), 
+               std::forward<Target>(tgt), std::forward<Targets>(tgts)...);
+}
+```
+
 
 
 
