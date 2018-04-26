@@ -4,8 +4,7 @@
 #
 # builds and runs tests, resolves include dependencies
 #
-# see help for usage:
-#    ./run_tests.py --help
+# see help for usage: ./run_tests.py --help
 #
 # (c) 2013-2017 Andre Mueller
 #
