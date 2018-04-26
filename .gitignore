@@ -13,6 +13,7 @@
 .pydevproject
 tags
 *.out
+*.json
 *.exe
 *.o
 

@@ -36,7 +36,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <cctype>
-#include <cmath>
 #include <memory>
 #include <vector>
 #include <limits>
