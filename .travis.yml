@@ -51,15 +51,13 @@ matrix:
 install:
   - if [[ "$COMPILER" != "" ]]; then export CXX=$COMPILER; fi
   - $CXX --version
-  # - | if [ "$LIBCXX" == "YES" ]; then
-  #     sudo apt-get purge cmake
-  #     sudo apt-get install cmake3
-  #     cmake --version
-  #     sudo CXX="$CXX" CC="$CC"
-  #     sudo ./cmake/install_libcxx.sh
-  #     export CXXFLAGS="-stdlib=libc++"
-  #   fi
-
+  - | if [ "$LIBCXX" == "YES" ]; then
+      sudo apt-get purge cmake
+      sudo apt-get install cmake3
+      cmake --version
+      sudo ./cmake/install_libcxx.sh
+      export CXXFLAGS="-stdlib=libc++"
+    fi
 
 script:
     - cd test && ./run_tests.py $TEST_FLAGS
