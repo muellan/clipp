@@ -1,0 +1,34 @@
+cmake_minimum_required(VERSION 3.1)
+project(clipp CXX)
+
+include(GNUInstallDirs)
+set(CMAKE_VERBOSE_MAKEFILE TRUE)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CXX_EXTENSIONS FALSE)
+
+message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+
+install(DIRECTORY include/
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  FILES_MATCHING PATTERN "*.h"
+)
+
+add_library(${PROJECT_NAME} INTERFACE)
+target_include_directories(${PROJECT_NAME} INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+install(TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}-config
+)
+install(EXPORT ${PROJECT_NAME}-config
+  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}
+)
+
+option(BUILD_TESTING "Do not build tests by default" FALSE)
+include(CTest)
+if(BUILD_TESTING)
+  add_subdirectory(test)
+endif()
