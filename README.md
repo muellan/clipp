@@ -147,7 +147,7 @@ auto cli = (                             // matches  required  positional  repea
     opt_values("file", vs),              // any arg      no        yes         yes
     
     //"catch all" parameter - useful for error handling
-    any_other(vs)                        // any arg      no        no          yes
+    any_other(vs),                       // any arg      no        no          yes
     //catches arguments that fulfill a predicate and aren't matched by other parameters
     any(predicate, vs)                   // predicate    no        no          yes
 );
@@ -181,10 +181,10 @@ auto cli = (
     required("--file") & opt_value("name", s),
     
     //option with exactly two values
-    option("-p", "--pos") & value("x") & value("y")
+    option("-p", "--pos") & value("x") & value("y"),
 
     //same as before                   v            v
-    in_sequence( option("-p", "--pos") , value("x") , value("y") )
+    in_sequence( option("-p", "--pos") , value("x") , value("y") ),
     
     //option with at least one value (and optionally more)
     option("-l") & values("lines", ls)
@@ -197,10 +197,10 @@ You can either supply other filter functions/function objects as first argument 
 ```cpp
 string name; double r = 0.0; int n = 0;
 auto cli = (
-    value("user", name)   // matches any non-empty string
-    word("user", name)    // matches any non-empty alphanumeric string
-    number("ratio", r)    // matches string representations of numbers
-    integer("times", n)   // matches string representations of integers
+    value("user", name),   // matches any non-empty string
+    word("user", name),    // matches any non-empty alphanumeric string
+    number("ratio", r),    // matches string representations of numbers
+    integer("times", n)    // matches string representations of integers
 );
 ```
 Analogous to ```value```, ```opt_value```, etc. there are also functions for ```words```, ```opt_word```, etc.
@@ -218,14 +218,14 @@ value(is_char, "c", c);      // one character  yes       yes         no
 #### Groups
  - [group](#grouping) mutually compatible parameters with parentheses and commas:
    ```cpp
-   auto cli = ( option("-a"), option("-b"), option("-c") )
+   auto cli = ( option("-a"), option("-b"), option("-c") );
    ```
 
  - group mutually exclusive parameters as [alternatives](#alternatives) using ```operator |``` or ```one_of```:
    ```cpp
-   auto cli1 = ( value("input_file") | command("list") | command("flush") )
+   auto cli1 = ( value("input_file") | command("list") | command("flush") );
 
-   auto cli2 = one_of( value("input_file") , command("list") , command("flush") )
+   auto cli2 = one_of( value("input_file") , command("list") , command("flush") );
    ```
 
  - group parameters so that they must be matched in sequence using ```operator &``` or ```in_sequence```:
@@ -243,7 +243,7 @@ value(is_char, "c", c);      // one character  yes       yes         no
 
  - groups can be nested and combined to form arbitrarily complex interfaces (see [here](#nested-alternatives) and [here](#complex-nestings)):
    ```cpp
-   auto cli = ( command("push") | ( command("pull"), option("-f", "--force") )  )
+   auto cli = ( command("push") | ( command("pull"), option("-f", "--force") )  );
    ```
 
  - groups can be repeatable as well:
@@ -263,10 +263,10 @@ value(is_char, "c", c);      // one character  yes       yes         no
 
  - make a group of flags [joinable](#joinable-flags):
    ```cpp
-   auto cli1 = joinable( option("-a"), option("-b")); //will match "-a", "-b", "-ab", "-ba"
+   auto cli1 = joinable( option("-a"), option("-b"));  //will match "-a", "-b", "-ab", "-ba"
 
    //works also with arbitrary common prefixes:
-   auto cli2 = joinable( option("--xA0"), option("--xB1")); //will also match "--xA0B1" or "--xB1A0"
+   auto cli2 = joinable( option("--xA0"), option("--xB1"));  //will also match "--xA0B1" or "--xB1A0"
    ```
 
 
@@ -275,13 +275,13 @@ The easiest way to connect the command line interface to the rest of your code i
 ```cpp
 bool b = false; int i = 5; int m = 0; string x; ifstream fs;
 auto cli = ( 
-    option("-b").set(b)                       // "-b" detected -> set b to true
+    option("-b").set(b),                      // "-b" detected -> set b to true
     option("-m").set(m,2),                    // "-m" detected -> set m to 2
     option("-x") & value("X", x),             // set x's value from arg string 
     option("-i") & opt_value("i", i),         // set i's value from arg string  
     option("-v").call( []{ cout << "v"; } ),  // call function (object) / lambda
     option("-v")( []{ cout << "v"; } ),       // same as previous line
-    option("-f") & value("file").call([&](string f){ fs.open(f); }),
+    option("-f") & value("file").call([&](string f){ fs.open(f); })
 );
 ```
 
@@ -308,7 +308,7 @@ Note that the target must either be:
 Docstrings for groups and for parameters can either be set with the member function ```doc``` or with ```operator %```:
 ```cpp
 auto cli = (
-    (   option("x").set(x).doc("sets X")
+    (   option("x").set(x).doc("sets X"),
         option("y").set(y) % "sets Y"         
     ),
     "documented group 1:" % (  
