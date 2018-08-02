@@ -5933,13 +5933,14 @@ private:
 class documentation
 {
 public:
-    using string = doc_string;
+    using string          = doc_string;
+    using filter_function = std::function<bool(const parameter&)>;
 
     documentation(const group& cli,
                   const doc_formatting& fmt = doc_formatting{},
-                  const param_filter& filter = param_filter{})
+                  filter_function filter = param_filter{})
     :
-        cli_(cli), fmt_{fmt}, usgFmt_{fmt}, filter_{filter}
+        cli_(cli), fmt_{fmt}, usgFmt_{fmt}, filter_{std::move(filter)}
     {
         //necessary, because we re-use "usage_lines" to generate
         //labels for documented groups
@@ -5947,11 +5948,13 @@ public:
             usgFmt_.max_flags_per_param_in_doc());
     }
 
-    documentation(const group& cli,
-                  const param_filter& filter,
-                  const doc_formatting& fmt = doc_formatting{})
-    :
-        documentation(cli, fmt, filter)
+    documentation(const group& cli, filter_function filter) :
+        documentation{cli, doc_formatting{}, std::move(filter)}
+    {}
+
+    documentation(const group& cli, const param_filter& filter) :
+        documentation{cli, doc_formatting{},
+                      [filter](const parameter& p) { return filter(p); }}
     {}
 
     template<class OStream>
@@ -5973,7 +5976,7 @@ private:
     const group& cli_;
     doc_formatting fmt_;
     doc_formatting usgFmt_;
-    param_filter filter_;
+    filter_function filter_;
 
 
     /***************************************************************//**
