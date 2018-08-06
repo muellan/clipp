@@ -313,10 +313,10 @@ fwd_to_unsigned_int(const char*& s)
 template<class T, class V, bool = (sizeof(V) > sizeof(T))>
 struct limits_clamped {
     static T from(const V& v) {
-        if(v > V(std::numeric_limits<T>::max())) {
+        if(v >= V(std::numeric_limits<T>::max())) {
             return std::numeric_limits<T>::max();
         }
-        if(v < V(std::numeric_limits<T>::lowest())) {
+        if(v <= V(std::numeric_limits<T>::lowest())) {
             return std::numeric_limits<T>::lowest();
         }
         return T(v);
