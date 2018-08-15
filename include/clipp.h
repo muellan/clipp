@@ -3971,7 +3971,7 @@ public:
         } else {
             ++pos_;
         }
-        check_left_scope();
+        check_if_left_scope();
         return *this;
     }
 
@@ -4091,7 +4091,7 @@ private:
     }
 
     //-----------------------------------------------------
-    void check_left_scope()
+    void check_if_left_scope()
     {
         if(posAfterLastMatch_) {
             if(pos_.level() < posAfterLastMatch_.level()) {
@@ -4201,7 +4201,7 @@ private:
 
 /*************************************************************************//**
  *
- * @brief finds the first parameter that matches a given string
+ * @brief finds the first parameter that matches a given string;
  *        candidate parameters are traversed using a scoped DFS traverser
  *
  *****************************************************************************/
@@ -4979,7 +4979,7 @@ namespace {
  *
  * @brief correct some common problems
  *        does not - and MUST NOT - change the number of arguments
- *        (no insertion, no deletion)
+ *        (no insertions or deletions allowed)
  *
  *****************************************************************************/
 void sanitize_args(arg_list& args)
