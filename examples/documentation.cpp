@@ -59,7 +59,7 @@ int main()
         )
     );
 
-    auto fmt = doc_formatting{} .start_column(4) .doc_column(28);
+    auto fmt = doc_formatting{} .first_column(4) .doc_column(28);
 
     cout << make_man_page(cli, "worddb", fmt)
         .prepend_section("DESCRIPTION", "    Builds a database of words from text files.")

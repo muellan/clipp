@@ -5,25 +5,25 @@ language: cpp
 
 matrix:
   include:
-    - env: COMPILER=clang++-3.8 TEST_FLAGS="-c clang" LIBCXX=YES
+    - env: COMPILER=clang++-3.8 TEST_FLAGS="-c clang" LIBCXX=NO
       addons: 
         apt: 
           sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-precise-3.8"]  
           packages: ["clang-3.8", "g++-6"]
 
-    - env: COMPILER=clang++-3.9 TEST_FLAGS="-c clang" LIBCXX=YES
+    - env: COMPILER=clang++-3.9 TEST_FLAGS="-c clang" LIBCXX=NO
       addons: 
         apt:  
           sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-3.9"]  
           packages: ["clang-3.9", "g++-6"]
 
-    - env: COMPILER=clang++-4.0 TEST_FLAGS="-c clang" LIBCXX=YES
+    - env: COMPILER=clang++-4.0 TEST_FLAGS="-c clang" LIBCXX=NO
       addons: 
         apt:  
           sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-4.0"]  
           packages: ["clang-4.0", "g++-6"]
 
-    - env: COMPILER=clang++-5.0 TEST_FLAGS="-c clang --valgrind" LIBCXX=YES
+    - env: COMPILER=clang++-5.0 TEST_FLAGS="-c clang --valgrind" LIBCXX=NO
       addons: 
         apt:  
           sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-5.0"]  

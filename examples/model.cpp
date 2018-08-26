@@ -109,7 +109,7 @@ settings configuration(int argc, char* argv[])
             }
         }
 
-        auto fmt = doc_formatting{}.start_column(8).doc_column(16);
+        auto fmt = doc_formatting{}.first_column(8).doc_column(16);
         //.max_flags_per_param_in_usage(3).surround_alternative_flags("(", ")");
 
         msg += "\nUsage:\n" + usage_lines(cli, argv[0], fmt).str() + '\n';

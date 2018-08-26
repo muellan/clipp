@@ -1,11 +1,11 @@
 /*****************************************************************************
  *  ___  _    _   ___ ___
  * |  _|| |  | | | _ \ _ \   CLIPP - command line interfaces for modern C++
- * | |_ | |_ | | |  _/  _/   version 1.1.0
+ * | |_ | |_ | | |  _/  _/   version 1.2.0
  * |___||___||_| |_| |_|     https://github.com/muellan/clipp
  *
  * Licensed under the MIT License <http://opensource.org/licenses/MIT>.
- * Copyright (c) 2017 André Müller <foss@andremueller-online.de>
+ * Copyright (c) 2017-18 André Müller <foss@andremueller-online.de>
  *
  * ---------------------------------------------------------------------------
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -3583,6 +3583,12 @@ operator | (group a, group b)
 
 
 
+/*************************************************************************//**
+ *
+ * @brief helpers (NOT FOR DIRECT USE IN CLIENT CODE!)
+ *        no interface guarantees; might be changed or removed in the future
+ *
+ *****************************************************************************/
 namespace detail {
 
 inline void set_blocking(bool) {}
@@ -3875,6 +3881,7 @@ with_prefixes_short_long(const arg_string& shortFlagPrefix,
  * @brief parsing implementation details
  *
  *****************************************************************************/
+
 namespace detail {
 
 
@@ -5223,13 +5230,59 @@ class doc_formatting
 public:
     using string = doc_string;
 
+    /** @brief same as 'first_column' */
+#if __cplusplus >= 201402L
+    [[deprecated]]
+#endif
+    doc_formatting& start_column(int col) { return first_column(col); }
+#if __cplusplus >= 201402L
+    [[deprecated]]
+#endif
+    int start_column() const noexcept { return first_column(); }
+
     /** @brief determines column where documentation printing starts */
-    doc_formatting& start_column(int col) { startCol_ = col; return *this; }
-    int             start_column() const noexcept { return startCol_; }
+    doc_formatting&
+    first_column(int col) {
+        //limit to [0,last_column] but push doc_column to the right if neccessary
+        if(col < 0) col = 0;
+        else if(col > last_column()) col = last_column();
+        if(col > doc_column()) doc_column(first_column());
+        firstCol_ = col;
+        return *this;
+    }
+    int first_column() const noexcept {
+        return firstCol_;
+    }
 
     /** @brief determines column where docstrings start */
-    doc_formatting& doc_column(int col) { docCol_ = col; return *this; }
-    int             doc_column() const noexcept  { return docCol_; }
+    doc_formatting&
+    doc_column(int col) {
+        //limit to [first_column,last_column]
+        if(col < 0) col = 0;
+        else if(col < first_column()) col = first_column();
+        else if(col > last_column()) col = last_column();
+        docCol_ = col;
+        return *this;
+    }
+    int doc_column() const noexcept {
+        return docCol_;
+    }
+
+    /** @brief determines column that no documentation text must exceed;
+     *         (text should be wrapped appropriately after this column)
+     */
+    doc_formatting&
+    last_column(int col) {
+        //limit to [first_column,oo] but push doc_column to the left if neccessary
+        if(col < first_column()) col = first_column();
+        if(col < doc_column()) doc_column(col);
+        lastCol_ = col;
+        return *this;
+    }
+
+    int last_column() const noexcept {
+        return lastCol_;
+    }
 
     /** @brief determines indent of documentation lines
      *         for children of a documented group */
@@ -5421,6 +5474,16 @@ public:
     }
     int alternatives_min_split_size() const noexcept { return groupSplitSize_; }
 
+    /** @brief determines whether to ignore new line characters in docstrings
+     */
+    doc_formatting& ignore_newline_chars(bool yes = true) {
+        ignoreNewlines_ = yes;
+        return *this;
+    }
+    bool ignore_newline_chars() const noexcept {
+        return ignoreNewlines_;
+    }
+
 private:
     string paramSep_      = string(" ");
     string groupSep_      = string(" ");
@@ -5442,8 +5505,9 @@ private:
     string joinablePre_   = string("(");
     string joinablePst_   = string(")");
     string emptyLabel_    = string("");
-    int startCol_ = 8;
+    int firstCol_ = 8;
     int docCol_ = 20;
+    int lastCol_ = 100;
     int indentSize_ = 4;
     int maxAltInUsage_ = 1;
     int maxAltInDocs_ = 32;
@@ -5453,7 +5517,335 @@ private:
     bool splitTopAlt_ = true;
     bool mergeAltCommonPfx_ = false;
     bool mergeJoinableCommonPfx_ = true;
+    bool ignoreNewlines_ = false;
 };
+
+
+
+namespace detail {
+
+/*************************************************************************//**
+ *
+ * @brief stream wrapper that applies formatting like line wrapping
+ *        to stream data
+ *
+ *****************************************************************************/
+template<class OStream = std::ostream, class StringT = doc_string>
+class formatting_ostream
+{
+public:
+    using string_type = StringT;
+    using size_type   = typename string_type::size_type;
+    using char_type   = typename string_type::value_type;
+
+    formatting_ostream(OStream& os):
+        os_(os),
+        curCol_{0}, firstCol_{0}, lastCol_{100},
+        hangingIndent_{0}, paragraphSpacing_{0}, paragraphSpacingThreshold_{2},
+        curBlankLines_{0}, curParagraphLines_{1},
+        totalNonBlankLines_{0},
+        ignoreInputNls_{false}
+    {}
+
+
+    //---------------------------------------------------------------
+    const OStream& base() const noexcept { return os_; }
+          OStream& base()       noexcept { return os_; }
+
+    bool good() const { return os_.good(); }
+
+
+    //---------------------------------------------------------------
+    /** @brief determines the leftmost border of the text body */
+    formatting_ostream& first_column(int c) {
+        firstCol_ = c < 0 ? 0 : c;
+        return *this;
+    }
+    int first_column() const noexcept { return firstCol_; }
+
+    /** @brief determines the rightmost border of the text body */
+    formatting_ostream& last_column(int c) {
+        lastCol_ = c < 0 ? 0 : c;
+        return *this;
+    }
+
+    int last_column() const noexcept { return lastCol_; }
+
+    int text_width() const noexcept {
+        return lastCol_ - firstCol_;
+    }
+
+    /** @brief additional indentation for the 2nd, 3rd, ... line of
+               a paragraph (sequence of soft-wrapped lines) */
+    formatting_ostream& hanging_indent(int amount) {
+        hangingIndent_ = amount;
+        return *this;
+    }
+    int hanging_indent() const noexcept {
+        return hangingIndent_;
+    }
+
+    /** @brief amount of blank lines between paragraphs */
+    formatting_ostream& paragraph_spacing(int lines) {
+        paragraphSpacing_ = lines;
+        return *this;
+    }
+    int paragraph_spacing() const noexcept {
+        return paragraphSpacing_;
+    }
+
+    /** @brief insert paragraph spacing
+               if paragraph is at least 'lines' lines long */
+    formatting_ostream& min_paragraph_lines_for_spacing(int lines) {
+        paragraphSpacingThreshold_ = lines;
+        return *this;
+    }
+    int min_paragraph_lines_for_spacing() const noexcept {
+        return paragraphSpacingThreshold_;
+    }
+
+    /** @brief if set to true, newline characters will be ignored */
+    formatting_ostream& ignore_newline_chars(bool yes) {
+        ignoreInputNls_ = yes;
+        return *this;
+    }
+
+    bool ignore_newline_chars() const noexcept {
+        return ignoreInputNls_;
+    }
+
+
+    //---------------------------------------------------------------
+    /* @brief insert 'n' spaces */
+    void write_spaces(int n) {
+        if(n < 1) return;
+        os_ << string_type(size_type(n), ' ');
+        curCol_ += n;
+    }
+
+    /* @brief go to new line, but continue current paragraph */
+    void wrap_soft(int times = 1) {
+        if(times < 1) return;
+        if(times > 1) {
+            os_ << string_type(size_type(times), '\n');
+        } else {
+            os_ << '\n';
+        }
+        curCol_ = 0;
+        ++curParagraphLines_;
+    }
+
+    /* @brief go to new line, and start a new paragraph */
+    void wrap_hard(int times = 1) {
+        if(times < 1) return;
+
+        if(paragraph_spacing() > 0 &&
+           paragraph_lines() >= min_paragraph_lines_for_spacing())
+        {
+            times = paragraph_spacing() + 1;
+        }
+
+        if(times > 1) {
+            os_ << string_type(size_type(times), '\n');
+            curBlankLines_ += times - 1;
+        } else {
+            os_ << '\n';
+        }
+        if(at_begin_of_line()) {
+            ++curBlankLines_;
+        }
+        curCol_ = 0;
+        curParagraphLines_ = 1;
+    }
+
+
+    //---------------------------------------------------------------
+    bool at_begin_of_line() const noexcept {
+        return curCol_ <= current_line_begin();
+    }
+    int current_line_begin() const noexcept {
+        return in_hanging_part_of_paragraph()
+            ? firstCol_ + hangingIndent_
+            : firstCol_;
+    }
+
+    int current_column() const noexcept {
+        return curCol_;
+    }
+
+    int total_non_blank_lines() const noexcept {
+        return totalNonBlankLines_;
+    }
+    int paragraph_lines() const noexcept {
+        return curParagraphLines_;
+    }
+    int blank_lines_before_paragraph() const noexcept {
+        return curBlankLines_;
+    }
+
+
+    //---------------------------------------------------------------
+    template<class T>
+    friend formatting_ostream&
+    operator << (formatting_ostream& os, const T& x) {
+        os.write(x);
+        return os;
+    }
+
+    void flush() {
+        os_.flush();
+    }
+
+
+private:
+    bool in_hanging_part_of_paragraph() const noexcept {
+        return hanging_indent() > 0 && paragraph_lines() > 1;
+    }
+    bool current_line_empty() const noexcept {
+        return curCol_ < 1;
+    }
+    bool left_of_text_area() const noexcept {
+        return curCol_ < current_line_begin();
+    }
+    bool right_of_text_area() const noexcept {
+        return curCol_ > lastCol_;
+    }
+    int columns_left_in_line() const noexcept {
+        return lastCol_ - std::max(current_line_begin(), curCol_);
+    }
+
+    void fix_indent() {
+        if(left_of_text_area()) {
+            const auto fst = current_line_begin();
+            write_spaces(fst - curCol_);
+            curCol_ = fst;
+        }
+    }
+
+    template<class Iter>
+    bool only_whitespace(Iter first, Iter last) const {
+        return last == std::find_if_not(first, last,
+                [](char_type c) { return std::isspace(c); });
+    }
+
+    /** @brief write any object */
+    template<class T>
+    void write(const T& x) {
+        std::ostringstream ss;
+        ss << x;
+        write(std::move(ss).str());
+    }
+
+    /** @brief write a stringstream */
+    void write(const std::ostringstream& s) {
+        write(s.str());
+    }
+
+    /** @brief write a string */
+    void write(const string_type& s) {
+        write(s.begin(), s.end());
+    }
+
+    /** @brief partition output into lines */
+    template<class Iter>
+    void write(Iter first, Iter last)
+    {
+        if(first == last) return;
+        if(*first == '\n') {
+            if(!ignore_newline_chars()) wrap_hard();
+            ++first;
+            if(first == last) return;
+        }
+        auto i = std::find(first, last, '\n');
+        if(i != last) {
+            if(ignore_newline_chars()) ++i;
+            if(i != last) {
+                write_line(first, i);
+                write(i, last);
+            }
+        }
+        else {
+            write_line(first, last);
+        }
+    }
+
+    /** @brief handle line wrapping due to column constraints */
+    template<class Iter>
+    void write_line(Iter first, Iter last)
+    {
+        if(first == last) return;
+        if(only_whitespace(first, last)) return;
+
+        if(right_of_text_area()) wrap_soft();
+
+        if(at_begin_of_line()) {
+            //discard whitespace, it we start a new line
+            first = std::find_if(first, last,
+                        [](char_type c) { return !std::isspace(c); });
+            if(first == last) return;
+        }
+
+        const auto n = int(std::distance(first,last));
+        const auto m = columns_left_in_line();
+        //if text to be printed is too long for one line -> wrap
+        if(n > m) {
+            //break before word, if break is mid-word
+            auto breakat = first + m;
+            while(breakat > first && !std::isspace(*breakat)) --breakat;
+            //could not find whitespace before word -> try after the word
+            if(!std::isspace(*breakat) && breakat == first) {
+                breakat = std::find_if(first+m, last,
+                          [](char_type c) { return std::isspace(c); });
+            }
+            if(breakat > first) {
+                if(curCol_ < 1) ++totalNonBlankLines_;
+                fix_indent();
+                std::copy(first, breakat, std::ostream_iterator<char_type>(os_));
+                curBlankLines_ = 0;
+            }
+            if(breakat < last) {
+                wrap_soft();
+                write_line(breakat, last);
+            }
+        }
+        else {
+            if(curCol_ < 1) ++totalNonBlankLines_;
+            fix_indent();
+            std::copy(first, last, std::ostream_iterator<char_type>(os_));
+            curCol_ += n;
+            curBlankLines_ = 0;
+        }
+    }
+
+    /** @brief write a single character */
+    void write(char_type c)
+    {
+        if(c == '\n') {
+            if(!ignore_newline_chars()) wrap_hard();
+        }
+        else {
+            if(at_begin_of_line()) ++totalNonBlankLines_;
+            fix_indent();
+            os_ << c;
+            ++curCol_;
+        }
+    }
+
+    OStream& os_;
+    int curCol_;
+    int firstCol_;
+    int lastCol_;
+    int hangingIndent_;
+    int paragraphSpacing_;
+    int paragraphSpacingThreshold_;
+    int curBlankLines_;
+    int curParagraphLines_;
+    int totalNonBlankLines_;
+    bool ignoreInputNls_;
+};
+
+
+}
 
 
 
@@ -5476,7 +5868,6 @@ public:
         cli_(cli), fmt_(fmt), prefix_(std::move(prefix))
     {
         if(!prefix_.empty()) prefix_ += ' ';
-        if(fmt_.start_column() > 0) prefix_.insert(0, fmt.start_column(), ' ');
     }
 
     usage_lines(const group& cli, const doc_formatting& fmt):
@@ -5493,7 +5884,7 @@ public:
 
     template<class OStream>
     inline friend OStream& operator << (OStream& os, const usage_lines& p) {
-        p.print_usage(os);
+        p.write(os);
         return os;
     }
 
@@ -5503,6 +5894,7 @@ public:
 
 
 private:
+    using stream_t = detail::formatting_ostream<>;
     const group& cli_;
     doc_formatting fmt_;
     string prefix_;
@@ -5535,15 +5927,29 @@ private:
      *
      *******************************************************************/
     template<class OStream>
-    void print_usage(OStream& os) const
+    void write(OStream& os) const
     {
+        detail::formatting_ostream<OStream> fos(os);
+        fos.first_column(fmt_.first_column());
+        fos.last_column(fmt_.last_column());
+
+        auto hindent = int(prefix_.size());
+        if(fos.first_column() + hindent >= int(0.4 * fos.text_width())) {
+            hindent = fmt_.indent_size();
+        }
+        fos.hanging_indent(hindent);
+
+        fos.paragraph_spacing(fmt_.paragraph_spacing());
+        fos.min_paragraph_lines_for_spacing(2);
+        fos.ignore_newline_chars(fmt_.ignore_newline_chars());
+
         context cur;
         cur.pos = cli_.begin_dfs();
         cur.linestart = true;
         cur.level = cur.pos.level();
         cur.outermost = &cli_;
 
-        print_usage(os, cur, prefix_);
+        write(fos, cur, prefix_);
     }
 
 
@@ -5555,7 +5961,7 @@ private:
      *
      *******************************************************************/
     template<class OStream>
-    void print_usage(OStream& os, context cur, string prefix) const
+    void write(OStream& os, context cur, string prefix) const
     {
         if(!cur.pos) return;
 
@@ -5649,7 +6055,7 @@ private:
                 for(std::size_t i = 0; i < group.size(); ++i) {
                     std::stringstream buf;
                     cur.outermost = cur.pos->is_group() ? &(cur.pos->as_group()) : nullptr;
-                    print_usage(buf, cur, pfx);
+                    write(buf, cur, pfx);
                     if(buf.tellp() > int(pfx.size())) {
                         os << buf.str();
                         if(i < group.size()-1) {
@@ -5959,24 +6365,42 @@ public:
 
     template<class OStream>
     inline friend OStream& operator << (OStream& os, const documentation& p) {
-        printed prn = printed::nothing;
-        p.print_doc(os, p.cli_, prn);
+        p.write(os);
         return os;
     }
 
     string str() const {
-        std::ostringstream os; os << *this; return os.str();
+        std::ostringstream os;
+        write(os);
+        return os.str();
     }
 
 
 private:
     using dfs_traverser = group::depth_first_traverser;
-    enum class printed { nothing, line, paragraph };
 
     const group& cli_;
     doc_formatting fmt_;
     doc_formatting usgFmt_;
     filter_function filter_;
+    enum class paragraph { param, group };
+
+
+    /***************************************************************//**
+     *
+     * @brief writes documentation to output stream
+     *
+     *******************************************************************/
+     template<class OStream>
+     void write(OStream& os) const {
+        detail::formatting_ostream<OStream> fos(os);
+        fos.first_column(fmt_.first_column());
+        fos.last_column(fmt_.last_column());
+        fos.hanging_indent(0);
+        fos.paragraph_spacing(0);
+        fos.ignore_newline_chars(fmt_.ignore_newline_chars());
+        print_doc(fos, cli_);
+     }
 
 
     /***************************************************************//**
@@ -5985,16 +6409,15 @@ private:
      *
      *******************************************************************/
     template<class OStream>
-    void print_doc(OStream& os, const group& cli,
-                   printed& sofar,
-                   int indentLvl = 0) const
+    void print_doc(detail::formatting_ostream<OStream>& os,
+                   const group& cli, int indentLvl = 0) const
     {
         if(cli.empty()) return;
 
         //if group itself doesn't have docstring
         if(cli.doc().empty()) {
             for(const auto& p : cli) {
-                print_doc(os, p, sofar, indentLvl);
+                print_doc(os, p, indentLvl);
             }
         }
         else { //group itself does have docstring
@@ -6002,24 +6425,19 @@ private:
                 [](const pattern& p){ return !p.doc().empty(); });
 
             if(anyDocInside) { //group docstring as title, then child entries
-                if(sofar != printed::nothing) {
-                    os << string(fmt_.paragraph_spacing() + 1, '\n');
-                }
-                auto indent = string(fmt_.start_column(), ' ');
-                if(indentLvl > 0) indent += string(fmt_.indent_size() * indentLvl, ' ');
-                os << indent << cli.doc() << '\n';
-                sofar = printed::nothing;
+                handle_spacing(os, paragraph::group, indentLvl);
+                os << cli.doc();
                 for(const auto& p : cli) {
-                    print_doc(os, p, sofar, indentLvl + 1);
+                    print_doc(os, p, indentLvl + 1);
                 }
-                sofar = printed::paragraph;
             }
             else { //group label first then group docstring
                 auto lbl = usage_lines(cli, usgFmt_)
                            .ommit_outermost_group_surrounders(true).str();
 
                 str::trim(lbl);
-                print_entry(os, lbl, cli.doc(), fmt_, sofar, indentLvl);
+                handle_spacing(os, paragraph::param, indentLvl);
+                print_entry(os, lbl, cli.doc());
             }
         }
     }
@@ -6031,19 +6449,54 @@ private:
      *
      *******************************************************************/
     template<class OStream>
-    void print_doc(OStream& os, const pattern& ptrn,
-                   printed& sofar, int indentLvl) const
+    void print_doc(detail::formatting_ostream<OStream>& os,
+                   const pattern& ptrn, int indentLvl) const
     {
         if(ptrn.is_group()) {
-            print_doc(os, ptrn.as_group(), sofar, indentLvl);
+            print_doc(os, ptrn.as_group(), indentLvl);
         }
         else {
             const auto& p = ptrn.as_param();
             if(!filter_(p)) return;
-            print_entry(os, param_label(p, fmt_), p.doc(), fmt_, sofar, indentLvl);
+
+            handle_spacing(os, paragraph::param, indentLvl);
+            print_entry(os, param_label(p, fmt_), p.doc());
         }
     }
 
+    /***************************************************************//**
+     *
+     * @brief handles line and paragraph spacings
+     *
+     *******************************************************************/
+    template<class OStream>
+    void handle_spacing(detail::formatting_ostream<OStream>& os,
+                        paragraph p, int indentLvl) const
+    {
+        const auto oldIndent = os.first_column();
+        const auto indent = fmt_.first_column() + indentLvl * fmt_.indent_size();
+
+        if(os.total_non_blank_lines() < 1) {
+            os.first_column(indent);
+            return;
+        }
+
+        if(os.paragraph_lines() > 1 || indent < oldIndent) {
+            os.wrap_hard(fmt_.paragraph_spacing() + 1);
+        } else {
+            os.wrap_hard();
+        }
+
+        if(p == paragraph::group) {
+            if(os.blank_lines_before_paragraph() < fmt_.paragraph_spacing()) {
+                os.wrap_hard(fmt_.paragraph_spacing() - os.blank_lines_before_paragraph());
+            }
+        }
+        else if(os.blank_lines_before_paragraph() < fmt_.line_spacing()) {
+            os.wrap_hard(fmt_.line_spacing() - os.blank_lines_before_paragraph());
+        }
+        os.first_column(indent);
+    }
 
     /*********************************************************************//**
      *
@@ -6051,40 +6504,19 @@ private:
      *
      ************************************************************************/
     template<class OStream>
-    static void
-    print_entry(OStream& os,
-                const string& label, const string& docstr,
-                const doc_formatting& fmt, printed& sofar, int indentLvl)
+    void print_entry(detail::formatting_ostream<OStream>& os,
+                     const string& label, const string& docstr) const
     {
         if(label.empty()) return;
 
-        auto indent = string(fmt.start_column(), ' ');
-        if(indentLvl > 0) indent += string(fmt.indent_size() * indentLvl, ' ');
-
-        const auto len = int(indent.size() + label.size());
-        const bool oneline = len < fmt.doc_column();
-
-        if(oneline) {
-            if(sofar == printed::line)
-                os << string(fmt.line_spacing() + 1, '\n');
-            else if(sofar == printed::paragraph)
-                os << string(fmt.paragraph_spacing() + 1, '\n');
-        }
-        else if(sofar != printed::nothing) {
-            os << string(fmt.paragraph_spacing() + 1, '\n');
-        }
-
-        sofar = oneline ? printed::line : printed::paragraph;
-
-        os << indent << label;
+        os << label;
 
         if(!docstr.empty()) {
-            if(oneline) {
-                os << string(fmt.doc_column() - len, ' ');
-            } else {
-                os << '\n' << string(fmt.doc_column(), ' ');
-            }
+            if(os.current_column() >= fmt_.doc_column()) os.wrap_soft();
+            const auto oldcol = os.first_column();
+            os.first_column(fmt_.doc_column());
             os << docstr;
+            os.first_column(oldcol);
         }
     }
 

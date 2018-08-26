@@ -36,8 +36,9 @@ int main()
     try {
 
     auto fmt = doc_formatting{}
-        .start_column(3)
+        .first_column(3)
         .doc_column(45)
+        .last_column(80)
         .empty_label("?")
         .param_separator("%")
         .group_separator("#")
@@ -241,14 +242,14 @@ int main()
          "\n"
          "\n"
          "\n"
-         "   documented group 1:\n"
+         "   documented group 1:\n\n"
          "       a                                     activates A\n"
          "\n"
          "       b                                     activates B\n"
          "\n"
          "\n"
          "\n"
-         "   documented group 2:\n"
+         "   documented group 2:\n\n"
          "       -g                                    activates G\n"
          "\n"
          "       -h                                    activates H\n"
@@ -308,137 +309,45 @@ int main()
                 )
             )
         ),
-         "   build commands\n"
+         "   build commands\n\n"
          "       new                                   make new database\n"
          "\n"
          "       add                                   append to existing database\n"
          "\n"
          "\n"
          "\n"
-         "   query settings\n"
+         "   query settings\n\n"
          "       <infile>                              input file\n"
          "\n"
          "       -p~--pretty-print                     human friendly output\n"
          "\n"
          "\n"
          "\n"
-         "   database info modes\n"
+         "   database info modes\n\n"
          "       space                                 detailed memory occupation analysis\n"
          "\n"
          "\n"
          "\n"
-         "       statistics analysis\n"
+         "       statistics analysis\n\n"
          "           words                             word frequency table\n"
          "\n"
          "           chars                             character frequency table\n"
          "\n"
          "\n"
          "\n"
-         "   remove mode\n"
+         "   remove mode\n\n"
          "       any|all                               modify\n"
          "\n"
          "       <regex>                               regular expression filter\n"
          "\n"
          "\n"
          "\n"
-         "   modification opererations\n"
+         "   modification opererations\n\n"
          "       -c~--compress                         compress database in-memory\n"
          "\n"
          "       -u~--unique                           keep only unique entries\n"
          "\n"
          "       -m~--memlimit                         max. size in RAM");
-
-
-    test(__LINE__, fmt, (
-            "user interface options:" % (
-                option("-v", "--verbose") % "show detailed output",
-                option("-i", "--interactive") % "use interactive mode"
-            ),
-            "copy mode:" % (
-                command("copy") | command("move"),
-                option("--all") % "copy all",
-                option("--replace") % "replace existing files",
-                option("-f", "--force") % "don't ask for confirmation"
-            ) |
-            "compare mode:" % (
-                command("compare"),
-                (command("date") | command("content")),
-                option("-b", "--binary") % "compare files byte by byte",
-                option("-q", "--quick") % "use heuristics for faster comparison"
-            ) |
-            "merge mode:" % (
-                command("merge"),
-                (
-                    command("diff") % "merge using diff"  |
-                    command("patch") % "merge using patch" |
-                    (   command("content") % "merge based on content",
-                        "content based merge options:" % (
-                            option("--git-style") % "emulate git's merge behavior",
-                            option("-m", "--marker") & value("marker") % "merge marker symbol"
-                        )
-                    )
-                ),
-                required("-o") & value("outdir") % "target directory for merge result",
-                option("--show-conflicts") % "show merge conflicts during run"
-            ) |
-            command("list"),
-            "mode-independent options:" % (
-                values("files") % "input files",
-                option("-r", "--recursive") % "descend into subdirectories",
-                option("-h", "--help") % "show help"
-            )
-        ),
-         "   user interface options:\n"
-         "       -v~--verbose                          show detailed output\n"
-         "\n"
-         "       -i~--interactive                      use interactive mode\n"
-         "\n"
-         "\n"
-         "\n"
-         "   copy mode:\n"
-         "       --all                                 copy all\n"
-         "\n"
-         "       --replace                             replace existing files\n"
-         "\n"
-         "       -f~--force                            don't ask for confirmation\n"
-         "\n"
-         "\n"
-         "\n"
-         "   compare mode:\n"
-         "       -b~--binary                           compare files byte by byte\n"
-         "\n"
-         "       -q~--quick                            use heuristics for faster comparison\n"
-         "\n"
-         "\n"
-         "\n"
-         "   merge mode:\n"
-         "       diff                                  merge using diff\n"
-         "\n"
-         "       patch                                 merge using patch\n"
-         "\n"
-         "       content                               merge based on content\n"
-         "\n"
-         "\n"
-         "\n"
-         "       content based merge options:\n"
-         "           --git-style                       emulate git's merge behavior\n"
-         "\n"
-         "           <marker>                          merge marker symbol\n"
-         "\n"
-         "\n"
-         "\n"
-         "       <outdir>                              target directory for merge result\n"
-         "\n"
-         "       --show-conflicts                      show merge conflicts during run\n"
-         "\n"
-         "\n"
-         "\n"
-         "   mode-independent options:\n"
-         "       ,,,<files>...                         input files\n"
-         "\n"
-         "       -r~--recursive                        descend into subdirectories\n"
-         "\n"
-         "       -h~--help                             show help");
 
 
     test(__LINE__, fmt, (
@@ -463,6 +372,144 @@ int main()
         "\n"
         "   all                                       report only if all match");
 
+
+    auto complexcli = (
+        "user interface options:" % (
+            option("-v", "--verbose") % "show detailed output",
+            option("-i", "--interactive") % "use interactive mode"
+        ),
+        "copy mode:" % (
+            command("copy") | command("move"),
+            option("--all") % "copy all",
+            option("--replace") % "replace existing files",
+            option("-f", "--force") % "don't ask for confirmation"
+        ) |
+        "compare mode:" % (
+            command("compare"),
+            (command("date") | command("content")),
+            option("-b", "--binary") % "compare files byte by byte",
+            option("-q", "--quick") % "use heuristics for faster comparison"
+        ) |
+        "merge mode:" % (
+            command("merge"),
+            (
+                command("diff") % "merge using diff"  |
+                command("patch") % "merge using patch" |
+                (   command("content") % "merge based on content",
+                    "content based merge options:" % (
+                        option("--git-style") % "emulate git's merge behavior",
+                        option("-m", "--marker") & value("marker") % "merge marker symbol"
+                    )
+                )
+            ),
+            required("-o") & value("outdir") % "target directory for merge result",
+            option("--show-conflicts") % "show merge conflicts during run"
+        ) |
+        command("list"),
+        "mode-independent options:" % (
+            values("files") % "input files",
+            option("-r", "--recursive") % "descend into subdirectories",
+            option("-h", "--help") % "show help"
+        )
+    );
+
+
+    test(__LINE__, fmt, complexcli,
+         "   user interface options:\n\n"
+         "       -v~--verbose                          show detailed output\n"
+         "\n"
+         "       -i~--interactive                      use interactive mode\n"
+         "\n"
+         "\n"
+         "\n"
+         "   copy mode:\n\n"
+         "       --all                                 copy all\n"
+         "\n"
+         "       --replace                             replace existing files\n"
+         "\n"
+         "       -f~--force                            don't ask for confirmation\n"
+         "\n"
+         "\n"
+         "\n"
+         "   compare mode:\n\n"
+         "       -b~--binary                           compare files byte by byte\n"
+         "\n"
+         "       -q~--quick                            use heuristics for faster\n"
+         "                                             comparison\n"
+         "\n"
+         "\n"
+         "\n"
+         "   merge mode:\n\n"
+         "       diff                                  merge using diff\n"
+         "\n"
+         "       patch                                 merge using patch\n"
+         "\n"
+         "       content                               merge based on content\n"
+         "\n"
+         "\n"
+         "\n"
+         "       content based merge options:\n\n"
+         "           --git-style                       emulate git's merge behavior\n"
+         "\n"
+         "           <marker>                          merge marker symbol\n"
+         "\n"
+         "\n"
+         "\n"
+         "       <outdir>                              target directory for merge result\n"
+         "\n"
+         "       --show-conflicts                      show merge conflicts during run\n"
+         "\n"
+         "\n"
+         "\n"
+         "   mode-independent options:\n\n"
+         "       ,,,<files>...                         input files\n"
+         "\n"
+         "       -r~--recursive                        descend into subdirectories\n"
+         "\n"
+         "       -h~--help                             show help");
+
+
+    fmt.first_column(7) .doc_column(20) .last_column(50);
+
+    test(__LINE__, fmt, complexcli,
+        "       user interface options:\n\n"
+        "           -v~--verbose\n"
+        "                    show detailed output\n\n\n\n"
+        "           -i~--interactive\n"
+        "                    use interactive mode\n\n\n\n"
+        "       copy mode:\n\n"
+        "           --all    copy all\n\n"
+        "           --replace\n"
+        "                    replace existing files\n\n\n\n"
+        "           -f~--force\n"
+        "                    don't ask for confirmation\n\n\n\n"
+        "       compare mode:\n\n"
+        "           -b~--binary\n"
+        "                    compare files byte by byte\n\n\n\n"
+        "           -q~--quick\n"
+        "                    use heuristics for faster\n"
+        "                    comparison\n\n\n\n"
+        "       merge mode:\n\n"
+        "           diff     merge using diff\n\n"
+        "           patch    merge using patch\n\n"
+        "           content  merge based on content\n\n\n\n"
+        "           content based merge options:\n\n"
+        "               --git-style\n"
+        "                    emulate git's merge behavior\n\n\n\n"
+        "               <marker>\n"
+        "                    merge marker symbol\n\n\n\n"
+        "           <outdir> target directory for merge\n"
+        "                    result\n\n\n\n"
+        "           --show-conflicts\n"
+        "                    show merge conflicts during\n"
+        "                    run\n\n\n\n"
+        "       mode-independent options:\n\n"
+        "           ,,,<files>...\n"
+        "                    input files\n\n\n\n"
+        "           -r~--recursive\n"
+        "                    descend into subdirectories\n\n\n\n"
+        "           -h~--help\n"
+        "                    show help");
 
     }
     catch(std::exception& e) {

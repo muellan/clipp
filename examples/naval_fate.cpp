@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
     );
 
     auto fmt = doc_formatting{}
-        .start_column(2)
+        .first_column(2)
         .doc_column(20)
         .max_flags_per_param_in_usage(8);
 

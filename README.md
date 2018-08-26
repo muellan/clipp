@@ -326,7 +326,7 @@ Usage Lines:
 cout << usage_lines(cli, "progname") << '\n';
 
 //with formatting options
-auto fmt = doc_formatting{}.start_column(2);
+auto fmt = doc_formatting{}.first_column(2);
 cout << usage_lines(cli, "progname",fmt) << '\n';
 ```
 
@@ -335,7 +335,7 @@ Detailed Documentation:
 cout << documentation(cli) << '\n';
 
 //with formatting options
-auto fmt = doc_formatting{}.start_column(2);
+auto fmt = doc_formatting{}.first_column(2);
 cout << documentation(cli, fmt) << '\n';
 ```
 
@@ -345,7 +345,7 @@ auto cli = ( /*CODE DEFINING COMMAND LINE INTERFACE GOES HERE*/ );
 cout << make_man_page(cli, "progname") << '\n';
 
 //with formatting options
-auto fmt = doc_formatting{}.start_column(2);
+auto fmt = doc_formatting{}.first_column(2);
 cout << make_man_page(cli, "progname", fmt) << '\n'; 
 ```
 
@@ -1387,7 +1387,7 @@ switch(m) {
         break;
     case mode::help: {
         auto fmt = doc_formatting{}
-            .start_column(2).doc_column(16)
+            .first_column(2).doc_column(16)
             .max_flags_per_param_in_usage(4);
 
         cout << "Naval Fate.\n\nUsage:\n"
@@ -1943,7 +1943,7 @@ auto cli = (
     )
 );
 
-auto fmt = doc_formatting{} .start_column(4) .doc_column(28);
+auto fmt = doc_formatting{} .first_column(4) .doc_column(28) .last_column(80);
 
 cout << make_man_page(cli, "worddb", fmt)
     .prepend_section("DESCRIPTION", "    Builds a database of words from text files.")
@@ -1955,8 +1955,9 @@ cout << make_man_page(cli, "worddb", fmt)
 ```cpp
 //all formatting options (with their default values)
 auto fmt = doc_formatting{}
-    .start_column(8)                           //column where usage lines and documentation starts
-    .doc_column(20)                            //parameter docstring start col
+    .first_column(8)                           //left border column for text body
+    .doc_column(20)                            //column where parameter docstring starts
+    .last_column(100)                          //right border column for text body
     .indent_size(4)                            //indent of documentation lines for children of a documented group
     .line_spacing(0)                           //number of empty lines after single documentation lines
     .paragraph_spacing(1)                      //number of empty lines before and after paragraphs
@@ -1979,6 +1980,8 @@ auto fmt = doc_formatting{}
     .alternatives_min_split_size(3)            //min. # of parameters for separate usage line
     .merge_alternative_flags_with_common_prefix(false)  //-ab(cdxy|xy) instead of -abcdxy|-abxy
     .merge_joinable_flags_with_common_prefix(true)     //-abc instead of -a -b -c
+    .ignore_newline_chars(false)               //ignore '\n' in docstrings
+    ;
 
 cout << "Usage:\n" << usage_lines(cli, "progname", fmt)
      << "\nOptions:\n" << documentation(cli, fmt) << '\n';
@@ -2021,7 +2024,26 @@ Parameters:
         -r, --recursive    convert files recursively
 ```
 
+#### Parameter Filters
 
+Any function/lambda that maps a parameter to a bool can be used as filter 
+predicate. CLIPP also comes with a default parameter filter class:
+```cpp
+//all param_filter options (with their default values)
+auto filter = param_filter{}
+    .prefix("")               //only parameters with given prefix
+    .required(tri::either)    //required parameters 
+    .blocking(tri::either)    //blocking/positional parameters
+    .repeatable(tri::either)  //repeatable parameters
+    .has_doc(tri::yes)        //parameters with/without docstrings
+    ;
+```
+which uses a dedicated tristate type:
+```cpp
+namespace clipp {
+   enum class tri { no, yes, either };
+}
+```
 
 
 ## Motivation

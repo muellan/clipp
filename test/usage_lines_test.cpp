@@ -36,8 +36,9 @@ int main()
     try {
 
     auto fmt = doc_formatting{}
-        .start_column(3)
+        .first_column(3)
         .doc_column(9)
+        .last_column(80)
         .empty_label("?")
         .param_separator("%")
         .group_separator("#")
