@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
     if(parse(argc, argv, cli)) {
         // program logic...
     } else {
-        auto fmt = doc_formatting{}.doc_column(31);
+        auto fmt = doc_formatting{}.doc_column(31).last_column(80);
         cout << make_man_page(cli, argv[0], fmt) << '\n';
     }
 }
