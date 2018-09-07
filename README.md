@@ -326,8 +326,10 @@ Usage Lines:
 cout << usage_lines(cli, "progname") << '\n';
 
 //with formatting options
-auto fmt = doc_formatting{}.first_column(2);
-cout << usage_lines(cli, "progname",fmt) << '\n';
+auto fmt = doc_formatting{}
+           .first_column(3)
+           .last_column(79);
+cout << usage_lines(cli, "progname", fmt) << '\n';
 ```
 
 Detailed Documentation:
@@ -335,7 +337,10 @@ Detailed Documentation:
 cout << documentation(cli) << '\n';
 
 //with formatting options
-auto fmt = doc_formatting{}.first_column(2);
+auto fmt = doc_formatting{}
+           .first_column(7)
+           .doc_column(15)
+           .last_column(99);
 cout << documentation(cli, fmt) << '\n';
 ```
 
@@ -345,7 +350,10 @@ auto cli = ( /*CODE DEFINING COMMAND LINE INTERFACE GOES HERE*/ );
 cout << make_man_page(cli, "progname") << '\n';
 
 //with formatting options
-auto fmt = doc_formatting{}.first_column(2);
+auto fmt = doc_formatting{}
+           .first_column(7)
+           .doc_column(15)
+           .last_column(99);
 cout << make_man_page(cli, "progname", fmt) << '\n'; 
 ```
 
