@@ -2076,6 +2076,47 @@ public:
         return p;
     }
 
+
+    //---------------------------------------------------------------
+    /** @brief prepend suffix to each flag */
+    inline friend parameter&
+    with_suffix(const arg_string& suffix, parameter& p)
+    {
+        if(suffix.empty() || p.flags().empty()) return p;
+
+        for(auto& f : p.flags_) {
+            if(f.find(suffix) + suffix.size() != f.size()) {
+                f.insert(f.end(), suffix.begin(), suffix.end());
+            }
+        }
+        return p;
+    }
+
+
+    /** @brief prepend suffix to each flag
+     */
+    inline friend parameter&
+    with_suffixes_short_long(
+        const arg_string& shortsfx, const arg_string& longsfx,
+        parameter& p)
+    {
+        if(shortsfx.empty() && longsfx.empty()) return p;
+        if(p.flags().empty()) return p;
+
+        for(auto& f : p.flags_) {
+            if(f.size() == 1) {
+                if(f.find(shortsfx) + shortsfx.size() != f.size()) {
+                    f.insert(f.end(), shortsfx.begin(), shortsfx.end());
+                }
+            } else {
+                if(f.find(longsfx) + longsfx.size() != f.size()) {
+                    f.insert(f.end(), longsfx.begin(), longsfx.end());
+                }
+            }
+        }
+        return p;
+    }
+
 private:
     //---------------------------------------------------------------
     void add_flags(arg_string str) {
@@ -3871,6 +3912,105 @@ with_prefixes_short_long(const arg_string& shortFlagPrefix,
 
 
 
+/*************************************************************************//**
+ *
+ * @brief recursively prepends a suffix to all flags
+ *
+ *****************************************************************************/
+inline parameter&&
+with_suffix(const arg_string& suffix, parameter&& p) {
+    return std::move(with_suffix(suffix, p));
+}
+
+
+//-------------------------------------------------------------------
+inline group&
+with_suffix(const arg_string& suffix, group& g)
+{
+    for(auto& p : g) {
+        if(p.is_group()) {
+            with_suffix(suffix, p.as_group());
+        } else {
+            with_suffix(suffix, p.as_param());
+        }
+    }
+    return g;
+}
+
+
+inline group&&
+with_suffix(const arg_string& suffix, group&& params)
+{
+    return std::move(with_suffix(suffix, params));
+}
+
+
+template<class Param, class... Params>
+inline group
+with_suffix(arg_string suffix, Param&& param, Params&&... params)
+{
+    return with_suffix(suffix, group{std::forward<Param>(param),
+                                     std::forward<Params>(params)...});
+}
+
+
+
+/*************************************************************************//**
+ *
+ * @brief recursively prepends a suffix to all flags
+ *
+ * @param shortsfx : used for single-letter flags
+ * @param longsfx  : used for flags with length > 1
+ *
+ *****************************************************************************/
+inline parameter&&
+with_suffixes_short_long(const arg_string& shortsfx, const arg_string& longsfx,
+                         parameter&& p)
+{
+    return std::move(with_suffixes_short_long(shortsfx, longsfx, p));
+}
+
+
+//-------------------------------------------------------------------
+inline group&
+with_suffixes_short_long(const arg_string& shortFlagSuffix,
+                         const arg_string& longFlagSuffix,
+                         group& g)
+{
+    for(auto& p : g) {
+        if(p.is_group()) {
+            with_suffixes_short_long(shortFlagSuffix, longFlagSuffix, p.as_group());
+        } else {
+            with_suffixes_short_long(shortFlagSuffix, longFlagSuffix, p.as_param());
+        }
+    }
+    return g;
+}
+
+
+inline group&&
+with_suffixes_short_long(const arg_string& shortFlagSuffix,
+                         const arg_string& longFlagSuffix,
+                         group&& params)
+{
+    return std::move(with_suffixes_short_long(shortFlagSuffix, longFlagSuffix,
+                                              params));
+}
+
+
+template<class Param, class... Params>
+inline group
+with_suffixes_short_long(const arg_string& shortFlagSuffix,
+                         const arg_string& longFlagSuffix,
+                         Param&& param, Params&&... params)
+{
+    return with_suffixes_short_long(shortFlagSuffix, longFlagSuffix,
+                                    group{std::forward<Param>(param),
+                                          std::forward<Params>(params)...});
+}
+
+
+
 
 
 
@@ -5526,8 +5666,8 @@ namespace detail {
 
 /*************************************************************************//**
  *
- * @brief stream wrapper that applies formatting like line wrapping
- *        to stream data
+ * @brief stream decorator
+ *        that applies formatting like line wrapping
  *
  *****************************************************************************/
 template<class OStream = std::ostream, class StringT = doc_string>

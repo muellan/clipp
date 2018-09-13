@@ -261,6 +261,16 @@ value(is_char, "c", c);      // one character  yes       yes         no
                                                   // => -a  --all           -b
    ```
 
+ - force common suffixes on a group of flags:
+   ```cpp
+   int x = 0;
+   auto cli1 = with_suffix("=", option("a") & value("x",x), ... );
+                             // =>      a=    ^unaffected^
+
+   auto cli2 = with_suffix_short_long(":", ":=", option("a", "all"), option("b"), ... );
+                                                  // =>  a:   all:=          b:
+   ```
+
  - make a group of flags [joinable](#joinable-flags):
    ```cpp
    auto cli1 = joinable( option("-a"), option("-b"));  //will match "-a", "-b", "-ab", "-ba"
@@ -604,6 +614,27 @@ bool a = false, b = false;
 auto cli = with_prefixes_short_long("-", "--",
     option("a", "all").set(a),      // -a, --all
     option("b", "bottom").set(b)    // -b, --bottom
+);
+```
+
+#### Same suffix for all flags
+```cpp
+bool a = false, b = false;
+
+auto cli = with_suffix(":", 
+    option("a").set(a),     // a:
+    option("b").set(b)      // b:
+);
+```
+
+#### Same suffix for all flags: single vs. multiple character(s)
+Single-letter flags will get the first suffix (empty in this example), flags with more than one letter will get the second one.
+```cpp
+int a = 0, b = 0;
+
+auto cli = with_suffixes_short_long("", "=",
+    option("a", "all") & value("A", a),      // -a, --all=
+    option("b", "bottom") & value("B", b)    // -b, --bottom=
 );
 ```
 
