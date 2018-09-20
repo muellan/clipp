@@ -1,7 +1,7 @@
 /*****************************************************************************
  *  ___  _    _   ___ ___
  * |  _|| |  | | | _ \ _ \   CLIPP - command line interfaces for modern C++
- * | |_ | |_ | | |  _/  _/   version 1.2.0
+ * | |_ | |_ | | |  _/  _/   version 1.2.1
  * |___||___||_| |_| |_|     https://github.com/muellan/clipp
  *
  * Licensed under the MIT License <http://opensource.org/licenses/MIT>.
@@ -114,12 +114,12 @@ public:
 
     /** @brief returns true, if query string is a prefix of the subject string */
     constexpr bool prefix() const noexcept {
-        return at_ == 0 && length_ > 0;
+        return at_ == 0;
     }
 
     /** @brief returns true, if query is a substring of the query string */
     constexpr explicit operator bool () const noexcept {
-        return at_ != arg_string::npos && length_ > 0;
+        return at_ != arg_string::npos;
     }
 
 private:
@@ -605,8 +605,7 @@ public:
     map_arg_to(T& target) noexcept : t_{std::addressof(target)} {}
 
     void operator () (const char* s) const {
-        if(t_ && s && (std::strlen(s) > 0))
-            *t_ = detail::make<T>::from(s);
+        if(t_ && s) *t_ = detail::make<T>::from(s);
     }
 
 private:
@@ -914,6 +913,7 @@ inline subrange
 substring_match(const std::basic_string<C,T,A>& subject,
                 const std::basic_string<C,T,A>& query)
 {
+    if(subject.empty() && query.empty()) return subrange(0,0);
     if(subject.empty() || query.empty()) return subrange{};
     auto i = subject.find(query);
     if(i == std::basic_string<C,T,A>::npos) return subrange{};
@@ -2014,12 +2014,13 @@ public:
     subrange
     match(const arg_string& arg) const
     {
-        if(arg.empty()) return subrange{};
-
         if(flags_.empty()) {
             return matcher_(arg);
         }
         else {
+            //empty flags are not allowed
+            if(arg.empty()) return subrange{};
+
             if(std::find(flags_.begin(), flags_.end(), arg) != flags_.end()) {
                 return subrange{0,arg.size()};
             }
@@ -4337,7 +4338,7 @@ public:
     const arg_string& str() const noexcept { return str_; }
     const scoped_dfs_traverser& pos() const noexcept { return pos_; }
 
-    explicit operator bool() const noexcept { return !str_.empty(); }
+    explicit operator bool() const noexcept { return bool(pos_); }
 
 private:
     arg_string str_;
@@ -4357,8 +4358,6 @@ match_t
 full_match(scoped_dfs_traverser pos, const arg_string& arg,
            const ParamSelector& select)
 {
-    if(arg.empty()) return match_t{};
-
     while(pos) {
         if(pos->is_param()) {
             const auto& param = pos->as_param();
@@ -4388,8 +4387,6 @@ match_t
 prefix_match(scoped_dfs_traverser pos, const arg_string& arg,
              const ParamSelector& select)
 {
-    if(arg.empty()) return match_t{};
-
     while(pos) {
         if(pos->is_param()) {
             const auto& param = pos->as_param();
@@ -4424,8 +4421,6 @@ match_t
 partial_match(scoped_dfs_traverser pos, const arg_string& arg,
               const ParamSelector& select)
 {
-    if(arg.empty()) return match_t{};
-
     while(pos) {
         if(pos->is_param()) {
             const auto& param = pos->as_param();
@@ -4581,7 +4576,7 @@ public:
         ++eaten_;
         ++index_;
 
-        if(!valid() || arg.empty()) return false;
+        if(!valid()) return false;
 
         if(!blocked_ && try_match(arg)) return true;
 
@@ -4856,7 +4851,7 @@ private:
     void add_match(const match_t& match)
     {
         const auto& pos = match.pos();
-        if(!pos || !pos->is_param() || match.str().empty()) return;
+        if(!pos || !pos->is_param()) return;
 
         pos_.next_after_match(pos);
 
@@ -5256,7 +5251,7 @@ parse(std::initializer_list<const char*> arglist, const group& cli)
     arg_list args;
     args.reserve(arglist.size());
     for(auto a : arglist) {
-        if(std::strlen(a) > 0) args.push_back(a);
+        args.push_back(a);
     }
 
     return parse(std::move(args), cli);
@@ -6924,7 +6919,8 @@ void print(OStream& os, const parsing_result& result)
 template<class OStream>
 void print(OStream& os, const parameter& p)
 {
-    if(p.blocking()) os << '!';
+    if(p.greedy()) os << '!';
+    if(p.blocking()) os << '~';
     if(!p.required()) os << '[';
     os << doc_label(p);
     if(p.repeatable()) os << "...";

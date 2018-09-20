@@ -49,21 +49,21 @@ wrapped_variants(const CLI& cli)
         ,
         /* 3*/ group{group{cli}}
         ,
-        /* 4*/ group{option("?????"), cli}
+        /* 4*/ group{option("?a?"), cli}
         ,
-        /* 5*/ group{cli, option("?????")}
+        /* 5*/ group{cli, option("?a?")}
         ,
-        /* 6*/ group{option("!!!!!"), cli, option("?????")}
+        /* 6*/ group{option("?b?"), cli, option("?a?")}
         ,
-        /* 7*/ group{group{option("?????")}, cli}
+        /* 7*/ group{group{option("?a?")}, cli}
         ,
-        /* 8*/ group{cli, group{option("?????")}}
+        /* 8*/ group{cli, group{option("?a?")}}
         ,
-        /* 9*/ group{option("?????"), group{cli}}
+        /* 9*/ group{option("?a?"), group{cli}}
         ,
-        /*10*/ group{group{cli}, option("?????")}
+        /*10*/ group{group{cli}, option("?a?")}
         ,
-        /*11*/ group{option("!!!!!"), group{cli}, option("?????")}
+        /*11*/ group{option("?b?"), group{cli}, option("?a?")}
     };
 }
 
@@ -99,6 +99,9 @@ void run_wrapped_variants(
 //             << " with variant " << variant << '\n'
 //             << "==============================================\n";
 //        clipp::debug::print(cout, wrappedCli);
+//        cout << "args = { ";
+//        for(const auto& a : args) cout << '"' << a << "\" ";
+//        cout << "}\n";
 //        auto res = clipp::parse(args, wrappedCli);
 //        cout << "----------------------------------------------\n";
 //        clipp::debug::print(cout, res);
@@ -133,8 +136,10 @@ void run_test(
 //    cout << "==============================================\n"
 //         << " in file " << info.file << " in line " << info.line << '\n'
 //         << "==============================================\n";
-
 //    clipp::debug::print(cout, cli);
+//    cout << "args = { ";
+//    for(const auto& a : args) cout << '"' << a << "\" ";
+//    cout << "}\n";
 //    auto res = clipp::parse(args, cli);
 //    cout << "----------------------------------------------\n";
 //    clipp::debug::print(cout, res);
