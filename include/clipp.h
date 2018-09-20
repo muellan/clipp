@@ -1275,7 +1275,7 @@ public:
     }
     /** @brief adds an action that will be called if a required parameter
      *         is missing; the action will get called with the index of
-     *         the command line argument where the missing event occured first
+     *         the command line argument where the missing event occurred first
      */
     Derived&
     if_missing(index_action a) {
@@ -1296,7 +1296,7 @@ public:
     /** @brief adds an action that will be called if a parameter
      *         was matched, but was unreachable in the current scope;
      *         the action will be called with the index of
-     *         the command line argument where the problem occured
+     *         the command line argument where the problem occurred
      */
     Derived&
     if_blocked(index_action a) {
@@ -1315,9 +1315,9 @@ public:
         return *static_cast<Derived*>(this);
     }
     /** @brief adds an action that will be called if a parameter match
-     *         was in conflict with a different alternative paramete;
+     *         was in conflict with a different alternative parameter;
      *         the action will be called with the index of
-     *         the command line argument where the problem occuredr
+     *         the command line argument where the problem occurred
      */
     Derived&
     if_conflicted(index_action a) {
@@ -3381,7 +3381,7 @@ public:
 
     //---------------------------------------------------------------
     /** @brief returns augmented iterator for depth first searches
-     *  @details taverser knows end of iteration and can skip over children
+     *  @details traverser knows end of iteration and can skip over children
      */
     depth_first_traverser
     begin_dfs() const noexcept {
@@ -4775,7 +4775,7 @@ private:
 
     //-----------------------------------------------------
     /** @brief try to match 'arg' as concatenation of joinable parameters
-     *         that are all contaied within one group
+     *         that are all contained within one group
      */
     template<class ParamSelector>
     bool try_match_joined(const group& joinGroup, arg_string arg,
@@ -5045,7 +5045,7 @@ public:
     using iterator       = arg_mappings::const_iterator;
 
     //-----------------------------------------------------
-    /** @brief default: empty redult */
+    /** @brief default: empty result */
     parsing_result() = default;
 
     parsing_result(arg_mappings arg2param, missing_events misses):
@@ -5085,14 +5085,14 @@ public:
     }
 
     /** @brief returns true if any parsing error / violation of the
-     *         command line interface definition occured */
+     *         command line interface definition occurred */
     bool any_error() const noexcept {
         return unmapped_args_count() > 0 || !missing().empty() ||
                any_blocked() || any_conflict() || any_bad_repeat();
     }
 
     /** @brief returns true if no parsing error / violation of the
-     *         command line interface definition occured */
+     *         command line interface definition occurred */
     explicit operator bool() const noexcept { return !any_error(); }
 
     /** @brief access to range of missing parameter match events */
@@ -5378,7 +5378,7 @@ public:
     /** @brief determines column where documentation printing starts */
     doc_formatting&
     first_column(int col) {
-        //limit to [0,last_column] but push doc_column to the right if neccessary
+        //limit to [0,last_column] but push doc_column to the right if necessary
         if(col < 0) col = 0;
         else if(col > last_column()) col = last_column();
         if(col > doc_column()) doc_column(first_column());
@@ -5408,7 +5408,7 @@ public:
      */
     doc_formatting&
     last_column(int col) {
-        //limit to [first_column,oo] but push doc_column to the left if neccessary
+        //limit to [first_column,oo] but push doc_column to the left if necessary
         if(col < first_column()) col = first_column();
         if(col < doc_column()) doc_column(col);
         lastCol_ = col;
@@ -5467,7 +5467,7 @@ public:
     }
     const string& flag_separator() const noexcept { return flagSep_; }
 
-    /** @brief determnines strings surrounding parameter labels */
+    /** @brief determines strings surrounding parameter labels */
     doc_formatting&
     surround_labels(const string& prefix, const string& postfix) {
         labelPre_ = prefix;
@@ -5477,7 +5477,7 @@ public:
     const string& label_prefix()  const noexcept { return labelPre_; }
     const string& label_postfix() const noexcept { return labelPst_; }
 
-    /** @brief determnines strings surrounding optional parameters/groups */
+    /** @brief determines strings surrounding optional parameters/groups */
     doc_formatting&
     surround_optional(const string& prefix, const string& postfix) {
         optionPre_ = prefix;
@@ -5487,7 +5487,7 @@ public:
     const string& optional_prefix()  const noexcept { return optionPre_; }
     const string& optional_postfix() const noexcept { return optionPst_; }
 
-    /** @brief determnines strings surrounding repeatable parameters/groups */
+    /** @brief determines strings surrounding repeatable parameters/groups */
     doc_formatting&
     surround_repeat(const string& prefix, const string& postfix) {
         repeatPre_ = prefix;
@@ -5497,7 +5497,7 @@ public:
     const string& repeat_prefix()  const noexcept { return repeatPre_; }
     const string& repeat_postfix() const noexcept { return repeatPst_; }
 
-    /** @brief determnines strings surrounding exclusive groups */
+    /** @brief determines strings surrounding exclusive groups */
     doc_formatting&
     surround_alternatives(const string& prefix, const string& postfix) {
         alternPre_ = prefix;
@@ -5507,7 +5507,7 @@ public:
     const string& alternatives_prefix()  const noexcept { return alternPre_; }
     const string& alternatives_postfix() const noexcept { return alternPst_; }
 
-    /** @brief determnines strings surrounding alternative flags */
+    /** @brief determines strings surrounding alternative flags */
     doc_formatting&
     surround_alternative_flags(const string& prefix, const string& postfix) {
         alternFlagPre_ = prefix;
@@ -5517,7 +5517,7 @@ public:
     const string& alternative_flags_prefix()  const noexcept { return alternFlagPre_; }
     const string& alternative_flags_postfix() const noexcept { return alternFlagPst_; }
 
-    /** @brief determnines strings surrounding non-exclusive groups */
+    /** @brief determines strings surrounding non-exclusive groups */
     doc_formatting&
     surround_group(const string& prefix, const string& postfix) {
         groupPre_ = prefix;
@@ -5527,7 +5527,7 @@ public:
     const string& group_prefix()  const noexcept { return groupPre_; }
     const string& group_postfix() const noexcept { return groupPst_; }
 
-    /** @brief determnines strings surrounding joinable groups */
+    /** @brief determines strings surrounding joinable groups */
     doc_formatting&
     surround_joinable(const string& prefix, const string& postfix) {
         joinablePre_ = prefix;
@@ -6201,7 +6201,7 @@ private:
                             os << '\n';
                         }
                     }
-                    cur.pos.next_sibling(); //do not descend into memebers
+                    cur.pos.next_sibling(); //do not descend into members
                 }
                 cur.pos.invalidate(); //signal end-of-path
                 return;

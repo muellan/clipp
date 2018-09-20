@@ -383,7 +383,7 @@ auto param = required("-nof").set(file,"") |
                               // if match is in conflict with other alternative "-nof"
                               .if_conflicted( [] { /* ... */ } );   
 ```
-The handler functions can also take an int, which is set to the argument index at which the event occured first:
+The handler functions can also take an int, which is set to the argument index at which the event occurred first:
 ```cpp
 string file = "default.txt";
 auto param = required("-nof").set(file,"") | 
@@ -1314,7 +1314,7 @@ if(parse(argc, argv, cli)) {
 }
 ```
 
-You could of course write down everything as one big expression (docstrings are ommitted)...:
+You could of course write down everything as one big expression (docstrings are omitted)...:
 ```cpp
 auto cli = (
     option("-v", "--verbose"),
@@ -1678,7 +1678,7 @@ The following definition for example, contains a subtle pitfall:
 auto cli = joinable(repeatable( option(",") , number("number", nums) ));
 //                                            ^^^ non-optional
 ```
-This will not match arguments like ```"1,"```. This is, because, if the repeat group is 'hit' by any of its child parameters, all non-optional parameters must also match wihtin the current 'repeat cycle'. So, if the parser hits the ```","``` it expects to find a number arg as well, because it is blocking (positional) and required. Only after seeing this number can it enter the next repeat cycle. Thus, the argument will not be matched, since joined matches are only valid if no error occured. Making the number optional solves the problem.
+This will not match arguments like ```"1,"```. This is, because, if the repeat group is 'hit' by any of its child parameters, all non-optional parameters must also match within the current 'repeat cycle'. So, if the parser hits the ```","``` it expects to find a number arg as well, because it is blocking (positional) and required. Only after seeing this number can it enter the next repeat cycle. Thus, the argument will not be matched, since joined matches are only valid if no error occured. Making the number optional solves the problem.
 
 
 ### Custom Value Filters
@@ -1931,7 +1931,7 @@ OPTIONS
     remove mode
         <regex>              regular expression filter
 
-    modification opererations
+    modification operations
         -c, --compress       compress database in-memory
         -u, --unique         keep only unique entries
         -m, --memlimit       max. size in RAM
@@ -1974,7 +1974,7 @@ auto cli = (
         value("regex") % "regular expression filter"
     ) | 
     ( command("modify"),
-        "modification opererations" % (
+        "modification operations" % (
             option("-c", "--compress") % "compress database in-memory",
             option("-u", "--unique")   % "keep only unique entries",
             option("-m", "--memlimit") % "max. size in RAM" & value("size")
@@ -2013,8 +2013,8 @@ auto fmt = doc_formatting{}
     .surround_repeat("", "...")                //surround repeatable parameters with these
     .surround_value("<", ">")                  //surround values with these
     .empty_label("")                           //used if parameter has no flags and no label
-    .max_alternative_flags_in_usage(1)         //max. # of flags per parameter in usage
-    .max_alternative_flags_in_doc(2)           //max. # of flags per parameter in detailed documentation
+    .max_flags_per_param_in_usage(1)           //max. # of flags per parameter in usage
+    .max_flags_per_param_in_doc(32)            //max. # of flags per parameter in detailed documentation
     .split_alternatives(true)                  //split usage into several lines for large alternatives
     .alternatives_min_split_size(3)            //min. # of parameters for separate usage line
     .merge_alternative_flags_with_common_prefix(false)  //-ab(cdxy|xy) instead of -abcdxy|-abxy
