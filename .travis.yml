@@ -5,6 +5,30 @@ language: cpp
 
 matrix:
   include:
+    - env: COMPILER=g++-5 TEST_FLAGS="-c gcc" LIBCXX=NO
+      addons: 
+        apt:  
+          sources: ["ubuntu-toolchain-r-test"]  
+          packages: ["g++-5"]
+
+    - env: COMPILER=g++-6 TEST_FLAGS="-c gcc" LIBCXX=NO
+      addons: 
+        apt: 
+          sources: ["ubuntu-toolchain-r-test"]  
+          packages: ["g++-6"]
+
+    - env: COMPILER=g++-7 TEST_FLAGS="-c gcc --valgrind" LIBCXX=NO
+      addons: 
+        apt: 
+          sources: ["ubuntu-toolchain-r-test"]  
+          packages: ["g++-7", "valgrind"]
+
+    - env: COMPILER=g++-8 TEST_FLAGS="-c gcc" LIBCXX=NO
+      addons: 
+        apt: 
+          sources: ["ubuntu-toolchain-r-test"]  
+          packages: ["g++-8", "valgrind"]
+
     # - env: COMPILER=clang++-3.8 TEST_FLAGS="-c clang" LIBCXX=NO
     #   addons: 
     #     apt: 
@@ -29,41 +53,10 @@ matrix:
     #       sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-5.0"]  
     #       packages: ["clang-5.0", "g++-6", "valgrind"]
 
-    - env: COMPILER=g++-5 TEST_FLAGS="-c gcc" LIBCXX=NO
-      addons: 
-        apt:  
-          sources: ["ubuntu-toolchain-r-test"]  
-          packages: ["g++-5"]
-
-    - env: COMPILER=g++-6 TEST_FLAGS="-c gcc" LIBCXX=NO
-      addons: 
-        apt: 
-          sources: ["ubuntu-toolchain-r-test"]  
-          packages: ["g++-6"]
-
-    - env: COMPILER=g++-7 TEST_FLAGS="-c gcc --valgrind" LIBCXX=NO
-      addons: 
-        apt: 
-          sources: ["ubuntu-toolchain-r-test"]  
-          packages: ["g++-7", "valgrind"]
-
-    - env: COMPILER=g++-8 TEST_FLAGS="-c gcc --valgrind" LIBCXX=NO
-      addons: 
-        apt: 
-          sources: ["ubuntu-toolchain-r-test"]  
-          packages: ["g++-8", "valgrind"]
-
 
 install:
-  - if [[ "$COMPILER" != "" ]]; then export CXX=$COMPILER; fi
-  - $CXX --version
-  - | if [ "$LIBCXX" == "YES" ]; then
-      sudo apt-get purge cmake
-      sudo apt-get install cmake3
-      cmake --version
-      sudo ./cmake/install_libcxx.sh
-      export CXXFLAGS="-stdlib=libc++"
-    fi
+  - if [[ "${COMPILER}" != "" ]]; then export CXX=${COMPILER}; fi
+  - ${CXX} --version
 
 script:
     - cd test && ./run_tests.py $TEST_FLAGS
