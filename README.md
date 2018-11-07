@@ -159,7 +159,7 @@ int main(int argc, char* argv[]) {
 | ` exe fetch [-a] `         | ` command("fetch").set(k,1), option("-a").set(a) `
 | ` exe init \| fetch [-a] ` | ` command("init").set(k,0) \| (command("fetch").set(k,1), option("-a").set(a)) `
 | ` exe [-a\|-b]  `          | ` option("-a").set(a) \| option("-b").set(b) `
-| ` exe [-m a\|b] `          | ` option("-m") & (required("-a").set(b) \| required("-b").set(b)) `
+| ` exe [-m a\|b] `          | ` option("-m") & (required("a").set(b) \| required("b").set(b)) `
 
 
 
