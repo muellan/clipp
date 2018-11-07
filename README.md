@@ -9,7 +9,8 @@ Easy to use, powerful and expressive command line argument handling for C++11/14
 - documentation generation (usage lines, man pages); error handling 
 - lots of examples; large set of tests
 
-- ### [Overview (short examples)](#quick-overview)
+- ### [Quick Reference Table](#quick-reference)
+- ### [Overview (short examples)](#overview)
 - ### [Detailed Examples](#examples)
 - #### [Why yet another library for parsing command line arguments?](#motivation) / [Design goals](#design-goals)
 - #### [Requirements / Compilers](#requirements)
@@ -111,17 +112,71 @@ if(parse(argc, argv, cli)) {
 
 
 
-## Quick Overview
+
+## Quick Reference
+
+Below are a few examples that should give you an idea for how clipp works.
+Consider this basic setup with a few variables that we want to set using
+command line arguments:
+```cpp
+int main(int argc, char* argv[]) { 
+    using namespace clipp;
+
+    // define some variables
+    bool a = false, b = false;
+    int n = 0, k = 0;
+    double x = 0.0, y = 0.0;
+    std::vector<int> ids;
+
+    auto cli = ( /* CODE DEFINING COMMAND LINE INTERFACE GOES HERE */ );
+
+    parse(argc, argv, cli);    //excludes argv[0]
+
+    std::cout << usage_lines(cli, "exe") << '\n';
+}
+```
+
+| Interface (`usage_lines`)  | Code (content of `cli` parentheses )
+| -------------------------- | ------------------------------------
+| ` exe [-a] `               | ` option("-a", "--all").set(a)`
+| ` exe [--all] `            | ` option("--all", "-a", "--ALL").set(a)`
+| ` exe [-a] [-b] `          | ` option("-a").set(a), option("-b").set(b)`
+| ` exe -a `                 | ` required("-a").set(a)`
+| ` exe [-a] -b `            | ` option("-a").set(a), required("-b").set(b)`
+| ` exe [-n <times>] `       | ` option("-n", "--iter") & value("times", n) `
+| ` exe [-n [<times>]] `     | ` option("-n", "--iter") & opt_value("times", n) `
+| ` exe -n <times>  `        | ` required("-n", "--iter") & value("times", n) `
+| ` exe -n [<times>] `       | ` required("-n", "--iter") & opt_value("times", n) `
+| ` exe [-c <x> <y>]`        | ` option("-c") & value("x", x) & value("y", y)`
+| ` exe -c <x> <y> `         | ` required("-c") & value("x", x) & value("y", y)`
+| ` exe -c <x> [<y>] `       | ` required("-c") & value("x", x) & opt_value("y", y)`
+| ` exe [-l <lines>...] `    | ` option("-l") & values("lines", ids) `
+| ` exe [-l [<lines>...]] `  | ` option("-l") & opt_values("lines", ids) `
+| ` exe [-l <lines>]... `    | ` repeatable( option("-l") & value("lines", ids) ) `
+| ` exe -l <lines>... `      | ` required("-l") & values("lines", ids) `
+| ` exe -l [<lines>...] `    | ` required("-l") & opt_values("lines", ids) `
+| ` exe (-l <lines>)... `    | ` repeatable( required("-l") & value("lines", ids) ) `
+| ` exe fetch [-a] `         | ` command("fetch").set(k,1), option("-a").set(a) `
+| ` exe init \| fetch [-a] ` | ` command("init").set(k,0) \| (command("fetch").set(k,1), option("-a").set(a)) `
+| ` exe [-a\|-b]  `          | ` option("-a").set(a) \| option("-b").set(b) `
+| ` exe [-m a\|b] `          | ` option("-m") & (required("-a").set(b) \| required("-b").set(b)) `
+
+
+
+
+## Overview
 
 See the [examples](#examples) section for detailed explanations of each topic.
 
 Namespace qualifiers are omitted from all examples for better readability. All entities are defined in ```namespace clipp```.
 
-#### Basic Setup ([parsing](#parsing))
+
+#### Basic Setup
 ```cpp
-using namespace clipp;
 int main(int argc, char* argv[]) { 
-    auto cli = ( /*CODE DEFINING COMMAND LINE INTERFACE GOES HERE*/ );
+    using namespace clipp;
+
+    auto cli = ( /* CODE DEFINING COMMAND LINE INTERFACE GOES HERE */ );
     parse(argc, argv, cli);    //excludes argv[0]
 
     //if you want to include argv[0]
@@ -130,8 +185,6 @@ int main(int argc, char* argv[]) {
 ```
 
 There are two kinds of building blocks for command line interfaces: parameters and groups. Convieniently named factory functions produce parameters or groups with the desired settings applied.
-
-
 #### Parameters ([flag strings](#flag-strings), [commands](#commands), [positional values](#required-positional-values), [required flags](#required-flags), [repeatable parameters](#repeatable-parameters))
 ```cpp
 bool a = false, f = false;
@@ -139,7 +192,7 @@ string s; vector<string> vs;
 auto cli = (                             // matches  required  positional  repeatable
     command("push"),                     // exactly      yes       yes         no
     required("-f", "--file").set(f),     // exactly      yes       no          no
-    option("-a", "--all", "-A").set(a),  // exactly      no        no          no
+    required("-a", "--all", "-A").set(a),  // exactly      no        no          no
                                                   
     value("file", s),                    // any arg      yes       yes         no
     values("file", vs),                  // any arg      yes       yes         yes
