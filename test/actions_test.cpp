@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * (c) 2017 André Müller; foss@andremueller-online.de
+ * (c) 2017-2018 André Müller; foss@andremueller-online.de
  *
  * Tests: "missing" detection for required parameters
  *    'if_missing' error handler should be called:

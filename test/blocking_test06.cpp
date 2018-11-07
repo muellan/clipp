@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * (c) 2017 André Müller; foss@andremueller-online.de
+ * (c) 2017-2018 André Müller; foss@andremueller-online.de
  *
  *****************************************************************************/
 
@@ -36,22 +36,96 @@ void test(int lineNo,
 
     active m;
 
-    auto cli = (
+    auto cli1 = (
         (
             option("a").set(m.a),
             option("b").set(m.b),
             option("c").set(m.c)
-        ) & (
+        ).doc("group abc")
+        & (
             option("d").set(m.d),
             option("e").set(m.e),
             option("f").set(m.f)
-        )
+        ).doc("group def")
     );
 
-    run_wrapped_variants({ __FILE__, lineNo }, args, cli,
+    run_wrapped_variants({ __FILE__, lineNo }, args, cli1,
               [&]{ m = active{}; },
               [&]{ return m == matches; });
+
+
+    auto cli2 = (
+        (
+            option("x"),
+            (
+                option("a").set(m.a),
+                option("b").set(m.b),
+                option("c").set(m.c)
+            ).doc("group abc")
+        ).doc("group x(abc)")
+        & (
+            option("d").set(m.d),
+            option("e").set(m.e),
+            option("f").set(m.f)
+        ).doc("group def")
+    );
+
+    run_wrapped_variants({ __FILE__, lineNo }, args, cli2,
+              [&]{ m = active{}; },
+              [&]{ return m == matches; });
+
+
+    auto cli3 = (
+        (
+            (   option("a").set(m.a),
+                option("b").set(m.b)
+            ).doc("group ab")
+            ,
+            option("c").set(m.c)
+        ).doc("group (ab)c")
+        & (
+            (   option("d").set(m.d),
+                option("e").set(m.e)
+            ).doc("group de")
+            ,
+            option("f").set(m.f)
+        ).doc("group (de)f")
+    );
+
+    run_wrapped_variants({ __FILE__, lineNo }, args, cli3,
+              [&]{ m = active{}; },
+              [&]{ return m == matches; });
+
+
+    auto cli4 = (
+        (
+            (
+                (   option("a").set(m.a),
+                    option("b").set(m.b)
+                ).doc("group ab")
+                ,
+                option("c").set(m.c)
+            ).doc("group (ab)c"),
+            option("x")
+        ).doc("group ((ab)c)x")
+        & (
+            (
+                (   option("d").set(m.d),
+                    option("e").set(m.e)
+                ).doc("group de")
+                ,
+                option("f").set(m.f)
+            ).doc("group (de)f"),
+            option("y")
+        ).doc("group ((de)f)y")
+    );
+
+    run_wrapped_variants({ __FILE__, lineNo }, args, cli4,
+              [&]{ m = active{}; },
+              [&]{ return m == matches; });
+
 }
+
 
 
 //-------------------------------------------------------------------

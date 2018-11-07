@@ -1,11 +1,11 @@
 /*****************************************************************************
  *  ___  _    _   ___ ___
  * |  _|| |  | | | _ \ _ \   CLIPP - command line interfaces for modern C++
- * | |_ | |_ | | |  _/  _/   version 1.2.1
+ * | |_ | |_ | | |  _/  _/   version 1.2.2
  * |___||___||_| |_| |_|     https://github.com/muellan/clipp
  *
  * Licensed under the MIT License <http://opensource.org/licenses/MIT>.
- * Copyright (c) 2017-18 André Müller <foss@andremueller-online.de>
+ * Copyright (c) 2017-2018 André Müller <foss@andremueller-online.de>
  *
  * ---------------------------------------------------------------------------
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -2829,12 +2829,12 @@ public:
             return int(stack_.size());
         }
 
-        bool is_first_in_group() const noexcept {
+        bool is_first_in_parent() const noexcept {
             if(stack_.empty()) return false;
             return (stack_.back().cur == stack_.back().parent->begin());
         }
 
-        bool is_last_in_group() const noexcept {
+        bool is_last_in_parent() const noexcept {
             if(stack_.empty()) return false;
             return (stack_.back().cur+1 == stack_.back().end);
         }
@@ -2868,6 +2868,14 @@ public:
             return std::any_of(stack_.begin() + minlevel, stack_.end(),
                 [](const context& c) { return c.parent->repeatable(); });
         }
+
+        /** @brief inside a particular group */
+        bool is_inside(const group* g) const noexcept {
+            if(!g) return false;
+            return std::any_of(stack_.begin(), stack_.end(),
+                [g](const context& c) { return c.parent == g; });
+        }
+
         /** @brief inside group with joinable flags */
         bool joinable() const noexcept {
             if(stack_.empty()) return false;
@@ -2882,16 +2890,47 @@ public:
 
         /** @brief innermost repeat group */
         const group*
-        repeat_group() const noexcept {
+        innermost_repeat_group() const noexcept {
             auto i = std::find_if(stack_.rbegin(), stack_.rend(),
                 [](const context& c) { return c.parent->repeatable(); });
-
             return i != stack_.rend() ? i->parent : nullptr;
+        }
+
+        /** @brief innermost exclusive (alternatives) group */
+        const group*
+        innermost_exclusive_group() const noexcept {
+            auto i = std::find_if(stack_.rbegin(), stack_.rend(),
+                [](const context& c) { return c.parent->exclusive(); });
+            return i != stack_.rend() ? i->parent : nullptr;
+        }
+
+        /** @brief innermost blocking group */
+        const group*
+        innermost_blocking_group() const noexcept {
+            auto i = std::find_if(stack_.rbegin(), stack_.rend(),
+                [](const context& c) { return c.parent->blocking(); });
+            return i != stack_.rend() ? i->parent : nullptr;
+        }
+
+        /** @brief returns the outermost group that will be left on next ++*/
+        const group*
+        outermost_blocking_group_fully_explored() const noexcept {
+            if(stack_.empty()) return nullptr;
+
+            const group* g = nullptr;
+            for(auto i = stack_.rbegin(); i != stack_.rend(); ++i) {
+                if(i->cur+1 == i->end) {
+                    if(i->parent->blocking()) g = i->parent;
+                } else {
+                    return g;
+                }
+            }
+            return g;
         }
 
         /** @brief outermost join group */
         const group*
-        join_group() const noexcept {
+        outermost_join_group() const noexcept {
             auto i = std::find_if(stack_.begin(), stack_.end(),
                 [](const context& c) { return c.parent->joinable(); });
             return i != stack_.end() ? i->parent : nullptr;
@@ -2904,7 +2943,7 @@ public:
         /** @brief common flag prefix of all flags in current group */
         arg_string common_flag_prefix() const noexcept {
             if(stack_.empty()) return "";
-            auto g = join_group();
+            auto g = outermost_join_group();
             return g ? g->common_flag_prefix() : arg_string("");
         }
 
@@ -2963,29 +3002,17 @@ public:
             return *this;
         }
 
-        /** @brief skips to next alternative in innermost group
-        */
-        depth_first_traverser&
-        next_alternative() {
-            if(stack_.empty()) return *this;
-
-            //find first exclusive group (from the top of the stack!)
-            auto i = std::find_if(stack_.rbegin(), stack_.rend(),
-                [](const context& c) { return c.parent->exclusive(); });
-            if(i == stack_.rend()) return *this;
-
-            stack_.erase(i.base(), stack_.end());
-            next_sibling();
-            return *this;
-        }
-
         /**
          * @brief
          */
         depth_first_traverser&
-        back_to_parent() {
-            if(stack_.empty()) return *this;
-            stack_.pop_back();
+        back_to_ancestor(const group* g) {
+            if(!g) return *this;
+            while(!stack_.empty()) {
+                const auto& top = stack_.back().cur;
+                if(top->is_group() && &(top->as_group()) == g) return *this;
+                stack_.pop_back();
+            }
             return *this;
         }
 
@@ -4044,7 +4071,7 @@ public:
     explicit
     scoped_dfs_traverser(const group& g):
         pos_{g}, lastMatch_{}, posAfterLastMatch_{}, scopes_{},
-        curMatched_{false}, ignoreBlocks_{false},
+        ignoreBlocks_{false},
         repeatGroupStarted_{false}, repeatGroupContinues_{false}
     {}
 
@@ -4052,8 +4079,19 @@ public:
     const dfs_traverser& last_match() const noexcept { return lastMatch_; }
 
     const group& parent() const noexcept { return pos_.parent(); }
-    const group* repeat_group() const noexcept { return pos_.repeat_group(); }
-    const group* join_group() const noexcept { return pos_.join_group(); }
+
+    const group* innermost_repeat_group() const noexcept {
+        return pos_.innermost_repeat_group();
+    }
+    const group* outermost_join_group() const noexcept {
+        return pos_.outermost_join_group();
+    }
+    const group* innermost_blocking_group() const noexcept {
+        return pos_.innermost_blocking_group();
+    }
+    const group* innermost_exclusive_group() const noexcept {
+        return pos_.innermost_exclusive_group();
+    }
 
     const pattern* operator ->() const noexcept { return pos_.operator->(); }
     const pattern& operator *() const noexcept { return *pos_; }
@@ -4067,8 +4105,13 @@ public:
 
     void ignore_blocking(bool yes) { ignoreBlocks_ = yes; }
 
-    void invalidate() { pos_.invalidate(); curMatched_ = false; }
-    bool matched() const noexcept { return curMatched_; }
+    void invalidate() {
+        pos_.invalidate();
+    }
+
+    bool matched() const noexcept {
+        return (pos_ == lastMatch_);
+    }
 
     bool start_of_repeat_group() const noexcept { return repeatGroupStarted_; }
 
@@ -4077,10 +4120,8 @@ public:
     next_sibling() { pos_.next_sibling(); return *this; }
 
     scoped_dfs_traverser&
-    next_alternative() { pos_.next_alternative(); return *this; }
-
-    scoped_dfs_traverser&
     next_after_siblings() { pos_.next_after_siblings(); return *this; }
+
 
     //-----------------------------------------------------
     scoped_dfs_traverser&
@@ -4094,20 +4135,20 @@ public:
         }
 
         //current pattern can block if it didn't match already
-        if(!ignoreBlocks_ && !matched()) {
+        if(ignoreBlocks_ || matched()) {
+            ++pos_;
+        }
+        else if(!pos_->is_group()) {
             //current group can block if we didn't have any match in it
-            if(pos_.is_last_in_group() && pos_.parent().blocking()
-                && (!posAfterLastMatch_ || &(posAfterLastMatch_.parent()) != &(pos_.parent())))
-            {
-                //ascend to parent's level
-                ++pos_;
-                //skip all siblings of parent group
-                pos_.next_after_siblings();
+            const group* g = pos_.outermost_blocking_group_fully_explored();
+            //no match in 'g' before -> skip to after its siblings
+            if(g && !lastMatch_.is_inside(g)) {
+                pos_.back_to_ancestor(g).next_after_siblings();
                 if(!pos_) return_to_outermost_scope();
             }
-            else if(pos_->blocking() && !pos_->is_group()) {
-                if(pos_.parent().exclusive()) { //is_alternative(pos_.level())) {
-                    pos_.next_alternative();
+            else if(pos_->blocking()) {
+                if(pos_.parent().exclusive()) {
+                    pos_.next_sibling();
                 } else {
                     //no match => skip siblings of blocking param
                     pos_.next_after_siblings();
@@ -4132,8 +4173,9 @@ public:
 
         lastMatch_ = match.base();
 
-        if(!match->blocking() && match.base().parent().blocking()) {
-            match.pos_.back_to_parent();
+        // if there is a blocking ancestor -> go back to it
+        if(!match->blocking()) {
+            match.pos_.back_to_ancestor(match.innermost_blocking_group());
         }
 
         //if match is not in current position & current position is blocking
@@ -4151,22 +4193,17 @@ public:
             if(is_last_in_current_scope(match.pos_)) {
                 //if current param is not repeatable -> back to previous scope
                 if(!match->repeatable() && !match->is_group()) {
-                    curMatched_ = false;
                     pos_ = std::move(match.pos_);
                     if(!scopes_.empty()) pos_.undo(scopes_.top());
                 }
                 else { //stay at match position
-                    curMatched_ = true;
                     pos_ = std::move(match.pos_);
                 }
             }
             else { //not last in current group
                 //if current param is not repeatable, go directly to next
                 if(!match->repeatable() && !match->is_group()) {
-                    curMatched_ = false;
                     ++match.pos_;
-                } else {
-                    curMatched_ = true;
                 }
 
                 if(match.pos_.level() > pos_.level()) {
@@ -4193,7 +4230,7 @@ public:
 
 private:
     //-----------------------------------------------------
-    bool is_last_in_current_scope(const dfs_traverser& pos)
+    bool is_last_in_current_scope(const dfs_traverser& pos) const
     {
         if(scopes_.empty()) return pos.is_last_in_path();
         //check if we would leave the current scope on ++
@@ -4205,11 +4242,11 @@ private:
     //-----------------------------------------------------
     void check_repeat_group_start(const scoped_dfs_traverser& newMatch)
     {
-        const auto newrg = newMatch.repeat_group();
+        const auto newrg = newMatch.innermost_repeat_group();
         if(!newrg) {
             repeatGroupStarted_ = false;
         }
-        else if(lastMatch_.repeat_group() != newrg) {
+        else if(lastMatch_.innermost_repeat_group() != newrg) {
             repeatGroupStarted_ = true;
         }
         else if(!repeatGroupContinues_ || !newMatch.repeatGroupContinues_) {
@@ -4228,12 +4265,12 @@ private:
     }
 
     //-----------------------------------------------------
-    bool repeat_group_continues()
+    bool repeat_group_continues() const
     {
         if(!repeatGroupContinues_) return false;
-        const auto curRepGroup = pos_.repeat_group();
+        const auto curRepGroup = pos_.innermost_repeat_group();
         if(!curRepGroup) return false;
-        if(curRepGroup != lastMatch_.repeat_group()) return false;
+        if(curRepGroup != lastMatch_.innermost_repeat_group()) return false;
         if(!posAfterLastMatch_) return false;
         return true;
     }
@@ -4291,7 +4328,6 @@ private:
     dfs_traverser lastMatch_;
     dfs_traverser posAfterLastMatch_;
     std::stack<dfs_traverser::memento> scopes_;
-    bool curMatched_ = false;
     bool ignoreBlocks_ = false;
     bool repeatGroupStarted_ = false;
     bool repeatGroupContinues_ = false;
@@ -4495,7 +4531,7 @@ public:
         bool bad_repeat() const noexcept {
             if(!param()) return false;
             return repeat_ > 0 && !param()->repeatable()
-                && !match_.repeat_group();
+                && !match_.innermost_repeat_group();
         }
 
         bool any_error() const noexcept {
@@ -4946,13 +4982,13 @@ private:
         ++npos;
         //need to add potential misses if:
         //either new repeat group was started
-        const auto newRepGroup = match.repeat_group();
+        const auto newRepGroup = match.innermost_repeat_group();
         if(newRepGroup) {
             if(pos_.start_of_repeat_group()) {
                 for_each_potential_miss(std::move(npos),
                     [&,this](const dfs_traverser& pos) {
                         //only add candidates within repeat group
-                        if(newRepGroup == pos.repeat_group()) {
+                        if(newRepGroup == pos.innermost_repeat_group()) {
                             missCand_.emplace_back(pos, index_, true);
                         }
                     });
@@ -5008,6 +5044,8 @@ private:
     //---------------------------------------------------------------
     std::size_t occurrences_of(const parameter* p) const
     {
+        if(!p) return 0;
+
         auto i = std::find_if(args_.rbegin(), args_.rend(),
             [p](const arg_mapping& a){ return a.param() == p; });
 
@@ -6123,7 +6161,7 @@ private:
 
         do {
             if(buf.tellp() > initPos) cur.linestart = false;
-            if(!cur.linestart && !cur.pos.is_first_in_group()) {
+            if(!cur.linestart && !cur.pos.is_first_in_parent()) {
                 buf << cur.separators.top();
             }
             if(cur.pos->is_group()) {
@@ -6244,7 +6282,7 @@ private:
         const auto& parent = cur.pos.parent();
 
         const bool startsOptionalSequence =
-            parent.size() > 1 && p.blocking() && cur.pos.is_first_in_group();
+            parent.size() > 1 && p.blocking() && cur.pos.is_first_in_parent();
 
         const bool outermost =
             ommitOutermostSurrounders_ && cur.outermost == &parent;
@@ -6961,7 +6999,7 @@ void print(OStream& os, const group& g, int level)
 {
     auto indent = doc_string(4*level, ' ');
     os << indent;
-    if(g.blocking()) os << '!';
+    if(g.blocking()) os << '~';
     if(g.joinable()) os << 'J';
     os << (g.exclusive() ? "(|\n" : "(\n");
     for(const auto& p : g) {

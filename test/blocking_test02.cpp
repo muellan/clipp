@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * (c) 2017 André Müller; foss@andremueller-online.de
+ * (c) 2017-2018 André Müller; foss@andremueller-online.de
  *
  *****************************************************************************/
 
@@ -40,21 +40,23 @@ void test(int lineNo,
     auto cli = (
         (   command("a"),
             option("-x").set(m.a)
-        ) |
+        ).doc("group (~a,-x)")
+        |
         (   command("b"),
             option("-x").set(m.b),
             (   command("u").set(m.i,1) |
                 command("v").set(m.i,2) |
                 command("w").set(m.i,3)
-            ),
+            ).doc("group (u|v|w)"),
             option("-e").set(m.e)
-        ) |
+        ).doc("group (~b,-x,(~u|~v|~w),-e)")
+        |
         (   command("c"),
             option("-x").set(m.c),
             command("d").set(m.d),
             required("-i").set(m.e) & value("i", m.i),
             option("-f").set(m.f)
-        )
+        ).doc("group (~c,-x,d,(~-i,~i),-f)")
     );
 
     run_wrapped_variants({ __FILE__, lineNo }, args, cli,

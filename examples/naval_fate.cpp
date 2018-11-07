@@ -4,7 +4,7 @@
  *
  * released under MIT license
  *
- * (c) 2017 André Müller; foss@andremueller-online.de
+ * (c) 2017-2018 André Müller; foss@andremueller-online.de
  *
 *
  * This command line interface example was taken from http://docopt.org/.
