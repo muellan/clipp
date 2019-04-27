@@ -1,7 +1,7 @@
 /*****************************************************************************
  *  ___  _    _   ___ ___
  * |  _|| |  | | | _ \ _ \   CLIPP - command line interfaces for modern C++
- * | |_ | |_ | | |  _/  _/   version 1.2.2
+ * | |_ | |_ | | |  _/  _/   version 1.2.3
  * |___||___||_| |_| |_|     https://github.com/muellan/clipp
  *
  * Licensed under the MIT License <http://opensource.org/licenses/MIT>.
@@ -4366,10 +4366,15 @@ struct select_values {
  *****************************************************************************/
 class match_t {
 public:
+    using size_type = arg_string::size_type;
+
     match_t() = default;
+
     match_t(arg_string s, scoped_dfs_traverser p):
         str_{std::move(s)}, pos_{std::move(p)}
     {}
+
+    size_type length() const noexcept { return str_.size(); }
 
     const arg_string& str() const noexcept { return str_; }
     const scoped_dfs_traverser& pos() const noexcept { return pos_; }
@@ -4420,28 +4425,30 @@ full_match(scoped_dfs_traverser pos, const arg_string& arg,
  *****************************************************************************/
 template<class ParamSelector>
 match_t
-prefix_match(scoped_dfs_traverser pos, const arg_string& arg,
-             const ParamSelector& select)
+longest_prefix_match(scoped_dfs_traverser pos, const arg_string& arg,
+                     const ParamSelector& select)
 {
+    match_t longest;
+
     while(pos) {
         if(pos->is_param()) {
             const auto& param = pos->as_param();
             if(select(param)) {
-                const auto match = param.match(arg);
+                auto match = param.match(arg);
                 if(match.prefix()) {
                     if(match.length() == arg.size()) {
                         return match_t{arg, std::move(pos)};
                     }
-                    else {
-                        return match_t{arg.substr(match.at(), match.length()),
-                                       std::move(pos)};
+                    else if(match.length() > longest.length()) {
+                        longest = match_t{arg.substr(match.at(), match.length()), 
+                                          pos};
                     }
                 }
             }
         }
         ++pos;
     }
-    return match_t{};
+    return longest;
 }
 
 
@@ -4747,7 +4754,7 @@ private:
     bool try_match_joined_sequence(arg_string arg,
                                    const ParamSelector& acceptFirst)
     {
-        auto fstMatch = detail::prefix_match(pos_, arg, acceptFirst);
+        auto fstMatch = detail::longest_prefix_match(pos_, arg, acceptFirst);
 
         if(!fstMatch) return false;
 
@@ -4824,7 +4831,7 @@ private:
         std::vector<match_t> matches;
 
         while(!arg.empty()) {
-            auto match = detail::prefix_match(parse.pos_, arg, select);
+            auto match = detail::longest_prefix_match(parse.pos_, arg, select);
 
             if(!match) return false;
 
