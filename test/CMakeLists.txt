@@ -34,5 +34,10 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} source_files)
 foreach(src IN LISTS source_files)
   get_filename_component(name_we ${src} NAME_WE)
   add_executable(test-${name_we} ${src})
+  target_link_libraries(test-${name_we} ${PROJECT_NAME}::${PROJECT_NAME})
+  set_target_properties(test-${name_we} PROPERTIES
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
+  )
   add_test(NAME ${name_we} COMMAND $<TARGET_FILE:test-${name_we}>)
 endforeach()
