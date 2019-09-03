@@ -21,6 +21,17 @@ write_basic_package_version_file(
   ${CONFIG_VERSION_FILE} COMPATIBILITY AnyNewerVersion
 )
 
+# Generate pkg-config .pc file
+set(PKGCONFIG_INSTALL_DIR
+  ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig
+  CACHE PATH "Installation directory for pkg-config (${PROJECT_NAME}.pc) file"
+)
+configure_file(
+  "${PROJECT_NAME}.pc.in"
+  "${PROJECT_NAME}.pc"
+  @ONLY
+)
+
 install(DIRECTORY include/
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   FILES_MATCHING PATTERN "*.h"
@@ -34,6 +45,9 @@ install(EXPORT ${PROJECT_NAME}-config
 )
 install(FILES ${CONFIG_VERSION_FILE}
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}
+)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
+  DESTINATION ${PKGCONFIG_INSTALL_DIR}
 )
 
 option(BUILD_TESTING "Do not build tests by default" OFF)
