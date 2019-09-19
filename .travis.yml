@@ -1,56 +1,51 @@
-dist: trusty
-sudo: false
+dist: bionic
 language: cpp
 
 
 matrix:
   include:
     - env: COMPILER=g++-5 TEST_FLAGS="-c gcc" LIBCXX=NO
-      addons: 
-        apt:  
-          sources: ["ubuntu-toolchain-r-test"]  
+      addons:
+        apt:
           packages: ["g++-5"]
 
     - env: COMPILER=g++-6 TEST_FLAGS="-c gcc" LIBCXX=NO
-      addons: 
-        apt: 
-          sources: ["ubuntu-toolchain-r-test"]  
+      addons:
+        apt:
           packages: ["g++-6"]
 
     - env: COMPILER=g++-7 TEST_FLAGS="-c gcc --valgrind" LIBCXX=NO
-      addons: 
-        apt: 
-          sources: ["ubuntu-toolchain-r-test"]  
+      addons:
+        apt:
           packages: ["g++-7", "valgrind"]
 
     - env: COMPILER=g++-8 TEST_FLAGS="-c gcc" LIBCXX=NO
-      addons: 
-        apt: 
-          sources: ["ubuntu-toolchain-r-test"]  
+      addons:
+        apt:
           packages: ["g++-8", "valgrind"]
 
     # - env: COMPILER=clang++-3.8 TEST_FLAGS="-c clang" LIBCXX=NO
-    #   addons: 
-    #     apt: 
-    #       sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-precise-3.8"]  
+    #   addons:
+    #     apt:
+    #       sources: ["llvm-toolchain-precise-3.8"]
     #       packages: ["clang-3.8", "g++-6"]
 
     # - env: COMPILER=clang++-3.9 TEST_FLAGS="-c clang" LIBCXX=NO
-    #   addons: 
-    #     apt:  
-    #       sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-3.9"]  
+    #   addons:
+    #     apt:
+    #       sources: ["llvm-toolchain-trusty-3.9"]
     #       packages: ["clang-3.9", "g++-6"]
 
     # - env: COMPILER=clang++-4.0 TEST_FLAGS="-c clang" LIBCXX=NO
-    #   addons: 
-    #     apt:  
-    #       sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-4.0"]  
+    #   addons:
+    #     apt:
+    #       sources: ["llvm-toolchain-trusty-4.0"]
     #       packages: ["clang-4.0", "g++-6"]
 
     # - env: COMPILER=clang++-5.0 TEST_FLAGS="-c clang --valgrind" LIBCXX=NO
-    #   addons: 
-    #     apt:  
-    #       sources: ["ubuntu-toolchain-r-test", "llvm-toolchain-trusty-5.0"]  
+    #   addons:
+    #     apt:
+    #       sources: ["llvm-toolchain-trusty-5.0"]
     #       packages: ["clang-5.0", "g++-6", "valgrind"]
 
 
