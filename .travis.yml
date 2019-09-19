@@ -24,6 +24,13 @@ matrix:
         apt:
           packages: ["g++-8", "valgrind"]
 
+    - env: COMPILER=g++-9 TEST_FLAGS="-c gcc" LIBCXX=NO
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+          packages: ["g++-9", "valgrind"]
+
     # - env: COMPILER=clang++-3.8 TEST_FLAGS="-c clang" LIBCXX=NO
     #   addons:
     #     apt:
