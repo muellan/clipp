@@ -5034,7 +5034,7 @@ private:
                 } else {
                     ++pos;
                 }
-            } else {  //param
+            } else if (pos.is_repeatable()) {  //non-repeatable param
                 if(pos->required()) {
                     action(pos);
                     ++pos;
@@ -5043,6 +5043,8 @@ private:
                 } else {
                     ++pos;
                 }
+            } else {
+                ++pos;
             }
         }
     }
