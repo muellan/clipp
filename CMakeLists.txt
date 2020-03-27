@@ -21,20 +21,31 @@ write_basic_package_version_file(
   ${CONFIG_VERSION_FILE} COMPATIBILITY AnyNewerVersion
 )
 
-install(DIRECTORY include/
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  FILES_MATCHING PATTERN "*.h"
-)
-install(TARGETS ${PROJECT_NAME}
-  EXPORT ${PROJECT_NAME}-config
-)
-install(EXPORT ${PROJECT_NAME}-config
-  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}
-  NAMESPACE ${PROJECT_NAME}::
-)
-install(FILES ${CONFIG_VERSION_FILE}
-  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}
-)
+# Determine if clipp is built as a subproject (using add_subdirectory)
+# or if it is the master project.
+set(MASTER_PROJECT OFF)
+if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+  set(MASTER_PROJECT ON)
+endif ()
+
+option(CLIPP_INSTALL "Generate the install target." ${MASTER_PROJECT})
+
+if(CLIPP_INSTALL)
+  install(DIRECTORY include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILES_MATCHING PATTERN "*.h"
+  )
+  install(TARGETS ${PROJECT_NAME}
+    EXPORT ${PROJECT_NAME}-config
+  )
+  install(EXPORT ${PROJECT_NAME}-config
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}
+    NAMESPACE ${PROJECT_NAME}::
+  )
+  install(FILES ${CONFIG_VERSION_FILE}
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}
+  )
+endif()
 
 option(BUILD_TESTING "Do not build tests by default" OFF)
 include(CTest)
