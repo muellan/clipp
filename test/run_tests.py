@@ -30,7 +30,7 @@ compiler = "gcc"
 valgrind = "valgrind --error-exitcode=1"
 gcov     = "gcov -l "
 
-gccflags = ("-std=c++0x -O0 -g "
+gccflags = ("-O0 -g "
                     " -Wall -Wextra -Wpedantic "
                     " -Wno-unknown-pragmas"
                     " -Wno-unknown-warning"
@@ -66,21 +66,24 @@ compilers = {
                "macro" : "-D", "incpath" : "-I",
                "obj" : "",
                "cov" : "-fprofile-arcs -ftest-coverage",
-               "link" : "-o "
+               "link" : "-o ",
+               "defaultStd": "-std=c++0x"
     },
-    "clang" : {"exe": "clang++",
+    "clang" : {"exe": "clang++-10",
                "flags" : gccflags,
                "macro" : "-D", "incpath" : "-I",
                "obj" : "",
                "cov" : "-fprofile-arcs -ftest-coverage",
-               "link" : "-o "
+               "link" : "-o ",
+               "defaultStd": "-std=c++0x"
     },
     "msvc" : {"exe": "cl",
               "flags" : " /W4 /EHsc ",
               "macro" : "/D:", "incpath" : "/I:",
               "obj" : "/Foc:",
               "cov" : "",
-              "link" : "/link /out:"
+              "link" : "/link /out:",
+              "defaultStd": "/std:c++14"
     }
 }
 
@@ -164,6 +167,7 @@ allpass = True
 useValgrind = False
 useGcov = False
 doClean = False
+stdOpt = None
 
 # process input args
 if len(argv) > 1:
@@ -192,7 +196,8 @@ if len(argv) > 1:
                 print "  -c, --compiler (gcc|clang|msvc)   select compiler"
                 print "  --valgrind                        run test through valgrind"
                 print "  --gcov                            run test through gcov"
-                print "  --continue-on-fail                continue running regardless of failed builds or tests";
+                print "  --continue-on-fail                continue running regardless of failed builds or tests"
+                print "  -s <standard>                     option to select c++ standard, e.g. \"-std\""
                 exit(0)
             elif arg == "--clean":
                 doClean = True
@@ -209,6 +214,10 @@ if len(argv) > 1:
             elif arg == "-c" or arg == "--compiler":
                 if i+1 < len(argv):
                     compiler = argv[i+1]
+                    next = i + 2
+            elif arg == '-s':
+                if i+1 < len(argv):
+                    stdOpt = argv[i+1]
                     next = i + 2
             else:
                 paths.append(arg)
@@ -230,6 +239,9 @@ includeOpt  = compilers[compiler]["incpath"]
 objOutOpt   = compilers[compiler]["obj"]
 linkOpt     = compilers[compiler]["link"]
 coverageOpt = compilers[compiler]["cov"]
+
+if not stdOpt:
+    stdOpt = compilers[compiler]["defaultStd"]
 
 if useGcov:
     compileopts = compileopts + " " + coverageOpt
@@ -277,7 +289,7 @@ print separator
 
 
 # compile and run tests
-compilecmd = compileexec + " " + compileopts
+compilecmd = compileexec + " " + stdOpt + " "  + compileopts
 print "compiler call: "
 print compilecmd
 print separator
