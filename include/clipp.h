@@ -6855,6 +6855,17 @@ make_man_page(const group& cli,
               const doc_formatting& fmt = doc_formatting{})
 {
     man_page man;
+	// clip off the exe path, i.e. execute eequivalent of basename(progname, ".exe")
+	auto sep_pos = progname.find_last_of(":/\\");
+	if (sep_pos != doc_string::npos)
+	{
+		progname = progname.substr(sep_pos + 1);
+	}
+	const doc_string exe = ".exe";
+	if (exe.size() < progname.size() && std::equal(exe.rbegin(), exe.rend(), progname.rbegin()))
+	{
+		progname = progname.substr(0, progname.size() - 4);
+	}
     man.append_section("SYNOPSIS", usage_lines(cli,progname,fmt).str());
     man.append_section("OPTIONS", documentation(cli,fmt).str());
     return man;
