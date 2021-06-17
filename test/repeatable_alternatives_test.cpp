@@ -25,8 +25,16 @@ struct active {
 
     friend bool operator == (const active& x, const active& y) noexcept {
         return x.a == y.a && x.b == y.b &&
-               std::equal(begin(x.i), end(x.i), begin(y.i)) &&
-               std::equal(begin(x.j), end(x.j), begin(y.j));
+			(
+				(x.i.size() == 0 && y.i.size() == 0) ||
+				(x.i.size() > 0 && y.i.size() > 0 && x.i.size() == y.i.size() &&
+					std::equal(x.i.begin(), x.i.end(), y.i.begin()))
+			) &&
+			(
+				(x.j.size() == 0 && y.j.size() == 0) ||
+				(x.j.size() > 0 && y.j.size() > 0 && x.j.size() == y.j.size() &&
+					std::equal(x.j.begin(), x.j.end(), y.j.begin()))
+			);
     }
 };
 

@@ -29,8 +29,16 @@ struct active {
 
     friend bool operator == (const active& x, const active& y) noexcept {
         return x.http == y.http && x.f == y.f &&
-               std::equal(x.tgts.begin(), x.tgts.end(), y.tgts.begin()) &&
-               std::equal(x.wrong.begin(), x.wrong.end(), y.wrong.begin());
+			(
+				(x.tgts.size() == 0 && y.tgts.size() == 0) ||
+				(x.tgts.size() > 0 && y.tgts.size() > 0 && x.tgts.size() == y.tgts.size() &&
+				std::equal(x.tgts.begin(), x.tgts.end(), y.tgts.begin()))
+			) &&
+			(
+				(x.wrong.size() == 0 && y.wrong.size() == 0) ||
+				(x.wrong.size() > 0 && y.wrong.size() > 0 && x.wrong.size() == y.wrong.size() &&
+				std::equal(x.wrong.begin(), x.wrong.end(), y.wrong.begin()))
+			);
     }
 };
 

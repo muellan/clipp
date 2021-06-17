@@ -37,7 +37,11 @@ struct active {
         return (x.a == y.a && x.ie == y.ie && x.je == y.je &&
                 x.ke == y.ke && x.ve == y.ve && x.i == y.i &&
                 x.j == y.j && x.k == y.k &&
-                std::equal(begin(x.v), end(x.v), begin(y.v)));
+				(
+					(x.v.size() == 0 && y.v.size() == 0) ||
+					(x.v.size() > 0 && y.v.size() > 0 && x.v.size() == y.v.size() &&
+						std::equal(x.v.begin(), x.v.end(), y.v.begin()))
+				));
     }
 
     template<class OStream>
