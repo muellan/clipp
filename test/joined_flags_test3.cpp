@@ -12,17 +12,23 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
-    active(bool a_, bool b_, bool c_, bool d_):
-        a{a_}, b{b_}, c{c_}, d{d_}
-    {}
-    bool a = false, b = false, c = false, d = false;
+namespace flags_test03 {
 
-    friend bool operator == (const active& x, const active& y) noexcept {
-        return x.a == y.a && x.b == y.b && x.c == y.c && x.d == y.d;
-    }
-};
+	struct active {
+		active() = default;
+		active(bool a_, bool b_, bool c_, bool d_) :
+			a{ a_ }, b{ b_ }, c{ c_ }, d{ d_ }
+		{}
+		bool a = false, b = false, c = false, d = false;
+
+		friend bool operator == (const active& x, const active& y) noexcept {
+			return x.a == y.a && x.b == y.b && x.c == y.c && x.d == y.d;
+		}
+	};
+
+}
+
+using namespace flags_test03;
 
 
 //-------------------------------------------------------------------

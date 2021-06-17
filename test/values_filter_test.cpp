@@ -12,30 +12,37 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
+namespace filter_test01 {
 
-    explicit
-    active(int i_, int j_, int k_,
-           std::size_t l_, std::size_t m_, std::size_t n_,
-           float u_, float v_, float w_,
-           double x_, double y_, double z_)
-    :
-        i{i_}, j{j_}, k{k_}, l{l_}, m{m_}, n{n_},
-        u{u_}, v{v_}, w{w_}, x{x_}, y{y_}, z{z_}
-    {}
+	struct active {
+		active() = default;
 
-    int i = 1, j = 1, k = 1;
-    std::size_t l = 1, m = 1, n = 1;
-    float u = 1.0f, v = 1.0f, w = 1.0f;
-    double x = 1.0, y = 1.0, z = 1.0;
+		explicit
+			active(int i_, int j_, int k_,
+				std::size_t l_, std::size_t m_, std::size_t n_,
+				float u_, float v_, float w_,
+				double x_, double y_, double z_)
+			:
+			i{ i_ }, j{ j_ }, k{ k_ }, l{ l_ }, m{ m_ }, n{ n_ },
+			u{ u_ }, v{ v_ }, w{ w_ }, x{ x_ }, y{ y_ }, z{ z_ }
+		{}
 
-    friend bool operator == (const active& a, const active& b) noexcept {
-        return (a.i == b.i && a.j == b.j && a.k == b.k && a.l == b.l &&
-                a.m == b.m && a.n == b.n && a.u == b.u && a.v == b.v &&
-                a.w == b.w && a.x == b.x && a.y == b.y && a.z == b.z);
-    }
-};
+		int i = 1, j = 1, k = 1;
+		std::size_t l = 1, m = 1, n = 1;
+		float u = 1.0f, v = 1.0f, w = 1.0f;
+		double x = 1.0, y = 1.0, z = 1.0;
+
+		friend bool operator == (const active& a, const active& b) noexcept {
+			return (a.i == b.i && a.j == b.j && a.k == b.k && a.l == b.l &&
+				a.m == b.m && a.n == b.n && a.u == b.u && a.v == b.v &&
+				a.w == b.w && a.x == b.x && a.y == b.y && a.z == b.z);
+		}
+	};
+
+}
+
+using namespace filter_test01;
+
 
 
 //-------------------------------------------------------------------

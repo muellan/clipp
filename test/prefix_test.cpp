@@ -12,16 +12,22 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
-    active(bool a_, int i_): a{a_}, i{i_} {}
-    bool a = false;
-    int i = 0;
+namespace prefix_test {
 
-    friend bool operator == (const active& x, const active& y) noexcept {
-        return (x.a == y.a && x.i == y.i);
-    }
-};
+	struct active {
+		active() = default;
+		active(bool a_, int i_) : a{ a_ }, i{ i_ } {}
+		bool a = false;
+		int i = 0;
+
+		friend bool operator == (const active& x, const active& y) noexcept {
+			return (x.a == y.a && x.i == y.i);
+		}
+	};
+
+}
+
+using namespace prefix_test;
 
 
 //-------------------------------------------------------------------

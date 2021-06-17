@@ -13,21 +13,27 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
+namespace params_test01 {
 
-    explicit
-    active(std::initializer_list<double> il): xs{il} {}
+	struct active {
+		active() = default;
 
-    std::vector<double> xs;
+		explicit
+			active(std::initializer_list<double> il) : xs{ il } {}
 
-    friend bool operator == (const active& a, const active& b) noexcept {
-        return std::equal(begin(a.xs), end(a.xs), begin(b.xs),
-            [](double x, double y) {
-                return std::abs(x - y) < 1e-5;
-            });
-    }
-};
+		std::vector<double> xs;
+
+		friend bool operator == (const active& a, const active& b) noexcept {
+			return std::equal(begin(a.xs), end(a.xs), begin(b.xs),
+				[](double x, double y) {
+					return std::abs(x - y) < 1e-5;
+				});
+		}
+	};
+
+}
+
+using namespace params_test01;
 
 
 //-------------------------------------------------------------------

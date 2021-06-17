@@ -12,20 +12,26 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
-    explicit
-    active(bool a_, bool b_, bool c_, bool d_):
-        a{a_}, b{b_}, c{c_}, d{d_}
-    {}
-    bool a = false, b = false, c = false, d = false;
-    bool conflict = false;
+namespace alt_options_test {
 
-    friend bool operator == (const active& x, const active& y) noexcept {
-        return (x.a == y.a && x.b == y.b && x.c == y.c &&
-                x.d == y.d && x.conflict == y.conflict);
-    }
-};
+	struct active {
+		active() = default;
+		explicit
+			active(bool a_, bool b_, bool c_, bool d_) :
+			a{ a_ }, b{ b_ }, c{ c_ }, d{ d_ }
+		{}
+		bool a = false, b = false, c = false, d = false;
+		bool conflict = false;
+
+		friend bool operator == (const active& x, const active& y) noexcept {
+			return (x.a == y.a && x.b == y.b && x.c == y.c &&
+				x.d == y.d && x.conflict == y.conflict);
+		}
+	};
+
+}
+
+using namespace alt_options_test;
 
 
 //-------------------------------------------------------------------

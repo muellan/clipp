@@ -13,28 +13,34 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    int av = 0;
-    int bv = 1;
-    float cv = 0.0f, dv = 1.0f;
-    double ev = 0.0, fv = 1.0;
-    std::string gv;
-    bool a = false, b = false, c = false, d = false, e = false, f = false,
-         g = false, h = false, i = false;
+namespace mixed_params_test {
 
-    friend bool operator == (const active& x, const active& y) noexcept {
-        if(x.a != y.a || x.b != y.b || x.c != y.c ||
-           x.d != y.d || x.e != y.e || x.f != y.f ||
-           x.g != y.g || x.h != y.h || x.i != y.i ||
-           x.av != y.av || x.bv != y.bv || x.gv != y.gv) return false;
+	struct active {
+		int av = 0;
+		int bv = 1;
+		float cv = 0.0f, dv = 1.0f;
+		double ev = 0.0, fv = 1.0;
+		std::string gv;
+		bool a = false, b = false, c = false, d = false, e = false, f = false,
+			g = false, h = false, i = false;
 
-        using std::abs;
-        if(abs(x.cv - y.cv) > 1e-4f || abs(x.dv - y.dv) > 1e-4f ||
-           abs(x.ev - y.ev) > 1e-4  || abs(x.fv - y.fv) > 1e-4) return false;
+		friend bool operator == (const active& x, const active& y) noexcept {
+			if (x.a != y.a || x.b != y.b || x.c != y.c ||
+				x.d != y.d || x.e != y.e || x.f != y.f ||
+				x.g != y.g || x.h != y.h || x.i != y.i ||
+				x.av != y.av || x.bv != y.bv || x.gv != y.gv) return false;
 
-        return true;
-    }
-};
+			using std::abs;
+			if (abs(x.cv - y.cv) > 1e-4f || abs(x.dv - y.dv) > 1e-4f ||
+				abs(x.ev - y.ev) > 1e-4 || abs(x.fv - y.fv) > 1e-4) return false;
+
+			return true;
+		}
+	};
+
+}
+
+using namespace mixed_params_test;
 
 
 //-------------------------------------------------------------------

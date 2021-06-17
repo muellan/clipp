@@ -12,21 +12,27 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
-    explicit
-    active(bool a_, bool b_, bool c_, bool d_):
-        a{a_}, b{b_}, c{c_}, d{d_}
-    {}
-    bool a = false, b = false, c = false, d = false;
-    bool conflict = false;
-    std::size_t missing  = 0;
+namespace alt_req_test {
 
-    friend bool operator == (const active& x, const active& y) noexcept {
-        return (x.a == y.a && x.b == y.b && x.c == y.c && x.d == y.d &&
-                x.conflict == y.conflict && x.missing == y.missing);
-    }
-};
+	struct active {
+		active() = default;
+		explicit
+			active(bool a_, bool b_, bool c_, bool d_) :
+			a{ a_ }, b{ b_ }, c{ c_ }, d{ d_ }
+		{}
+		bool a = false, b = false, c = false, d = false;
+		bool conflict = false;
+		std::size_t missing = 0;
+
+		friend bool operator == (const active& x, const active& y) noexcept {
+			return (x.a == y.a && x.b == y.b && x.c == y.c && x.d == y.d &&
+				x.conflict == y.conflict && x.missing == y.missing);
+		}
+	};
+
+}
+
+using namespace alt_req_test;
 
 
 //-------------------------------------------------------------------

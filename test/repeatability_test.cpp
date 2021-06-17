@@ -12,40 +12,46 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
+namespace repeatability_test {
 
-    explicit
-    active(bool a_, bool b_, bool c_, bool d_, bool e_, bool f_,
-           std::initializer_list<int> i_) :
-        a{a_}, b{b_}, c{c_}, d{d_}, e{e_}, f{f_}, i{i_}
-    {}
+	struct active {
+		active() = default;
 
-    bool a = false, b = false, c = false, d = false, e = false, f = false;
-    std::vector<int> i;
+		explicit
+			active(bool a_, bool b_, bool c_, bool d_, bool e_, bool f_,
+				std::initializer_list<int> i_) :
+			a{ a_ }, b{ b_ }, c{ c_ }, d{ d_ }, e{ e_ }, f{ f_ }, i{ i_ }
+		{}
 
-    friend bool operator == (const active& x, const active& y) noexcept {
-        return (x.a == y.a && x.b == y.b && x.c == y.c &&
-                x.d == y.d && x.e == y.e && x.f == y.f &&
-                std::equal(begin(x.i), end(x.i), begin(y.i)));
-    }
-};
+		bool a = false, b = false, c = false, d = false, e = false, f = false;
+		std::vector<int> i;
 
-struct repeats {
-    repeats() = default;
+		friend bool operator == (const active& x, const active& y) noexcept {
+			return (x.a == y.a && x.b == y.b && x.c == y.c &&
+				x.d == y.d && x.e == y.e && x.f == y.f &&
+				std::equal(begin(x.i), end(x.i), begin(y.i)));
+		}
+	};
 
-    explicit
-    repeats(int a_, int b_, int c_, int d_, int e_, int f_, int i_) :
-        a{a_}, b{b_}, c{c_}, d{d_}, e{e_}, f{f_}, i{i_}
-    {}
+	struct repeats {
+		repeats() = default;
 
-    int a = 0, b = 0, c = 0, d = 0, e = 0, f = 0, i = 0;
+		explicit
+			repeats(int a_, int b_, int c_, int d_, int e_, int f_, int i_) :
+			a{ a_ }, b{ b_ }, c{ c_ }, d{ d_ }, e{ e_ }, f{ f_ }, i{ i_ }
+		{}
 
-    friend bool operator == (const repeats& x, const repeats& y) noexcept {
-        return (x.a == y.a && x.b == y.b && x.c == y.c &&
-                x.d == y.d && x.e == y.e && x.f == y.f && x.i == y.i);
-    }
-};
+		int a = 0, b = 0, c = 0, d = 0, e = 0, f = 0, i = 0;
+
+		friend bool operator == (const repeats& x, const repeats& y) noexcept {
+			return (x.a == y.a && x.b == y.b && x.c == y.c &&
+				x.d == y.d && x.e == y.e && x.f == y.f && x.i == y.i);
+		}
+	};
+
+}
+
+using namespace repeatability_test;
 
 
 //-------------------------------------------------------------------

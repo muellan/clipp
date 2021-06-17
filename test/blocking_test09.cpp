@@ -12,27 +12,33 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
-    explicit
-    active(const std::string f_,
-           std::initializer_list<std::string> ts,
-           bool http_, bool ftp_,
-           std::initializer_list<std::string> ws) :
-           http{http_}, ftp{ftp_}, f{f_}, tgts{ts}, wrong{ws}
-    {}
-    bool http = false, ftp = false;
+namespace test09 {
 
-    std::string f;
-    std::vector<std::string> tgts;
-    std::vector<std::string> wrong;
+	struct active {
+		active() = default;
+		explicit
+			active(const std::string f_,
+				std::initializer_list<std::string> ts,
+				bool http_, bool ftp_,
+				std::initializer_list<std::string> ws) :
+			http{ http_ }, ftp{ ftp_ }, f{ f_ }, tgts{ ts }, wrong{ ws }
+		{}
+		bool http = false, ftp = false;
 
-    friend bool operator == (const active& x, const active& y) noexcept {
-        return x.http == y.http && x.f == y.f &&
-               std::equal(x.tgts.begin(), x.tgts.end(), y.tgts.begin()) &&
-               std::equal(x.wrong.begin(), x.wrong.end(), y.wrong.begin());
-    }
-};
+		std::string f;
+		std::vector<std::string> tgts;
+		std::vector<std::string> wrong;
+
+		friend bool operator == (const active& x, const active& y) noexcept {
+			return x.http == y.http && x.f == y.f &&
+				std::equal(x.tgts.begin(), x.tgts.end(), y.tgts.begin()) &&
+				std::equal(x.wrong.begin(), x.wrong.end(), y.wrong.begin());
+		}
+	};
+
+}
+
+using namespace test09;
 
 
 //-------------------------------------------------------------------

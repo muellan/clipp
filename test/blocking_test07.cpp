@@ -13,19 +13,25 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
-    explicit
-    active(bool a_, bool b_, bool c_, bool d_, bool e_, bool f_) :
-        a{a_}, b{b_}, c{c_}, d{d_}, e{e_}, f{f_}
-    {}
-    bool a = false, b = false, c = false, d = false, e = false, f = false;
+namespace test07 {
 
-    friend bool operator == (const active& x, const active& y) noexcept {
-        return (x.a == y.a && x.b == y.b && x.c == y.c && x.d == y.d &&
-                x.e == y.e && x.f == y.f);
-    }
-};
+	struct active {
+		active() = default;
+		explicit
+			active(bool a_, bool b_, bool c_, bool d_, bool e_, bool f_) :
+			a{ a_ }, b{ b_ }, c{ c_ }, d{ d_ }, e{ e_ }, f{ f_ }
+		{}
+		bool a = false, b = false, c = false, d = false, e = false, f = false;
+
+		friend bool operator == (const active& x, const active& y) noexcept {
+			return (x.a == y.a && x.b == y.b && x.c == y.c && x.d == y.d &&
+				x.e == y.e && x.f == y.f);
+		}
+	};
+
+}
+
+using namespace test07;
 
 
 //-------------------------------------------------------------------
