@@ -6815,17 +6815,41 @@ public:
 
     //---------------------------------------------------------------
     man_page& program_name(const string& n) {
-        progName_ = n;
+        progName_ = program_basename(n);
         return *this;
     }
     man_page& program_name(string&& n) {
-        progName_ = std::move(n);
+        progName_ = program_basename(n);
         return *this;
     }
     const string& program_name() const noexcept {
         return progName_;
     }
 
+	static const string program_basename(const string& progname) {
+		// clip off the exe path, i.e. execute equivalent of basename(progname, ".exe")
+		auto sep_pos = progname.find_last_of(":/\\");
+		auto end_pos = progname.size();
+		const doc_string exe = ".exe";
+		if (exe.size() < progname.size() && std::equal(exe.rbegin(), exe.rend(), progname.rbegin()))
+		{
+			end_pos -= exe.size();
+		}
+		if (sep_pos == doc_string::npos)
+		{
+			sep_pos = 0;
+		}
+		else
+		{
+			sep_pos++;
+		}
+
+		if (sep_pos > 0 || end_pos < progname.size())
+		{
+			return progname.substr(sep_pos, end_pos - sep_pos);
+		}
+		return progname;
+	}
 
     //---------------------------------------------------------------
     man_page& section_row_spacing(int rows) {
@@ -6855,7 +6879,8 @@ make_man_page(const group& cli,
               const doc_formatting& fmt = doc_formatting{})
 {
     man_page man;
-    man.append_section("SYNOPSIS", usage_lines(cli,progname,fmt).str());
+	man.program_name(progname);
+    man.append_section("SYNOPSIS", usage_lines(cli, man.program_name(),fmt).str());
     man.append_section("OPTIONS", documentation(cli,fmt).str());
     return man;
 }
