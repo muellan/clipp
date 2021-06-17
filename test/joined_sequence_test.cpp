@@ -12,24 +12,31 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
+namespace sequence_test01 {
 
-    explicit
-    active(int i_, char a_, char b_, char c_) : i{i_}, a{a_}, b{b_}, c{c_} {}
+	struct active {
+		active() = default;
 
-    active(int i_, const std::string& s_) : i{i_}, s{s_} {}
+		explicit
+			active(int i_, char a_, char b_, char c_) : i{ i_ }, a{ a_ }, b{ b_ }, c{ c_ } {}
 
-    int i = 0;
-    char a = ' ', b = ' ', c = ' ';
-    std::string s = "";
+		active(int i_, const std::string& s_) : i{ i_ }, s{ s_ } {}
 
-    friend bool operator == (const active& x, const active& y) noexcept {
-        return (x.i == y.i &&
-                x.a == y.a && x.b == y.b && x.c == y.c &&
-                x.s == y.s);
-    }
-};
+		int i = 0;
+		char a = ' ', b = ' ', c = ' ';
+		std::string s = "";
+
+		friend bool operator == (const active& x, const active& y) noexcept {
+			return (x.i == y.i &&
+				x.a == y.a && x.b == y.b && x.c == y.c &&
+				x.s == y.s);
+		}
+	};
+
+}
+
+using namespace sequence_test01;
+
 
 
 //-------------------------------------------------------------------

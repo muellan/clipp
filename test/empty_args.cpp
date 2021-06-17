@@ -12,21 +12,27 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
-    explicit
-    active(bool o_, std::string ov_ = "_", std::string pv_ = "_"):
-        o{o_}, ov{std::move(ov_)}, pv{std::move(pv_)}
-    {}
+namespace empty_args_test {
 
-    bool o = false;
-    std::string ov = "_";
-    std::string pv = "_";
+	struct active {
+		active() = default;
+		explicit
+			active(bool o_, std::string ov_ = "_", std::string pv_ = "_") :
+			o{ o_ }, ov{ std::move(ov_) }, pv{ std::move(pv_) }
+		{}
 
-    friend bool operator == (const active& x, const active& y) noexcept {
-        return (x.o == y.o && x.ov == y.ov && x.pv == y.pv);
-    }
-};
+		bool o = false;
+		std::string ov = "_";
+		std::string pv = "_";
+
+		friend bool operator == (const active& x, const active& y) noexcept {
+			return (x.o == y.o && x.ov == y.ov && x.pv == y.pv);
+		}
+	};
+
+}
+
+using namespace empty_args_test;
 
 
 //-------------------------------------------------------------------

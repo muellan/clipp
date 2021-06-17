@@ -12,52 +12,58 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
-    explicit
-    active(bool a_, bool b_, bool c_, bool d_,
-           int av_, int bv_, int cv_, int dv_):
-        a{a_}, b{b_}, c{c_}, d{d_},
-        av{av_}, bv{bv_}, cv{cv_}, dv{dv_}
-    {}
-    bool a = false, b = false, c = false, d = false;
-    int av = 0, bv = 0, cv = 0, dv = 0;
+namespace required_params_test01 {
 
-    friend bool operator == (const active& x, const active& y) noexcept {
-        return (x.a == y.a && x.b == y.b && x.c == y.c && x.d == y.d &&
-                x.av == y.av && x.bv == y.bv && x.cv == y.cv && x.dv == y.dv );
-    }
+	struct active {
+		active() = default;
+		explicit
+			active(bool a_, bool b_, bool c_, bool d_,
+				int av_, int bv_, int cv_, int dv_) :
+			a{ a_ }, b{ b_ }, c{ c_ }, d{ d_ },
+			av{ av_ }, bv{ bv_ }, cv{ cv_ }, dv{ dv_ }
+		{}
+		bool a = false, b = false, c = false, d = false;
+		int av = 0, bv = 0, cv = 0, dv = 0;
 
-    template<class OStream>
-    friend OStream& operator << (OStream& os, const active& x) {
-        return os << '{' << x.a <<' '<< x.b <<' '<< x.c <<' '<< x.d
-            << " | " << x.av <<' '<< x.bv <<' '<< x.cv <<' '<< x.dv << '}';
-    }
-};
+		friend bool operator == (const active& x, const active& y) noexcept {
+			return (x.a == y.a && x.b == y.b && x.c == y.c && x.d == y.d &&
+				x.av == y.av && x.bv == y.bv && x.cv == y.cv && x.dv == y.dv);
+		}
 
-//---------------------------------------------------------------
-struct errors {
-    errors() = default;
-    explicit
-    errors(bool a_, bool b_, bool c_, bool d_,
-           bool av_, bool bv_, bool cv_, bool dv_):
-        a{a_}, b{b_}, c{c_}, d{d_},
-        av{av_}, bv{bv_}, cv{cv_}, dv{dv_}
-    {}
-    bool a = false, b = false, c = false, d = false;
-    bool av = false, bv = false, cv = false, dv = false;
+		template<class OStream>
+		friend OStream& operator << (OStream& os, const active& x) {
+			return os << '{' << x.a << ' ' << x.b << ' ' << x.c << ' ' << x.d
+				<< " | " << x.av << ' ' << x.bv << ' ' << x.cv << ' ' << x.dv << '}';
+		}
+	};
 
-    friend bool operator == (const errors& x, const errors& y) noexcept {
-        return (x.a == y.a && x.b == y.b && x.c == y.c && x.d == y.d &&
-                x.av == y.av && x.bv == y.bv && x.cv == y.cv && x.dv == y.dv );
-    }
+	//---------------------------------------------------------------
+	struct errors {
+		errors() = default;
+		explicit
+			errors(bool a_, bool b_, bool c_, bool d_,
+				bool av_, bool bv_, bool cv_, bool dv_) :
+			a{ a_ }, b{ b_ }, c{ c_ }, d{ d_ },
+			av{ av_ }, bv{ bv_ }, cv{ cv_ }, dv{ dv_ }
+		{}
+		bool a = false, b = false, c = false, d = false;
+		bool av = false, bv = false, cv = false, dv = false;
 
-    template<class OStream>
-    friend OStream& operator << (OStream& os, const errors& x) {
-        return os << '{' << x.a <<' '<< x.b <<' '<< x.c <<' '<< x.d
-            << " | " << x.av <<' '<< x.bv <<' '<< x.cv <<' '<< x.dv << '}';
-    }
-};
+		friend bool operator == (const errors& x, const errors& y) noexcept {
+			return (x.a == y.a && x.b == y.b && x.c == y.c && x.d == y.d &&
+				x.av == y.av && x.bv == y.bv && x.cv == y.cv && x.dv == y.dv);
+		}
+
+		template<class OStream>
+		friend OStream& operator << (OStream& os, const errors& x) {
+			return os << '{' << x.a << ' ' << x.b << ' ' << x.c << ' ' << x.d
+				<< " | " << x.av << ' ' << x.bv << ' ' << x.cv << ' ' << x.dv << '}';
+		}
+	};
+
+}
+
+using namespace required_params_test01;
 
 
 //-------------------------------------------------------------------

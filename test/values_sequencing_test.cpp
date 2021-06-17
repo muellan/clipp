@@ -12,40 +12,47 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
+namespace sequencing_test01 {
 
-    explicit
-    active(bool a_,
-           bool ie_, bool je_, bool ke_, bool ve_,
-           int i_, int j_, int k_, std::initializer_list<int> v_)
-    :
-        a{a_},
-        ie{ie_}, je{je_}, ke{ke_}, ve{ve_},
-        i{i_}, j{j_}, k{k_}, v{v_}
-    {}
+	struct active {
+		active() = default;
 
-    //option presence
-    bool a = false;
-    //requirement error
-    bool ie = false, je = false, ke = false, ve = false;
-    //values
-    int i = 0, j = 0, k = 0;
-    std::vector<int> v;
+		explicit
+			active(bool a_,
+				bool ie_, bool je_, bool ke_, bool ve_,
+				int i_, int j_, int k_, std::initializer_list<int> v_)
+			:
+			a{ a_ },
+			ie{ ie_ }, je{ je_ }, ke{ ke_ }, ve{ ve_ },
+			i{ i_ }, j{ j_ }, k{ k_ }, v{ v_ }
+		{}
 
-    friend bool operator == (const active& x, const active& y) noexcept {
-        return (x.a == y.a && x.ie == y.ie && x.je == y.je &&
-                x.ke == y.ke && x.ve == y.ve && x.i == y.i &&
-                x.j == y.j && x.k == y.k &&
-                std::equal(begin(x.v), end(x.v), begin(y.v)));
-    }
+		//option presence
+		bool a = false;
+		//requirement error
+		bool ie = false, je = false, ke = false, ve = false;
+		//values
+		int i = 0, j = 0, k = 0;
+		std::vector<int> v;
 
-    template<class OStream>
-    friend OStream& operator << (OStream& os, const active& x) {
-        return os << x.a <<' '<< x.ie <<' '<< x.je <<' '<< x.ke <<' '
-                  << x.ve <<' '<< x.i <<' '<< x.j <<' '<< x.k;
-    }
-};
+		friend bool operator == (const active& x, const active& y) noexcept {
+			return (x.a == y.a && x.ie == y.ie && x.je == y.je &&
+				x.ke == y.ke && x.ve == y.ve && x.i == y.i &&
+				x.j == y.j && x.k == y.k &&
+				std::equal(begin(x.v), end(x.v), begin(y.v)));
+		}
+
+		template<class OStream>
+		friend OStream& operator << (OStream& os, const active& x) {
+			return os << x.a << ' ' << x.ie << ' ' << x.je << ' ' << x.ke << ' '
+				<< x.ve << ' ' << x.i << ' ' << x.j << ' ' << x.k;
+		}
+	};
+
+}
+
+using namespace sequencing_test01;
+
 
 
 //-------------------------------------------------------------------

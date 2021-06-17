@@ -12,15 +12,21 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
-    active(bool a_, bool b_): a{a_}, b{b_} {}
-    bool a = false, b = false;
+namespace flags_test01 {
 
-    friend bool operator == (const active& x, const active& y) noexcept {
-        return (x.a == y.a && x.b == y.b);
-    }
-};
+	struct active {
+		active() = default;
+		active(bool a_, bool b_) : a{ a_ }, b{ b_ } {}
+		bool a = false, b = false;
+
+		friend bool operator == (const active& x, const active& y) noexcept {
+			return (x.a == y.a && x.b == y.b);
+		}
+	};
+
+}
+
+using namespace flags_test01;
 
 
 //-------------------------------------------------------------------

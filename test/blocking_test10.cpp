@@ -12,24 +12,30 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
-    explicit
-    active(bool n_, std::initializer_list<int> nums_,
-           bool s_, const std::string& str_)
-    :
-           str{str_}, nums{nums_}, n{n_}, s{s_}
-    {}
+namespace test10 {
 
-    std::string str;
-    std::vector<int> nums;
-    bool n = false, s = false;
+	struct active {
+		active() = default;
+		explicit
+			active(bool n_, std::initializer_list<int> nums_,
+				bool s_, const std::string& str_)
+			:
+			str{ str_ }, nums{ nums_ }, n{ n_ }, s{ s_ }
+		{}
 
-    friend bool operator == (const active& x, const active& y) noexcept {
-        return x.n == y.n && x.s == y.s && x.str == y.str &&
-               std::equal(x.nums.begin(), x.nums.end(), y.nums.begin());
-    }
-};
+		std::string str;
+		std::vector<int> nums;
+		bool n = false, s = false;
+
+		friend bool operator == (const active& x, const active& y) noexcept {
+			return x.n == y.n && x.s == y.s && x.str == y.str &&
+				std::equal(x.nums.begin(), x.nums.end(), y.nums.begin());
+		}
+	};
+
+}
+
+using namespace test10;
 
 
 //-------------------------------------------------------------------

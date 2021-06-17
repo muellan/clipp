@@ -12,20 +12,27 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
-    explicit
-    active(bool a_, bool b_, bool c_, bool d_, bool e_, bool f_, int i_ = 0) :
-        a{a_}, b{b_}, c{c_}, d{d_}, e{e_}, f{f_}, i{i_}
-    {}
-    bool a = false, b = false, c = false, d = false, e = false, f = false;
-    int i = 0;
+namespace test02 {
 
-    friend bool operator == (const active& x, const active& y) noexcept {
-        return (x.a == y.a && x.b == y.b && x.c == y.c && x.d == y.d &&
-                x.e == y.e && x.f == y.f && x.i == y.i);
-    }
-};
+	struct active {
+		active() = default;
+		explicit
+			active(bool a_, bool b_, bool c_, bool d_, bool e_, bool f_, int i_ = 0) :
+			a{ a_ }, b{ b_ }, c{ c_ }, d{ d_ }, e{ e_ }, f{ f_ }, i{ i_ }
+		{}
+		bool a = false, b = false, c = false, d = false, e = false, f = false;
+		int i = 0;
+
+		friend bool operator == (const active& x, const active& y) noexcept {
+			return (x.a == y.a && x.b == y.b && x.c == y.c && x.d == y.d &&
+				x.e == y.e && x.f == y.f && x.i == y.i);
+		}
+	};
+
+}
+
+using namespace test02;
+
 
 
 //-------------------------------------------------------------------

@@ -12,23 +12,29 @@
 
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
-    explicit
-    active(bool a_, bool b_,
-           std::initializer_list<int> i_, std::initializer_list<int> j_)
-    :
-        a{a_}, b{b_}, i{i_}, j{j_}
-    {}
-    bool a = false, b = false;
-    std::vector<int> i, j;
+namespace repeatable_alts_test {
 
-    friend bool operator == (const active& x, const active& y) noexcept {
-        return x.a == y.a && x.b == y.b &&
-               std::equal(begin(x.i), end(x.i), begin(y.i)) &&
-               std::equal(begin(x.j), end(x.j), begin(y.j));
-    }
-};
+	struct active {
+		active() = default;
+		explicit
+			active(bool a_, bool b_,
+				std::initializer_list<int> i_, std::initializer_list<int> j_)
+			:
+			a{ a_ }, b{ b_ }, i{ i_ }, j{ j_ }
+		{}
+		bool a = false, b = false;
+		std::vector<int> i, j;
+
+		friend bool operator == (const active& x, const active& y) noexcept {
+			return x.a == y.a && x.b == y.b &&
+				std::equal(begin(x.i), end(x.i), begin(y.i)) &&
+				std::equal(begin(x.j), end(x.j), begin(y.j));
+		}
+	};
+
+}
+
+using namespace repeatable_alts_test;
 
 
 //-------------------------------------------------------------------
