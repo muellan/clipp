@@ -21,11 +21,15 @@ struct active {
 
     std::vector<double> xs;
 
-    friend bool operator == (const active& a, const active& b) noexcept {
-        return std::equal(begin(a.xs), end(a.xs), begin(b.xs),
-            [](double x, double y) {
-                return std::abs(x - y) < 1e-5;
-            });
+	friend bool operator == (const active& x, const active& y) noexcept {
+		return (
+			(x.xs.size() == 0 && y.xs.size() == 0) ||
+			(x.xs.size() > 0 && y.xs.size() > 0 && x.xs.size() == y.xs.size() &&
+			std::equal(begin(x.xs), end(x.xs), begin(y.xs),
+				[](double x, double y) {
+					return std::abs(x - y) < 1e-5;
+				}))
+		);
     }
 };
 

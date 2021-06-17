@@ -94,17 +94,19 @@ void run_wrapped_variants(
 
         parse(args, wrappedCli);
 
-//        cout << "==============================================\n"
-//             << " in file " << info.file << " in line " << info.line
-//             << " with variant " << variant << '\n'
-//             << "==============================================\n";
-//        clipp::debug::print(cout, wrappedCli);
-//        cout << "args = { ";
-//        for(const auto& a : args) cout << '"' << a << "\" ";
-//        cout << "}\n";
-//        auto res = clipp::parse(args, wrappedCli);
-//        cout << "----------------------------------------------\n";
-//        clipp::debug::print(cout, res);
+#if 0
+		cout << "==============================================\n"
+             << " in file " << info.file << " in line " << info.line
+             << " with variant " << variant << '\n'
+             << "==============================================\n";
+        clipp::debug::print(cout, wrappedCli);
+        cout << "args = { ";
+        for(const auto& a : args) cout << '"' << a << "\" ";
+        cout << "}\n";
+        auto res = clipp::parse(args, wrappedCli);
+        cout << "----------------------------------------------\n";
+        clipp::debug::print(cout, res);
+#endif
 
         if(!valid()) {
             throw std::runtime_error{"failed test " + info.file +
@@ -133,16 +135,18 @@ void run_test(
 
     parse(args, cli);
 
-//    cout << "==============================================\n"
-//         << " in file " << info.file << " in line " << info.line << '\n'
-//         << "==============================================\n";
-//    clipp::debug::print(cout, cli);
-//    cout << "args = { ";
-//    for(const auto& a : args) cout << '"' << a << "\" ";
-//    cout << "}\n";
-//    auto res = clipp::parse(args, cli);
-//    cout << "----------------------------------------------\n";
-//    clipp::debug::print(cout, res);
+#if 0
+    cout << "==============================================\n"
+         << " in file " << info.file << " in line " << info.line << '\n'
+         << "==============================================\n";
+    clipp::debug::print(cout, cli);
+    cout << "args = { ";
+    for(const auto& a : args) cout << '"' << a << "\" ";
+    cout << "}\n";
+    auto res = clipp::parse(args, cli);
+    cout << "----------------------------------------------\n";
+    clipp::debug::print(cout, res);
+#endif
 
     if(!valid()) {
         throw std::runtime_error{"failed test " + info.file +
