@@ -155,6 +155,21 @@ namespace traits {
  * @brief function (class) signature type trait
  *
  *****************************************************************************/
+#if defined(__cpp_lib_is_invocable)
+template<class Fn, class Ret, class... Args>
+constexpr auto
+check_is_callable(int) -> decltype(
+    std::declval<Fn>()(std::declval<Args>()...),
+    std::integral_constant<bool,
+        std::is_same<Ret,typename std::invoke_result<Fn,Args...>::type>::value>{} );
+
+template<class Fn, class Ret>
+constexpr auto
+check_is_callable_without_arg(int) -> decltype(
+    std::declval<Fn>()(),
+    std::integral_constant<bool,
+        std::is_same<Ret,typename std::invoke_result<Fn>::type>::value>{} );
+#else
 template<class Fn, class Ret, class... Args>
 constexpr auto
 check_is_callable(int) -> decltype(
@@ -162,16 +177,17 @@ check_is_callable(int) -> decltype(
     std::integral_constant<bool,
         std::is_same<Ret,typename std::result_of<Fn(Args...)>::type>::value>{} );
 
-template<class,class,class...>
-constexpr auto
-check_is_callable(long) -> std::false_type;
-
 template<class Fn, class Ret>
 constexpr auto
 check_is_callable_without_arg(int) -> decltype(
     std::declval<Fn>()(),
     std::integral_constant<bool,
         std::is_same<Ret,typename std::result_of<Fn()>::type>::value>{} );
+#endif
+
+template<class,class,class...>
+constexpr auto
+check_is_callable(long) -> std::false_type;
 
 template<class,class>
 constexpr auto
