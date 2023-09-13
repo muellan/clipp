@@ -167,7 +167,7 @@ check_is_callable(int) -> decltype(
     std::integral_constant<bool,
         std::is_same<Ret,
 #if CLIPP_CPLUSPLUS >= 201703L
-        typename std::invoke_result<Fn(Args...)>::type
+        typename std::invoke_result_t<Fn, Args...>
 #else
         typename std::result_of<Fn(Args...)>::type
 #endif
@@ -185,7 +185,7 @@ check_is_callable_without_arg(int) -> decltype(
     std::integral_constant<bool,
         std::is_same<Ret,
 #if CLIPP_CPLUSPLUS >= 201703L
-        typename std::invoke_result<Fn()>::type
+        typename std::invoke_result_t<Fn>
 #else
         typename std::result_of<Fn()>::type
 #endif
