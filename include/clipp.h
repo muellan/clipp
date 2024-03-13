@@ -1406,9 +1406,7 @@ public:
     //---------------------------------------------------------------
     /** @brief executes all argument actions */
     void execute_actions(const arg_string& arg) const {
-        int i = 0;
         for(const auto& a : argActions_) {
-            ++i;
             a(arg.c_str());
         }
     }
@@ -4959,12 +4957,12 @@ private:
         //go through all exclusive groups of matching pattern
         for(const auto& m : match.stack()) {
             if(m.parent->exclusive()) {
-                for(auto i = int(missCand_.size())-1; i >= 0; --i) {
+                for(std::size_t i = missCand_.size()-1; i >= 0; --i) {
                     bool removed = false;
                     for(const auto& c : missCand_[i].pos.stack()) {
                         //sibling within same exclusive group => discard
                         if(c.parent == m.parent && c.cur != m.cur) {
-                            missCand_.erase(missCand_.begin() + i);
+                            missCand_.erase(missCand_.begin() + 1L);
                             if(missCand_.empty()) return;
                             removed = true;
                             break;
@@ -5103,8 +5101,8 @@ public:
      */
     arg_mappings::size_type
     unmapped_args_count() const noexcept {
-        return std::count_if(arg2param_.begin(), arg2param_.end(),
-            [](const arg_mapping& a){ return !a.param(); });
+        return static_cast<arg_mappings::size_type>(std::count_if(arg2param_.begin(), arg2param_.end(),
+            [](const arg_mapping& a){ return !a.param(); }));
     }
 
     /** @brief returns if any argument could only be matched by an
@@ -6239,7 +6237,7 @@ private:
                         os << buf.str();
                         if(i < group.size()-1) {
                             if(cur.line > 0) {
-                                os << string(fmt_.line_spacing(), '\n');
+                                os << string(static_cast<std::size_t>(fmt_.line_spacing()), '\n');
                             }
                             ++cur.line;
                             os << '\n';
@@ -6312,7 +6310,7 @@ private:
 
             if(surrAlt) lbl += fmt_.alternative_flags_prefix();
             bool sep = false;
-            for(int i = 0; i < n; ++i) {
+            for(std::size_t i = 0; i < static_cast<std::size_t>(n); ++i) {
                 if(sep) {
                     if(cur.is_singleton())
                         lbl += fmt_.alternative_group_separator();
@@ -6715,9 +6713,9 @@ private:
         const auto& flags = param.flags();
         if(!flags.empty()) {
             lbl += flags[0];
-            const int n = std::min(fmt.max_flags_per_param_in_doc(),
-                                   int(flags.size()));
-            for(int i = 1; i < n; ++i) {
+            const auto n = static_cast<std::size_t>(std::min(fmt.max_flags_per_param_in_doc(),
+                                   int(flags.size())));
+            for(std::size_t i = 1; i < n; ++i) {
                 lbl += fmt.flag_separator() + flags[i];
             }
         }
@@ -6872,7 +6870,7 @@ OStream&
 operator << (OStream& os, const man_page& man)
 {
     bool first = true;
-    const auto secSpc = doc_string(man.section_row_spacing() + 1, '\n');
+    const auto secSpc = doc_string(static_cast<std::size_t>(man.section_row_spacing()) + std::size_t(1), '\n');
     for(const auto& section : man) {
         if(!section.content().empty()) {
             if(first) first = false; else os << secSpc;
@@ -7003,7 +7001,7 @@ void print(OStream& os, const pattern& param, int level = 0)
 template<class OStream>
 void print(OStream& os, const group& g, int level)
 {
-    auto indent = doc_string(4*level, ' ');
+    auto indent = doc_string(static_cast<std::size_t>(4*level), ' ');
     os << indent;
     if(g.blocking()) os << '~';
     if(g.joinable()) os << 'J';
