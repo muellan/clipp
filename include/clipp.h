@@ -4957,12 +4957,12 @@ private:
         //go through all exclusive groups of matching pattern
         for(const auto& m : match.stack()) {
             if(m.parent->exclusive()) {
-                for(std::size_t i = missCand_.size()-1; i >= 0; --i) {
+                for(auto i = static_cast<int>(missCand_.size())-1; i >= 0; --i) {
                     bool removed = false;
-                    for(const auto& c : missCand_[i].pos.stack()) {
+                    for(const auto& c : missCand_[static_cast<std::size_t>(i)].pos.stack()) {
                         //sibling within same exclusive group => discard
                         if(c.parent == m.parent && c.cur != m.cur) {
-                            missCand_.erase(missCand_.begin() + 1L);
+                            missCand_.erase(missCand_.begin() + i);
                             if(missCand_.empty()) return;
                             removed = true;
                             break;
@@ -4970,9 +4970,9 @@ private:
                     }
                     //remove miss candidates only within current repeat cycle
                     if(i > 0 && removed) {
-                        if(missCand_[i-1].startsRepeatGroup) break;
+                        if(missCand_[static_cast<std::size_t>(i-1)].startsRepeatGroup) break;
                     } else {
-                        if(missCand_[i].startsRepeatGroup) break;
+                        if(missCand_[static_cast<std::size_t>(i)].startsRepeatGroup) break;
                     }
                 }
             }
