@@ -10,13 +10,14 @@
 
 #include "testing.h"
 
+namespace {
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
+struct test_active {
+    test_active() = default;
 
     explicit
-    active(bool a_, bool b_, bool c_, bool d_, bool e_, bool f_,
+    test_active(bool a_, bool b_, bool c_, bool d_, bool e_, bool f_,
            std::initializer_list<int> i_) :
         a{a_}, b{b_}, c{c_}, d{d_}, e{e_}, f{f_}, i{i_}
     {}
@@ -24,7 +25,7 @@ struct active {
     bool a = false, b = false, c = false, d = false, e = false, f = false;
     std::vector<int> i;
 
-    friend bool operator == (const active& x, const active& y) noexcept {
+    friend bool operator == (const test_active& x, const test_active& y) noexcept {
         return (x.a == y.a && x.b == y.b && x.c == y.c &&
                 x.d == y.d && x.e == y.e && x.f == y.f &&
                 std::equal(begin(x.i), end(x.i), begin(y.i)));
@@ -51,12 +52,12 @@ struct repeats {
 //-------------------------------------------------------------------
 void test(int lineNo,
           const std::initializer_list<const char*> args,
-          const active& matches,
+          const test_active& matches,
           const repeats& repeated)
 {
     using namespace clipp;
 
-    active m;
+    test_active m;
     repeats r;
     auto cli = group(
         //repeatable option
@@ -91,67 +92,69 @@ void test(int lineNo,
     );
 
     run_wrapped_variants({ __FILE__, lineNo }, args, cli,
-              [&]{ m = active{}; r = repeats{}; },
+              [&]{ m = test_active{}; r = repeats{}; },
               [&]{ return m == matches && r == repeated; });
 }
 
+} // namespace
 
 //-------------------------------------------------------------------
-int main()
+int TEST_MAIN()
 {
     try {
-        test(__LINE__, {""}, active{}, repeats{});
+        test(__LINE__, {""}, test_active{}, repeats{});
                                                             //     a b c d e f i           a b c d e f i
-        test(__LINE__, {"a"},                          active{1,0,0,0,0,0,{}}, repeats{0,0,0,0,0,0,0});
-        test(__LINE__, {"a", "a"},                     active{1,0,0,0,0,0,{}}, repeats{1,0,0,0,0,0,0});
-        test(__LINE__, {"a", "a", "a"},                active{1,0,0,0,0,0,{}}, repeats{2,0,0,0,0,0,0});
-        test(__LINE__, {"a", "a", "a", "a"},           active{1,0,0,0,0,0,{}}, repeats{3,0,0,0,0,0,0});
-        test(__LINE__, {"a", "a", "a", "a", "a" },     active{1,0,0,0,0,0,{}}, repeats{4,0,0,0,0,0,0});
-        test(__LINE__, {"a", "a", "e", "a", "a", "a"}, active{1,0,0,0,1,0,{}}, repeats{4,0,0,0,0,0,0});
+        test(__LINE__, {"a"},                          test_active{1,0,0,0,0,0,{}}, repeats{0,0,0,0,0,0,0});
+        test(__LINE__, {"a", "a"},                     test_active{1,0,0,0,0,0,{}}, repeats{1,0,0,0,0,0,0});
+        test(__LINE__, {"a", "a", "a"},                test_active{1,0,0,0,0,0,{}}, repeats{2,0,0,0,0,0,0});
+        test(__LINE__, {"a", "a", "a", "a"},           test_active{1,0,0,0,0,0,{}}, repeats{3,0,0,0,0,0,0});
+        test(__LINE__, {"a", "a", "a", "a", "a" },     test_active{1,0,0,0,0,0,{}}, repeats{4,0,0,0,0,0,0});
+        test(__LINE__, {"a", "a", "e", "a", "a", "a"}, test_active{1,0,0,0,1,0,{}}, repeats{4,0,0,0,0,0,0});
 
-        test(__LINE__, {"b"},                     active{0,1,0,0,0,0,{}},  repeats{0,0,0,0,0,0,0});
-        test(__LINE__, {"b", "b", "2"},           active{0,1,0,0,0,0,{2}}, repeats{0,1,0,0,0,0,0});
-        test(__LINE__, {"b", "2", "b"},           active{0,1,0,0,0,0,{2}}, repeats{0,1,0,0,0,0,0});
-        test(__LINE__, {"b", "a", "b"},           active{1,1,0,0,0,0,{}},  repeats{0,1,0,0,0,0,0});
-        test(__LINE__, {"b", "b", "2", "3"},      active{0,1,0,0,0,0,{2}}, repeats{0,1,0,0,0,0,1});
-        test(__LINE__, {"b", "2", "b", "b", "3"}, active{0,1,0,0,0,0,{2}}, repeats{0,2,0,0,0,0,1});
+        test(__LINE__, {"b"},                     test_active{0,1,0,0,0,0,{}},  repeats{0,0,0,0,0,0,0});
+        test(__LINE__, {"b", "b", "2"},           test_active{0,1,0,0,0,0,{2}}, repeats{0,1,0,0,0,0,0});
+        test(__LINE__, {"b", "2", "b"},           test_active{0,1,0,0,0,0,{2}}, repeats{0,1,0,0,0,0,0});
+        test(__LINE__, {"b", "a", "b"},           test_active{1,1,0,0,0,0,{}},  repeats{0,1,0,0,0,0,0});
+        test(__LINE__, {"b", "b", "2", "3"},      test_active{0,1,0,0,0,0,{2}}, repeats{0,1,0,0,0,0,1});
+        test(__LINE__, {"b", "2", "b", "b", "3"}, test_active{0,1,0,0,0,0,{2}}, repeats{0,2,0,0,0,0,1});
 
-        test(__LINE__, {"c"},                active{0,0,1,0,0,0,{}},    repeats{0,0,0,0,0,0,0});
-        test(__LINE__, {"c", "c"},           active{0,0,1,0,0,0,{}},    repeats{0,0,1,0,0,0,0});
-        test(__LINE__, {"c", "2"},           active{0,0,1,0,0,0,{2}},   repeats{0,0,0,0,0,0,0});
-        test(__LINE__, {"c", "2", "3"},      active{0,0,1,0,0,0,{2,3}}, repeats{0,0,0,0,0,0,1});
-        test(__LINE__, {"c", "c", "2", "3"}, active{0,0,1,0,0,0,{2,3}}, repeats{0,0,1,0,0,0,1});
-        test(__LINE__, {"c", "2", "3", "c"}, active{0,0,1,0,0,0,{2,3}}, repeats{0,0,1,0,0,0,1});
+        test(__LINE__, {"c"},                test_active{0,0,1,0,0,0,{}},    repeats{0,0,0,0,0,0,0});
+        test(__LINE__, {"c", "c"},           test_active{0,0,1,0,0,0,{}},    repeats{0,0,1,0,0,0,0});
+        test(__LINE__, {"c", "2"},           test_active{0,0,1,0,0,0,{2}},   repeats{0,0,0,0,0,0,0});
+        test(__LINE__, {"c", "2", "3"},      test_active{0,0,1,0,0,0,{2,3}}, repeats{0,0,0,0,0,0,1});
+        test(__LINE__, {"c", "c", "2", "3"}, test_active{0,0,1,0,0,0,{2,3}}, repeats{0,0,1,0,0,0,1});
+        test(__LINE__, {"c", "2", "3", "c"}, test_active{0,0,1,0,0,0,{2,3}}, repeats{0,0,1,0,0,0,1});
 
-        test(__LINE__, {"d"},                active{0,0,0,1,0,0,{}},    repeats{0,0,0,0,0,0,0});
-        test(__LINE__, {"d", "d"},           active{0,0,0,1,0,0,{}},    repeats{0,0,0,1,0,0,0});
-        test(__LINE__, {"d", "2"},           active{0,0,0,1,0,0,{2}},   repeats{0,0,0,0,0,0,0});
-        test(__LINE__, {"d", "2", "d", "3"}, active{0,0,0,1,0,0,{2,3}}, repeats{0,0,0,1,0,0,1});
-        test(__LINE__, {"d", "2", "3"},      active{0,0,0,1,0,0,{2}},   repeats{0,0,0,0,0,0,0});
+        test(__LINE__, {"d"},                test_active{0,0,0,1,0,0,{}},    repeats{0,0,0,0,0,0,0});
+        test(__LINE__, {"d", "d"},           test_active{0,0,0,1,0,0,{}},    repeats{0,0,0,1,0,0,0});
+        test(__LINE__, {"d", "2"},           test_active{0,0,0,1,0,0,{2}},   repeats{0,0,0,0,0,0,0});
+        test(__LINE__, {"d", "2", "d", "3"}, test_active{0,0,0,1,0,0,{2,3}}, repeats{0,0,0,1,0,0,1});
+        test(__LINE__, {"d", "2", "3"},      test_active{0,0,0,1,0,0,{2}},   repeats{0,0,0,0,0,0,0});
 
-        test(__LINE__, {"e"},                          active{0,0,0,0,1,0,{}}, repeats{0,0,0,0,0,0,0});
-        test(__LINE__, {"e", "a"},                     active{1,0,0,0,1,0,{}}, repeats{0,0,0,0,0,0,0});
-        test(__LINE__, {"e", "e"},                     active{0,0,0,0,1,0,{}}, repeats{0,0,0,0,1,0,0});
-        test(__LINE__, {"e", "e", "e"},                active{0,0,0,0,1,0,{}}, repeats{0,0,0,0,2,0,0});
-        test(__LINE__, {"e", "a", "e", "e"},           active{1,0,0,0,1,0,{}}, repeats{0,0,0,0,2,0,0});
-        test(__LINE__, {"e", "b", "e", "a", "e" },     active{1,1,0,0,1,0,{}}, repeats{0,0,0,0,2,0,0});
-        test(__LINE__, {"e", "a", "a", "e", "e", "a"}, active{1,0,0,0,1,0,{}}, repeats{2,0,0,0,2,0,0});
+        test(__LINE__, {"e"},                          test_active{0,0,0,0,1,0,{}}, repeats{0,0,0,0,0,0,0});
+        test(__LINE__, {"e", "a"},                     test_active{1,0,0,0,1,0,{}}, repeats{0,0,0,0,0,0,0});
+        test(__LINE__, {"e", "e"},                     test_active{0,0,0,0,1,0,{}}, repeats{0,0,0,0,1,0,0});
+        test(__LINE__, {"e", "e", "e"},                test_active{0,0,0,0,1,0,{}}, repeats{0,0,0,0,2,0,0});
+        test(__LINE__, {"e", "a", "e", "e"},           test_active{1,0,0,0,1,0,{}}, repeats{0,0,0,0,2,0,0});
+        test(__LINE__, {"e", "b", "e", "a", "e" },     test_active{1,1,0,0,1,0,{}}, repeats{0,0,0,0,2,0,0});
+        test(__LINE__, {"e", "a", "a", "e", "e", "a"}, test_active{1,0,0,0,1,0,{}}, repeats{2,0,0,0,2,0,0});
 
-        test(__LINE__, {"f"},                          active{0,0,0,0,0,1,{}},      repeats{0,0,0,0,0,0,0});
-        test(__LINE__, {"f", "2"},                     active{0,0,0,0,0,1,{2}},     repeats{0,0,0,0,0,0,0});
-        test(__LINE__, {"f", "2", "3"},                active{0,0,0,0,0,1,{2,3}},   repeats{0,0,0,0,0,0,1});
-        test(__LINE__, {"f", "2", "f", "3"},           active{0,0,0,0,0,1,{2,3}},   repeats{0,0,0,0,0,1,1});
-        test(__LINE__, {"f", "2", "3", "4"},           active{0,0,0,0,0,1,{2,3,4}}, repeats{0,0,0,0,0,0,2});
-        test(__LINE__, {"f", "2", "f", "3", "4"},      active{0,0,0,0,0,1,{2,3,4}}, repeats{0,0,0,0,0,1,2});
-        test(__LINE__, {"f", "2", "3", "f", "4"},      active{0,0,0,0,0,1,{2,3,4}}, repeats{0,0,0,0,0,1,2});
-        test(__LINE__, {"f", "2", "f", "3", "f", "4"}, active{0,0,0,0,0,1,{2,3,4}}, repeats{0,0,0,0,0,2,2});
+        test(__LINE__, {"f"},                          test_active{0,0,0,0,0,1,{}},      repeats{0,0,0,0,0,0,0});
+        test(__LINE__, {"f", "2"},                     test_active{0,0,0,0,0,1,{2}},     repeats{0,0,0,0,0,0,0});
+        test(__LINE__, {"f", "2", "3"},                test_active{0,0,0,0,0,1,{2,3}},   repeats{0,0,0,0,0,0,1});
+        test(__LINE__, {"f", "2", "f", "3"},           test_active{0,0,0,0,0,1,{2,3}},   repeats{0,0,0,0,0,1,1});
+        test(__LINE__, {"f", "2", "3", "4"},           test_active{0,0,0,0,0,1,{2,3,4}}, repeats{0,0,0,0,0,0,2});
+        test(__LINE__, {"f", "2", "f", "3", "4"},      test_active{0,0,0,0,0,1,{2,3,4}}, repeats{0,0,0,0,0,1,2});
+        test(__LINE__, {"f", "2", "3", "f", "4"},      test_active{0,0,0,0,0,1,{2,3,4}}, repeats{0,0,0,0,0,1,2});
+        test(__LINE__, {"f", "2", "f", "3", "f", "4"}, test_active{0,0,0,0,0,1,{2,3,4}}, repeats{0,0,0,0,0,2,2});
 
-        test(__LINE__, {"f", "f"},                     active{0,0,0,0,0,1,{}},    repeats{0,0,0,0,0,1,0});
-        test(__LINE__, {"f", "2", "3", "f"},           active{0,0,0,0,0,1,{2,3}}, repeats{0,0,0,0,0,1,1});
+        test(__LINE__, {"f", "f"},                     test_active{0,0,0,0,0,1,{}},    repeats{0,0,0,0,0,1,0});
+        test(__LINE__, {"f", "2", "3", "f"},           test_active{0,0,0,0,0,1,{2,3}}, repeats{0,0,0,0,0,1,1});
 
     }
     catch(std::exception& e) {
         std::cerr << e.what() << std::endl;
         return 1;
     }
+    return 0;
 }

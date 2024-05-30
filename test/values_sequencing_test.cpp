@@ -11,12 +11,14 @@
 #include "testing.h"
 
 
+namespace {
+
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
+struct test_active {
+    test_active() = default;
 
     explicit
-    active(bool a_,
+    test_active(bool a_,
            bool ie_, bool je_, bool ke_, bool ve_,
            int i_, int j_, int k_, std::initializer_list<int> v_)
     :
@@ -33,7 +35,7 @@ struct active {
     int i = 0, j = 0, k = 0;
     std::vector<int> v;
 
-    friend bool operator == (const active& x, const active& y) noexcept {
+    friend bool operator == (const test_active& x, const test_active& y) noexcept {
         return (x.a == y.a && x.ie == y.ie && x.je == y.je &&
                 x.ke == y.ke && x.ve == y.ve && x.i == y.i &&
                 x.j == y.j && x.k == y.k &&
@@ -41,7 +43,7 @@ struct active {
     }
 
     template<class OStream>
-    friend OStream& operator << (OStream& os, const active& x) {
+    friend OStream& operator << (OStream& os, const test_active& x) {
         return os << x.a <<' '<< x.ie <<' '<< x.je <<' '<< x.ke <<' '
                   << x.ve <<' '<< x.i <<' '<< x.j <<' '<< x.k;
     }
@@ -51,11 +53,11 @@ struct active {
 //-------------------------------------------------------------------
 void test(int lineNo,
           const std::initializer_list<const char*> args,
-          const active& matches)
+          const test_active& matches)
 {
     using namespace clipp;
 
-    active m;
+    test_active m;
 
     auto cli = group(
         option("-a").set(m.a) & opt_value("i", m.i).if_missing(set(m.ie))
@@ -111,103 +113,105 @@ void test(int lineNo,
     );
 
     run_wrapped_variants({ __FILE__, lineNo }, args, cli,
-              [&]{ m = active{}; },
+              [&]{ m = test_active{}; },
               [&]{ return m == matches; });
 }
 
+} // namespace
 
 //-------------------------------------------------------------------
-int main()
+int TEST_MAIN()
 {
     try {
-        test(__LINE__, {""},   active{});
+        test(__LINE__, {""},   test_active{});
 
-        test(__LINE__, {"-a"},      active{1, 0,0,0,0, 0,0,0,{}});
-        test(__LINE__, {"-a", "2"}, active{1, 0,0,0,0, 2,0,0,{}});
+        test(__LINE__, {"-a"},      test_active{1, 0,0,0,0, 0,0,0,{}});
+        test(__LINE__, {"-a", "2"}, test_active{1, 0,0,0,0, 2,0,0,{}});
 
-        test(__LINE__, {"-b"},           active{1, 0,0,0,0, 0,0,0,{}});
-        test(__LINE__, {"-b", "2"},      active{1, 0,0,0,0, 2,0,0,{}});
-        test(__LINE__, {"-b", "2", "3"}, active{1, 0,0,0,0, 2,3,0,{}});
+        test(__LINE__, {"-b"},           test_active{1, 0,0,0,0, 0,0,0,{}});
+        test(__LINE__, {"-b", "2"},      test_active{1, 0,0,0,0, 2,0,0,{}});
+        test(__LINE__, {"-b", "2", "3"}, test_active{1, 0,0,0,0, 2,3,0,{}});
 
-        test(__LINE__, {"-c"},                active{1, 0,0,0,0, 0,0,0,{}});
-        test(__LINE__, {"-c", "2"},           active{1, 0,0,0,0, 2,0,0,{}});
-        test(__LINE__, {"-c", "2", "3" },     active{1, 0,0,0,0, 2,3,0,{}});
-        test(__LINE__, {"-c", "2", "3", "4"}, active{1, 0,0,0,0, 2,3,4,{}});
+        test(__LINE__, {"-c"},                test_active{1, 0,0,0,0, 0,0,0,{}});
+        test(__LINE__, {"-c", "2"},           test_active{1, 0,0,0,0, 2,0,0,{}});
+        test(__LINE__, {"-c", "2", "3" },     test_active{1, 0,0,0,0, 2,3,0,{}});
+        test(__LINE__, {"-c", "2", "3", "4"}, test_active{1, 0,0,0,0, 2,3,4,{}});
 
-        test(__LINE__, {"-d"},                     active{1, 0,0,0,0, 0,0,0,{}});
-        test(__LINE__, {"-d", "2"},                active{1, 0,0,0,0, 0,0,0,{2}});
-        test(__LINE__, {"-d", "2", "3"},           active{1, 0,0,0,0, 0,0,0,{2,3}});
-        test(__LINE__, {"-d", "2", "3", "4"},      active{1, 0,0,0,0, 0,0,0,{2,3,4}});
-        test(__LINE__, {"-d", "2", "3", "4", "5"}, active{1, 0,0,0,0, 0,0,0,{2,3,4, 5}});
+        test(__LINE__, {"-d"},                     test_active{1, 0,0,0,0, 0,0,0,{}});
+        test(__LINE__, {"-d", "2"},                test_active{1, 0,0,0,0, 0,0,0,{2}});
+        test(__LINE__, {"-d", "2", "3"},           test_active{1, 0,0,0,0, 0,0,0,{2,3}});
+        test(__LINE__, {"-d", "2", "3", "4"},      test_active{1, 0,0,0,0, 0,0,0,{2,3,4}});
+        test(__LINE__, {"-d", "2", "3", "4", "5"}, test_active{1, 0,0,0,0, 0,0,0,{2,3,4, 5}});
 
-        test(__LINE__, {"-c", "2", "-d", "3"}, active{1, 0,0,0,0, 2,0,0,{3}});
-        test(__LINE__, {"-d", "3", "-c", "2"}, active{1, 0,0,0,0, 2,0,0,{3}});
+        test(__LINE__, {"-c", "2", "-d", "3"}, test_active{1, 0,0,0,0, 2,0,0,{3}});
+        test(__LINE__, {"-d", "3", "-c", "2"}, test_active{1, 0,0,0,0, 2,0,0,{3}});
 
-        test(__LINE__, {"-e"},                     active{1, 0,0,0,0, 0,0,0,{}});
-        test(__LINE__, {"-e", "2"},                active{1, 0,0,0,0, 2,0,0,{}});
-        test(__LINE__, {"-e", "2", "3"},           active{1, 0,0,0,0, 2,0,0,{3}});
-        test(__LINE__, {"-e", "2", "3", "4"},      active{1, 0,0,0,0, 2,0,0,{3,4}});
-        test(__LINE__, {"-e", "2", "3", "4", "5"}, active{1, 0,0,0,0, 2,0,0,{3,4, 5}});
+        test(__LINE__, {"-e"},                     test_active{1, 0,0,0,0, 0,0,0,{}});
+        test(__LINE__, {"-e", "2"},                test_active{1, 0,0,0,0, 2,0,0,{}});
+        test(__LINE__, {"-e", "2", "3"},           test_active{1, 0,0,0,0, 2,0,0,{3}});
+        test(__LINE__, {"-e", "2", "3", "4"},      test_active{1, 0,0,0,0, 2,0,0,{3,4}});
+        test(__LINE__, {"-e", "2", "3", "4", "5"}, test_active{1, 0,0,0,0, 2,0,0,{3,4, 5}});
 
-        test(__LINE__, {"-f"},                     active{1, 0,0,0,0, 0,0,0,{}});
-        test(__LINE__, {"-f", "2"},                active{1, 0,0,0,0, 2,0,0,{}});
-        test(__LINE__, {"-f", "2", "3"},           active{1, 0,0,0,0, 2,3,0,{}});
-        test(__LINE__, {"-f", "2", "3", "4"},      active{1, 0,0,0,0, 2,3,0,{4}});
-        test(__LINE__, {"-f", "2", "3", "4", "5"}, active{1, 0,0,0,0, 2,3,0,{4, 5}});
+        test(__LINE__, {"-f"},                     test_active{1, 0,0,0,0, 0,0,0,{}});
+        test(__LINE__, {"-f", "2"},                test_active{1, 0,0,0,0, 2,0,0,{}});
+        test(__LINE__, {"-f", "2", "3"},           test_active{1, 0,0,0,0, 2,3,0,{}});
+        test(__LINE__, {"-f", "2", "3", "4"},      test_active{1, 0,0,0,0, 2,3,0,{4}});
+        test(__LINE__, {"-f", "2", "3", "4", "5"}, test_active{1, 0,0,0,0, 2,3,0,{4, 5}});
 
-        test(__LINE__, {"-k"},      active{1, 1,0,0,0, 0,0,0,{}});
-        test(__LINE__, {"-k", "2"}, active{1, 0,0,0,0, 2,0,0,{}});
+        test(__LINE__, {"-k"},      test_active{1, 1,0,0,0, 0,0,0,{}});
+        test(__LINE__, {"-k", "2"}, test_active{1, 0,0,0,0, 2,0,0,{}});
 
-        test(__LINE__, {"-l"},           active{1, 1,0,0,0, 0,0,0,{}});
-        test(__LINE__, {"-l", "2"},      active{1, 0,0,0,0, 2,0,0,{}});
-        test(__LINE__, {"-l", "2", "3"}, active{1, 0,0,0,0, 2,3,0,{}});
+        test(__LINE__, {"-l"},           test_active{1, 1,0,0,0, 0,0,0,{}});
+        test(__LINE__, {"-l", "2"},      test_active{1, 0,0,0,0, 2,0,0,{}});
+        test(__LINE__, {"-l", "2", "3"}, test_active{1, 0,0,0,0, 2,3,0,{}});
 
-        test(__LINE__, {"-m"},                active{1, 1,0,0,0, 0,0,0,{}});
-        test(__LINE__, {"-m", "2"},           active{1, 0,0,0,0, 2,0,0,{}});
-        test(__LINE__, {"-m", "2", "3" },     active{1, 0,0,0,0, 2,3,0,{}});
-        test(__LINE__, {"-m", "2", "3", "4"}, active{1, 0,0,0,0, 2,3,4,{}});
+        test(__LINE__, {"-m"},                test_active{1, 1,0,0,0, 0,0,0,{}});
+        test(__LINE__, {"-m", "2"},           test_active{1, 0,0,0,0, 2,0,0,{}});
+        test(__LINE__, {"-m", "2", "3" },     test_active{1, 0,0,0,0, 2,3,0,{}});
+        test(__LINE__, {"-m", "2", "3", "4"}, test_active{1, 0,0,0,0, 2,3,4,{}});
 
-        test(__LINE__, {"-n"},                     active{1, 0,0,0,1, 0,0,0,{}});
-        test(__LINE__, {"-n", "2"},                active{1, 0,0,0,0, 0,0,0,{2}});
-        test(__LINE__, {"-n", "2", "3"},           active{1, 0,0,0,0, 0,0,0,{2,3}});
-        test(__LINE__, {"-n", "2", "3", "4"},      active{1, 0,0,0,0, 0,0,0,{2,3,4}});
-        test(__LINE__, {"-n", "2", "3", "4", "5"}, active{1, 0,0,0,0, 0,0,0,{2,3,4, 5}});
+        test(__LINE__, {"-n"},                     test_active{1, 0,0,0,1, 0,0,0,{}});
+        test(__LINE__, {"-n", "2"},                test_active{1, 0,0,0,0, 0,0,0,{2}});
+        test(__LINE__, {"-n", "2", "3"},           test_active{1, 0,0,0,0, 0,0,0,{2,3}});
+        test(__LINE__, {"-n", "2", "3", "4"},      test_active{1, 0,0,0,0, 0,0,0,{2,3,4}});
+        test(__LINE__, {"-n", "2", "3", "4", "5"}, test_active{1, 0,0,0,0, 0,0,0,{2,3,4, 5}});
 
-        test(__LINE__, {"-o"},                     active{1, 1,0,0,0, 0,0,0,{}});
-        test(__LINE__, {"-o", "2"},                active{1, 0,0,0,0, 2,0,0,{}});
-        test(__LINE__, {"-o", "2", "3"},           active{1, 0,0,0,0, 2,0,0,{3}});
-        test(__LINE__, {"-o", "2", "3", "4"},      active{1, 0,0,0,0, 2,0,0,{3,4}});
-        test(__LINE__, {"-o", "2", "3", "4", "5"}, active{1, 0,0,0,0, 2,0,0,{3,4, 5}});
+        test(__LINE__, {"-o"},                     test_active{1, 1,0,0,0, 0,0,0,{}});
+        test(__LINE__, {"-o", "2"},                test_active{1, 0,0,0,0, 2,0,0,{}});
+        test(__LINE__, {"-o", "2", "3"},           test_active{1, 0,0,0,0, 2,0,0,{3}});
+        test(__LINE__, {"-o", "2", "3", "4"},      test_active{1, 0,0,0,0, 2,0,0,{3,4}});
+        test(__LINE__, {"-o", "2", "3", "4", "5"}, test_active{1, 0,0,0,0, 2,0,0,{3,4, 5}});
 
-        test(__LINE__, {"-p"},                     active{1, 1,1,0,0, 0,0,0,{}});
-        test(__LINE__, {"-p", "2"},                active{1, 0,1,0,0, 2,0,0,{}});
-        test(__LINE__, {"-p", "2", "3"},           active{1, 0,0,0,0, 2,3,0,{}});
-        test(__LINE__, {"-p", "2", "3", "4"},      active{1, 0,0,0,0, 2,3,0,{4}});
-        test(__LINE__, {"-p", "2", "3", "4", "5"}, active{1, 0,0,0,0, 2,3,0,{4, 5}});
+        test(__LINE__, {"-p"},                     test_active{1, 1,1,0,0, 0,0,0,{}});
+        test(__LINE__, {"-p", "2"},                test_active{1, 0,1,0,0, 2,0,0,{}});
+        test(__LINE__, {"-p", "2", "3"},           test_active{1, 0,0,0,0, 2,3,0,{}});
+        test(__LINE__, {"-p", "2", "3", "4"},      test_active{1, 0,0,0,0, 2,3,0,{4}});
+        test(__LINE__, {"-p", "2", "3", "4", "5"}, test_active{1, 0,0,0,0, 2,3,0,{4, 5}});
 
-        test(__LINE__, {"-q"},                     active{1, 1,1,0,1, 0,0,0,{}});
-        test(__LINE__, {"-q", "2"},                active{1, 0,1,0,1, 2,0,0,{}});
-        test(__LINE__, {"-q", "2", "3"},           active{1, 0,0,0,1, 2,3,0,{}});
-        test(__LINE__, {"-q", "2", "3", "4"},      active{1, 0,0,0,0, 2,3,0,{4}});
-        test(__LINE__, {"-q", "2", "3", "4", "5"}, active{1, 0,0,0,0, 2,3,0,{4, 5}});
+        test(__LINE__, {"-q"},                     test_active{1, 1,1,0,1, 0,0,0,{}});
+        test(__LINE__, {"-q", "2"},                test_active{1, 0,1,0,1, 2,0,0,{}});
+        test(__LINE__, {"-q", "2", "3"},           test_active{1, 0,0,0,1, 2,3,0,{}});
+        test(__LINE__, {"-q", "2", "3", "4"},      test_active{1, 0,0,0,0, 2,3,0,{4}});
+        test(__LINE__, {"-q", "2", "3", "4", "5"}, test_active{1, 0,0,0,0, 2,3,0,{4, 5}});
 
-        test(__LINE__, {"-r"},           active{1, 1,1,0,0, 0,0,0,{}});
-        test(__LINE__, {"-r", "2"},      active{1, 0,1,0,0, 2,0,0,{}});
-        test(__LINE__, {"-r", "2", "3"}, active{1, 0,0,0,0, 2,3,0,{}});
+        test(__LINE__, {"-r"},           test_active{1, 1,1,0,0, 0,0,0,{}});
+        test(__LINE__, {"-r", "2"},      test_active{1, 0,1,0,0, 2,0,0,{}});
+        test(__LINE__, {"-r", "2", "3"}, test_active{1, 0,0,0,0, 2,3,0,{}});
 
-        test(__LINE__, {"-s"},                active{1, 1,1,0,0, 0,0,0,{}});
-        test(__LINE__, {"-s", "2"},           active{1, 0,1,0,0, 2,0,0,{}});
-        test(__LINE__, {"-s", "2", "3" },     active{1, 0,0,0,0, 2,3,0,{}});
-        test(__LINE__, {"-s", "2", "3", "4"}, active{1, 0,0,0,0, 2,3,4,{}});
+        test(__LINE__, {"-s"},                test_active{1, 1,1,0,0, 0,0,0,{}});
+        test(__LINE__, {"-s", "2"},           test_active{1, 0,1,0,0, 2,0,0,{}});
+        test(__LINE__, {"-s", "2", "3" },     test_active{1, 0,0,0,0, 2,3,0,{}});
+        test(__LINE__, {"-s", "2", "3", "4"}, test_active{1, 0,0,0,0, 2,3,4,{}});
 
-        test(__LINE__, {"-t"},                active{1, 1,1,1,0, 0,0,0,{}});
-        test(__LINE__, {"-t", "2"},           active{1, 0,1,1,0, 2,0,0,{}});
-        test(__LINE__, {"-t", "2", "3" },     active{1, 0,0,1,0, 2,3,0,{}});
-        test(__LINE__, {"-t", "2", "3", "4"}, active{1, 0,0,0,0, 2,3,4,{}});
+        test(__LINE__, {"-t"},                test_active{1, 1,1,1,0, 0,0,0,{}});
+        test(__LINE__, {"-t", "2"},           test_active{1, 0,1,1,0, 2,0,0,{}});
+        test(__LINE__, {"-t", "2", "3" },     test_active{1, 0,0,1,0, 2,3,0,{}});
+        test(__LINE__, {"-t", "2", "3", "4"}, test_active{1, 0,0,0,0, 2,3,4,{}});
 
     }
     catch(std::exception& e) {
         std::cerr << e.what() << std::endl;
         return 1;
     }
+    return 0;
 }

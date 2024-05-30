@@ -5,6 +5,8 @@ clipp - command line interfaces for modern C++
 
 Easy to use, powerful and expressive command line argument handling for C++11/14/17 contained in a **single header file**. 
 
+- char/wchar_t/TCHAR - all stuff now parametrized
+- C++17 by default (gcc 13+, clang 17+, msvc 2022 build ok)
 - options, options+value(s), positional values, positional commands, nested alternatives, decision trees, joinable flags, custom value filters, ...
 - documentation generation (usage lines, man pages); error handling 
 - lots of examples; large set of tests

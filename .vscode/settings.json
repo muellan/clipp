@@ -1,0 +1,6 @@
+{
+    "cmake.configureArgs": [
+        "-DBUILD_TESTING=1",
+        "-DBUILD_EXAMPLES=1"
+    ]
+}

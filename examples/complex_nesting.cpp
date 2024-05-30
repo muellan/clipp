@@ -8,6 +8,9 @@
  *
  *****************************************************************************/
 
+#include "pch.h"
+#include "example-def.h" // EXAMPLE_MAIN
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -15,7 +18,7 @@
 #include <clipp.h>
 
 
-int main(int argc, char* argv[])
+int EXAMPLE_MAIN(int argc, char* argv[])
 {
     using namespace clipp;
     using std::cout;
@@ -75,4 +78,5 @@ int main(int argc, char* argv[])
         auto fmt = doc_formatting{}.doc_column(31).last_column(80);
         cout << make_man_page(cli, argv[0], fmt) << '\n';
     }
+    return 0;
 }

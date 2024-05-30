@@ -8,6 +8,9 @@
  *
  *****************************************************************************/
 
+#include "pch.h"
+#include "example-def.h" // EXAMPLE_MAIN
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -15,7 +18,7 @@
 #include <clipp.h>
 
 
-int main(int argc, char* argv[])
+int EXAMPLE_MAIN(int argc, char* argv[])
 {
     using namespace clipp;
     using std::cout;
@@ -37,4 +40,5 @@ int main(int argc, char* argv[])
     auto result = parse(argc, argv, cli);
 
     clipp::debug::print(std::cout, result);
+    return 0;
 }

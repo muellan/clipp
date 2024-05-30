@@ -10,6 +10,7 @@
 
 #include "testing.h"
 
+namespace {
 
 //-------------------------------------------------------------------
 void test(int lineNo, bool expected, const clipp::group& cli)
@@ -78,8 +79,10 @@ make_cli_1()
         lastOpt);
 }
 
+} // namespace
+
 //-------------------------------------------------------------------
-int main()
+int TEST_MAIN()
 {
     using namespace clipp;
 
@@ -165,4 +168,5 @@ int main()
         std::cerr << e.what() << std::endl;
         return 1;
     }
+    return 0;
 }

@@ -8,13 +8,16 @@
  *
  *****************************************************************************/
 
+#include "pch.h"
+#include "example-def.h" // EXAMPLE_MAIN
+
 #include <iostream>
 #include <string>
 
 #include <clipp.h>
 
 
-int main(int argc, char* argv[])
+int EXAMPLE_MAIN(int argc, char* argv[])
 {
     using namespace clipp;
     using std::cout;
@@ -67,4 +70,5 @@ int main(int argc, char* argv[])
     else {
         cout << make_man_page(cli, argv[0]) << '\n';
     }
+    return 0;
 }

@@ -14,7 +14,7 @@
 //-------------------------------------------------------------------
 /** @brief test if parameter factory call expressions compile
  */
-void test_init_expressions_compile(int argc, char* argv[])
+static void test_init_expressions_compile(int argc, char* argv[])
 {
     using namespace clipp;
 
@@ -74,7 +74,7 @@ void test_param_init(int lineNo,
 
 
 //-------------------------------------------------------------------
-int main(int argc, char* argv[])
+int TEST_MAIN(int argc, char* argv[])
 {
     test_init_expressions_compile(argc, argv);
 
@@ -153,4 +153,6 @@ int main(int argc, char* argv[])
         std::cerr << e.what() << std::endl;
         return 1;
     }
+
+    return 0;
 }

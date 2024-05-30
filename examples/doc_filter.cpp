@@ -8,11 +8,14 @@
  *
  *****************************************************************************/
 
+#include "pch.h"
+#include "example-def.h" // EXAMPLE_MAIN
+
 #include <iostream>
 #include "clipp.h"
 
 
-int main(int argc, char* argv[])
+int EXAMPLE_MAIN(int argc, char* argv[])
 {
     using namespace clipp;
     using std::cout;
@@ -29,12 +32,12 @@ int main(int argc, char* argv[])
     );
 
     if(!parse(argc, argv, cli)) {
-        auto fmt = doc_formatting{}.doc_column(28);
+        auto fmt2 = doc_formatting{}.doc_column(28);
 
         auto filter = param_filter{}.prefix("--");
 
         cout << "Usage:\n" << usage_lines(cli, argv[0]) << "\n\n"
-             << "Parameters:\n" << documentation(cli, fmt, filter) << '\n';
+             << "Parameters:\n" << documentation(cli, fmt2, filter) << '\n';
     }
     else {
         cout << "input file: " << infile << '\n'
@@ -42,4 +45,6 @@ int main(int argc, char* argv[])
              << "recursive:  " << (rec ? "yes\n" : "no\n")
              << "UTF-16:     " << (utf16 ? "yes\n" : "no\n");
     }
+
+    return 0;
 }

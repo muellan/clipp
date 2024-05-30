@@ -8,13 +8,16 @@
  *
  *****************************************************************************/
 
+#include "pch.h"
+#include "example-def.h" // EXAMPLE_MAIN
+
 #include <iostream>
 #include <string>
 
 #include <clipp.h>
 
 
-int main()
+int EXAMPLE_MAIN()
 {
     using namespace clipp;
     using std::cout;
@@ -64,4 +67,6 @@ int main()
     cout << make_man_page(cli, "worddb", fmt)
         .prepend_section("DESCRIPTION", "    Builds a database of words from text files.")
         .append_section("LICENSE", "    GPL3") << '\n';
+
+    return 0;
 }

@@ -10,6 +10,7 @@
 
 #include "testing.h"
 
+namespace {
 
 //-------------------------------------------------------------------
 struct counters {
@@ -56,10 +57,10 @@ void test(int lineNo,
               [&]{ return m == matches; });
 }
 
-
+} // namespace
 
 //-------------------------------------------------------------------
-int main()
+int TEST_MAIN()
 {
     try {
         test(__LINE__, {}, counters{});
@@ -99,4 +100,5 @@ int main()
         std::cerr << e.what() << std::endl;
         return 1;
     }
+    return 0;
 }

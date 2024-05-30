@@ -1,5 +1,4 @@
-#ifndef CLIPP_TESTING_H_
-#define CLIPP_TESTING_H_
+#pragma once
 
 //don't include anything else before the test subject
 #include "../include/clipp.h"
@@ -14,6 +13,17 @@
 #include <type_traits>
 #include <limits>
 
+#define __STR_CAT(A, B) A##B
+#define _STR_CAT(A, B)  __STR_CAT(A, B)
+
+#ifdef ALL_TESTS_AS_SINGLE_PRJ
+#  ifndef THIS_TEST_FNAME
+#    error macro THIS_TEST_FNAME must be defined!
+#  endif // !THIS_TEST_FNAME
+#  define TEST_MAIN _STR_CAT(THIS_TEST_FNAME, _main)
+#else
+#  define TEST_MAIN main
+#endif
 
 /*************************************************************************//**
  *
@@ -28,6 +38,20 @@ struct test_location
 
     std::string file;
     int line;
+
+#ifdef _XTRA_FUNCTIONAL
+    void debug_out(char const* message) const
+    {
+        std::ostringstream stm;
+        stm << file.c_str() << "(" << line << "): " << message << std::endl;
+#if defined(_WIN32)
+        OutputDebugStringA(stm.str().c_str());
+#endif
+        std::cout << stm.str().c_str() << std::endl;
+    }
+#else // !_XTRA_FUNCTIONAL
+    void debug_out(char const*) const {}
+#endif
 };
 
 
@@ -38,7 +62,7 @@ struct test_location
  *
  *****************************************************************************/
 template<class CLI>
-std::vector<CLI>
+inline std::vector<CLI>
 wrapped_variants(const CLI& cli)
 {
     using namespace clipp;
@@ -76,7 +100,7 @@ wrapped_variants(const CLI& cli)
  *
  *****************************************************************************/
 template<class CLI>
-void run_wrapped_variants(
+inline void run_wrapped_variants(
     const test_location& info,
     const std::initializer_list<const char*>& args,
     const CLI& cli,
@@ -94,19 +118,20 @@ void run_wrapped_variants(
 
         parse(args, wrappedCli);
 
-//        cout << "==============================================\n"
-//             << " in file " << info.file << " in line " << info.line
-//             << " with variant " << variant << '\n'
-//             << "==============================================\n";
-//        clipp::debug::print(cout, wrappedCli);
-//        cout << "args = { ";
-//        for(const auto& a : args) cout << '"' << a << "\" ";
-//        cout << "}\n";
-//        auto res = clipp::parse(args, wrappedCli);
-//        cout << "----------------------------------------------\n";
-//        clipp::debug::print(cout, res);
+        //cout << "==============================================\n"
+        //     << " in file " << info.file << " in line " << info.line
+        //     << " with variant " << variant << '\n'
+        //     << "==============================================\n";
+        //clipp::debug::print(cout, wrappedCli);
+        //cout << "args = { ";
+        //for(const auto& a : args) cout << '"' << a << "\" ";
+        //cout << "}\n";
+        //auto res = clipp::parse(args, wrappedCli);
+        //cout << "----------------------------------------------\n";
+        //clipp::debug::print(cout, res);
 
         if(!valid()) {
+            info.debug_out("TEST FAILED");
             throw std::runtime_error{"failed test " + info.file +
                                      " in line " + to_string(info.line) +
                                      " with variant " + to_string(variant) };
@@ -122,7 +147,7 @@ void run_wrapped_variants(
  *
  *****************************************************************************/
 template<class CLI>
-void run_test(
+inline void run_test(
     const test_location& info,
     const std::initializer_list<const char*>& args,
     const CLI& cli,
@@ -133,22 +158,20 @@ void run_test(
 
     parse(args, cli);
 
-//    cout << "==============================================\n"
-//         << " in file " << info.file << " in line " << info.line << '\n'
-//         << "==============================================\n";
-//    clipp::debug::print(cout, cli);
-//    cout << "args = { ";
-//    for(const auto& a : args) cout << '"' << a << "\" ";
-//    cout << "}\n";
-//    auto res = clipp::parse(args, cli);
-//    cout << "----------------------------------------------\n";
-//    clipp::debug::print(cout, res);
+    //cout << "==============================================\n"
+    //     << " in file " << info.file << " in line " << info.line << '\n'
+    //     << "==============================================\n";
+    //clipp::debug::print(cout, cli);
+    //cout << "args = { ";
+    //for(const auto& a : args) cout << '"' << a << "\" ";
+    //cout << "}\n";
+    //auto res = clipp::parse(args, cli);
+    //cout << "----------------------------------------------\n";
+    //clipp::debug::print(cout, res);
 
     if(!valid()) {
+        info.debug_out("TEST FAILED");
         throw std::runtime_error{"failed test " + info.file +
                                  " in line " + to_string(info.line) };
     }
 }
-
-
-#endif

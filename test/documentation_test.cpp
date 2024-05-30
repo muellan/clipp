@@ -12,26 +12,32 @@
 
 using namespace clipp;
 
+namespace {
+
 //-------------------------------------------------------------------
 void test(int lineNo, const doc_formatting& fmt,
           const group& cli, const std::string& expected)
 {
     auto doc = documentation(cli,fmt).str();
 
-//    std::cout << "\n====================================\n\n" << doc << "\n";
-//    return;
+    //std::cout << "\n====================================\n\n" << doc << "\n";
+    //return;
 
     if(doc != expected) {
         std::cout << "\nEXPECTED:\n" << expected << "\nOBSERVED:\n" << doc << '\n';
 
-        throw std::runtime_error{"failed " + std::string( __FILE__ ) +
-                                 " in line " + std::to_string(lineNo)};
+        test_location const loc{std::string{__FILE__}, lineNo};
+        loc.debug_out("FAILED");
+
+        throw std::runtime_error{"failed " + loc.file + 
+                                 " in line " + std::to_string(loc.line)};
     }
 }
 
+} // namespace
 
 //-------------------------------------------------------------------
-int main()
+int TEST_MAIN()
 {
     try {
 
@@ -516,4 +522,5 @@ int main()
         std::cerr << e.what() << std::endl;
         return 1;
     }
+    return 0;
 }

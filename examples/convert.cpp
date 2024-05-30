@@ -8,11 +8,14 @@
  *
  *****************************************************************************/
 
+#include "pch.h"
+#include "example-def.h" // EXAMPLE_MAIN
+
 #include <iostream>
 #include "clipp.h"
 
 
-int main(int argc, char* argv[])
+int EXAMPLE_MAIN(int argc, char* argv[])
 {
     using namespace clipp;
     using std::cout;
@@ -37,4 +40,5 @@ int main(int argc, char* argv[])
              << "recursive:  " << (rec ? "yes\n" : "no\n")
              << "UTF-16:     " << (utf16 ? "yes\n" : "no\n");
     }
+    return 0;
 }

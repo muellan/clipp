@@ -10,18 +10,19 @@
 
 #include "testing.h"
 
+namespace {
 
 //-------------------------------------------------------------------
-struct active {
-    active() = default;
+struct test_active {
+    test_active() = default;
     explicit
-    active(bool a_, bool b_, bool c_, bool d_, bool e_, bool f_, int i_ = 0) :
+    test_active(bool a_, bool b_, bool c_, bool d_, bool e_, bool f_, int i_ = 0) :
         a{a_}, b{b_}, c{c_}, d{d_}, e{e_}, f{f_}, i{i_}
     {}
     bool a = false, b = false, c = false, d = false, e = false, f = false;
     int i = 0;
 
-    friend bool operator == (const active& x, const active& y) noexcept {
+    friend bool operator == (const test_active& x, const test_active& y) noexcept {
         return (x.a == y.a && x.b == y.b && x.c == y.c && x.d == y.d &&
                 x.e == y.e && x.f == y.f && x.i == y.i);
     }
@@ -31,11 +32,11 @@ struct active {
 //-------------------------------------------------------------------
 void test(int lineNo,
           const std::initializer_list<const char*> args,
-          const active& matches)
+          const test_active& matches)
 {
     using namespace clipp;
 
-    active m;
+    test_active m;
 
     auto cli = (
         (   command("a"),
@@ -60,86 +61,87 @@ void test(int lineNo,
     );
 
     run_wrapped_variants({ __FILE__, lineNo }, args, cli,
-              [&]{ m = active{}; },
+              [&]{ m = test_active{}; },
               [&]{ return m == matches; });
 }
 
+} // namespace
 
 //-------------------------------------------------------------------
-int main()
+int TEST_MAIN()
 {
     try {
-        test(__LINE__, {""}, active{});
+        test(__LINE__, {""}, test_active{});
 
-        test(__LINE__, {"a"}, active{});
-        test(__LINE__, {"b"}, active{});
-        test(__LINE__, {"c"}, active{});
-        test(__LINE__, {"-x"}, active{});
+        test(__LINE__, {"a"}, test_active{});
+        test(__LINE__, {"b"}, test_active{});
+        test(__LINE__, {"c"}, test_active{});
+        test(__LINE__, {"-x"}, test_active{});
 
-        test(__LINE__, {"a", "-x"}, active{1,0,0,0,0,0, 0});
-        test(__LINE__, {"b", "-x"}, active{0,1,0,0,0,0, 0});
-        test(__LINE__, {"c", "-x"}, active{0,0,1,0,0,0, 0});
+        test(__LINE__, {"a", "-x"}, test_active{1,0,0,0,0,0, 0});
+        test(__LINE__, {"b", "-x"}, test_active{0,1,0,0,0,0, 0});
+        test(__LINE__, {"c", "-x"}, test_active{0,0,1,0,0,0, 0});
 
-        test(__LINE__, {"b", "u"}, active{0,0,0,0,0,0, 1});
-        test(__LINE__, {"b", "v"}, active{0,0,0,0,0,0, 2});
-        test(__LINE__, {"b", "w"}, active{0,0,0,0,0,0, 3});
+        test(__LINE__, {"b", "u"}, test_active{0,0,0,0,0,0, 1});
+        test(__LINE__, {"b", "v"}, test_active{0,0,0,0,0,0, 2});
+        test(__LINE__, {"b", "w"}, test_active{0,0,0,0,0,0, 3});
 
-        test(__LINE__, {"b", "-x", "u"}, active{0,1,0,0,0,0, 1});
-        test(__LINE__, {"b", "-x", "v"}, active{0,1,0,0,0,0, 2});
-        test(__LINE__, {"b", "-x", "w"}, active{0,1,0,0,0,0, 3});
+        test(__LINE__, {"b", "-x", "u"}, test_active{0,1,0,0,0,0, 1});
+        test(__LINE__, {"b", "-x", "v"}, test_active{0,1,0,0,0,0, 2});
+        test(__LINE__, {"b", "-x", "w"}, test_active{0,1,0,0,0,0, 3});
 
-        test(__LINE__, {"b", "u", "-x"}, active{0,0,0,0,0,0, 1});
-        test(__LINE__, {"b", "v", "-x"}, active{0,0,0,0,0,0, 2});
-        test(__LINE__, {"b", "w", "-x"}, active{0,0,0,0,0,0, 3});
+        test(__LINE__, {"b", "u", "-x"}, test_active{0,0,0,0,0,0, 1});
+        test(__LINE__, {"b", "v", "-x"}, test_active{0,0,0,0,0,0, 2});
+        test(__LINE__, {"b", "w", "-x"}, test_active{0,0,0,0,0,0, 3});
 
-        test(__LINE__, {"b", "-x", "u", "-e"}, active{0,1,0,0,1,0, 1});
-        test(__LINE__, {"b", "-x", "v", "-e"}, active{0,1,0,0,1,0, 2});
-        test(__LINE__, {"b", "-x", "w", "-e"}, active{0,1,0,0,1,0, 3});
+        test(__LINE__, {"b", "-x", "u", "-e"}, test_active{0,1,0,0,1,0, 1});
+        test(__LINE__, {"b", "-x", "v", "-e"}, test_active{0,1,0,0,1,0, 2});
+        test(__LINE__, {"b", "-x", "w", "-e"}, test_active{0,1,0,0,1,0, 3});
 
-        test(__LINE__, {"b", "u", "-x", "-e"}, active{0,0,0,0,1,0, 1});
-        test(__LINE__, {"b", "v", "-x", "-e"}, active{0,0,0,0,1,0, 2});
-        test(__LINE__, {"b", "w", "-x", "-e"}, active{0,0,0,0,1,0, 3});
+        test(__LINE__, {"b", "u", "-x", "-e"}, test_active{0,0,0,0,1,0, 1});
+        test(__LINE__, {"b", "v", "-x", "-e"}, test_active{0,0,0,0,1,0, 2});
+        test(__LINE__, {"b", "w", "-x", "-e"}, test_active{0,0,0,0,1,0, 3});
 
-        test(__LINE__, {"b", "-x", "u", "-e"}, active{0,1,0,0,1,0, 1});
-        test(__LINE__, {"b", "-x", "v", "-e"}, active{0,1,0,0,1,0, 2});
-        test(__LINE__, {"b", "-x", "w", "-e"}, active{0,1,0,0,1,0, 3});
+        test(__LINE__, {"b", "-x", "u", "-e"}, test_active{0,1,0,0,1,0, 1});
+        test(__LINE__, {"b", "-x", "v", "-e"}, test_active{0,1,0,0,1,0, 2});
+        test(__LINE__, {"b", "-x", "w", "-e"}, test_active{0,1,0,0,1,0, 3});
 
-        test(__LINE__, {"b", "-x", "-e", "u"}, active{0,1,0,0,0,0, 1});
-        test(__LINE__, {"b", "-x", "-e", "v"}, active{0,1,0,0,0,0, 2});
-        test(__LINE__, {"b", "-x", "-e", "w"}, active{0,1,0,0,0,0, 3});
+        test(__LINE__, {"b", "-x", "-e", "u"}, test_active{0,1,0,0,0,0, 1});
+        test(__LINE__, {"b", "-x", "-e", "v"}, test_active{0,1,0,0,0,0, 2});
+        test(__LINE__, {"b", "-x", "-e", "w"}, test_active{0,1,0,0,0,0, 3});
 
-        test(__LINE__, {"c", "-x", "-i"},  active{0,0,1,0,0,0, 0});
-        test(__LINE__, {"c", "-x", "-f"},  active{0,0,1,0,0,0, 0});
-        test(__LINE__, {"c", "-x", "123"}, active{0,0,1,0,0,0, 0});
+        test(__LINE__, {"c", "-x", "-i"},  test_active{0,0,1,0,0,0, 0});
+        test(__LINE__, {"c", "-x", "-f"},  test_active{0,0,1,0,0,0, 0});
+        test(__LINE__, {"c", "-x", "123"}, test_active{0,0,1,0,0,0, 0});
 
-        test(__LINE__, {"c", "-x", "-i", "123"}, active{0,0,1,0,0,0, 0});
-        test(__LINE__, {"c", "-x", "-i", "-f"},  active{0,0,1,0,0,0, 0});
-        test(__LINE__, {"c", "-x", "123", "-i"}, active{0,0,1,0,0,0, 0});
-        test(__LINE__, {"c", "-x", "123", "-f"}, active{0,0,1,0,0,0, 0});
+        test(__LINE__, {"c", "-x", "-i", "123"}, test_active{0,0,1,0,0,0, 0});
+        test(__LINE__, {"c", "-x", "-i", "-f"},  test_active{0,0,1,0,0,0, 0});
+        test(__LINE__, {"c", "-x", "123", "-i"}, test_active{0,0,1,0,0,0, 0});
+        test(__LINE__, {"c", "-x", "123", "-f"}, test_active{0,0,1,0,0,0, 0});
 
-        test(__LINE__, {"c", "-x", "-i", "123", "-f"}, active{0,0,1,0,0,0, 0});
+        test(__LINE__, {"c", "-x", "-i", "123", "-f"}, test_active{0,0,1,0,0,0, 0});
 
-        test(__LINE__, {"c", "-x", "d"}, active{0,0,1,1,0,0, 0});
+        test(__LINE__, {"c", "-x", "d"}, test_active{0,0,1,1,0,0, 0});
 
-        test(__LINE__, {"c", "-x", "d", "-i"},  active{0,0,1,1,1,0, 0});
-        test(__LINE__, {"c", "-x", "d", "-f"},  active{0,0,1,1,0,1, 0});
-        test(__LINE__, {"c", "-x", "d", "123"}, active{0,0,1,1,0,0, 0});
+        test(__LINE__, {"c", "-x", "d", "-i"},  test_active{0,0,1,1,1,0, 0});
+        test(__LINE__, {"c", "-x", "d", "-f"},  test_active{0,0,1,1,0,1, 0});
+        test(__LINE__, {"c", "-x", "d", "123"}, test_active{0,0,1,1,0,0, 0});
 
-        test(__LINE__, {"c", "-x", "d", "-i", "123"}, active{0,0,1,1,1,0, 123});
-        test(__LINE__, {"c", "-x", "d", "-i", "-f"},  active{0,0,1,1,1,1, 0});
-        test(__LINE__, {"c", "-x", "d", "123", "-i"}, active{0,0,1,1,1,0, 0});
-        test(__LINE__, {"c", "-x", "d", "123", "-f"}, active{0,0,1,1,0,1, 0});
+        test(__LINE__, {"c", "-x", "d", "-i", "123"}, test_active{0,0,1,1,1,0, 123});
+        test(__LINE__, {"c", "-x", "d", "-i", "-f"},  test_active{0,0,1,1,1,1, 0});
+        test(__LINE__, {"c", "-x", "d", "123", "-i"}, test_active{0,0,1,1,1,0, 0});
+        test(__LINE__, {"c", "-x", "d", "123", "-f"}, test_active{0,0,1,1,0,1, 0});
 
-        test(__LINE__, {"c", "-x", "d", "-i", "123", "-f"}, active{0,0,1,1,1,1, 123});
+        test(__LINE__, {"c", "-x", "d", "-i", "123", "-f"}, test_active{0,0,1,1,1,1, 123});
 
-        test(__LINE__, {"c", "-x", "d", "-f", "-i"}, active{0,0,1,1,1,1, 0});
-        test(__LINE__, {"c", "-x", "d", "-f", "-i", "123"}, active{0,0,1,1,1,1, 123});
+        test(__LINE__, {"c", "-x", "d", "-f", "-i"}, test_active{0,0,1,1,1,1, 0});
+        test(__LINE__, {"c", "-x", "d", "-f", "-i", "123"}, test_active{0,0,1,1,1,1, 123});
 
-        test(__LINE__, {"c", "d", "-f", "-i", "123"}, active{0,0,0,1,1,1, 123});
-        test(__LINE__, {"c", "d", "-i", "123", "-f"}, active{0,0,0,1,1,1, 123});
+        test(__LINE__, {"c", "d", "-f", "-i", "123"}, test_active{0,0,0,1,1,1, 123});
+        test(__LINE__, {"c", "d", "-i", "123", "-f"}, test_active{0,0,0,1,1,1, 123});
 
-        test(__LINE__, {"c", "d", "-x", "-i", "123", "-f"}, active{0,0,0,1,1,1, 123});
-        test(__LINE__, {"c", "d", "-f", "-i", "123", "-x"}, active{0,0,0,1,1,1, 123});
+        test(__LINE__, {"c", "d", "-x", "-i", "123", "-f"}, test_active{0,0,0,1,1,1, 123});
+        test(__LINE__, {"c", "d", "-f", "-i", "123", "-x"}, test_active{0,0,0,1,1,1, 123});
 
 
     }
@@ -147,4 +149,5 @@ int main()
         std::cerr << e.what() << std::endl;
         return 1;
     }
+    return 0;
 }

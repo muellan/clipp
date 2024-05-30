@@ -12,6 +12,8 @@
 
 using namespace clipp;
 
+namespace {
+
 //-------------------------------------------------------------------
 void test(int lineNo, const doc_formatting& fmt,
           const group& cli, const std::string& expected)
@@ -29,9 +31,10 @@ void test(int lineNo, const doc_formatting& fmt,
     }
 }
 
+} // namespace
 
 //-------------------------------------------------------------------
-int main()
+int TEST_MAIN()
 {
     try {
 
@@ -370,4 +373,5 @@ int main()
         std::cerr << e.what() << std::endl;
         return 1;
     }
+    return 0;
 }

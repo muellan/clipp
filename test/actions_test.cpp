@@ -19,6 +19,7 @@
 
 #include "testing.h"
 
+namespace {
 
 //-------------------------------------------------------------------
 template<class T>
@@ -109,9 +110,10 @@ void test(int lineNo,
     );
 }
 
+} // namespace
 
 //-------------------------------------------------------------------
-int main()
+int TEST_MAIN()
 {
     try {
         test(__LINE__, {""},
@@ -399,4 +401,5 @@ int main()
         std::cerr << e.what() << std::endl;
         return 1;
     }
+    return 0;
 }

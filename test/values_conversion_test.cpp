@@ -12,6 +12,9 @@
 
 #include "testing.h"
 
+namespace {
+
+
 //-------------------------------------------------------------------
 #if defined(_MSC_VER)
 #if _MSC_VER < 1800
@@ -65,10 +68,10 @@ void test(int lineNo, T x, const std::string& arg, T expected)
 
     auto cli = group( value("", x) );
 
-//    std::cout << lineNo << " " << x << "  '" << arg << "' " << expected;
+    //std::cout << lineNo << " " << x << "  '" << arg << "' " << expected;
 
     run_test({ __FILE__, lineNo }, {arg.c_str()}, cli, [&]{
-//        std::cout << " -> " << x << std::endl;
+        //std::cout << " -> " << x << std::endl;
         return equals<T>::result(x,expected); } );
 }
 
@@ -127,12 +130,12 @@ struct test_clamp<T,Wide,false> {
     static void in(int) {}
 };
 
+} // namespace
 
 //-------------------------------------------------------------------
-int main()
+int TEST_MAIN()
 {
     try {
-
         test<bool>(__LINE__, false, "",  false);
         test<bool>(__LINE__, false, " ", true);
         test<bool>(__LINE__, false, "0", true);
@@ -194,4 +197,5 @@ int main()
         std::cerr << e.what() << std::endl;
         return 1;
     }
+    return 0;
  }

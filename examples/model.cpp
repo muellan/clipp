@@ -8,6 +8,9 @@
  *
  *****************************************************************************/
 
+#include "pch.h"
+#include "example-def.h" // EXAMPLE_MAIN
+
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -124,7 +127,7 @@ settings configuration(int argc, char* argv[])
 
 
 //-------------------------------------------------------------------
-int main(int argc, char* argv[])
+int EXAMPLE_MAIN(int argc, char* argv[])
 {
     try {
         auto conf = configuration(argc, argv);
@@ -133,4 +136,5 @@ int main(int argc, char* argv[])
     catch(std::exception& e) {
         std::cerr << "ERROR: " << e.what() << '\n';
     }
+    return 0;
 }

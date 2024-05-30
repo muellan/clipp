@@ -32,6 +32,9 @@
  *
  *****************************************************************************/
 
+#include "pch.h"
+#include "example-def.h" // EXAMPLE_MAIN
+
 #include <iostream>
 #include <algorithm>
 #include <string>
@@ -40,7 +43,7 @@
 #include <clipp.h>
 
 
-int main(int argc, char* argv[])
+int EXAMPLE_MAIN(int argc, char* argv[])
 {
     using namespace clipp;
     using std::string;
@@ -135,4 +138,5 @@ int main(int argc, char* argv[])
                   << usage_lines(navalcli, "naval_fate", fmt) << '\n';
     }
 
+    return 0;
 }

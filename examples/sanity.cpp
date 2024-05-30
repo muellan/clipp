@@ -8,13 +8,16 @@
  *
  *****************************************************************************/
 
+#include "pch.h"
+#include "example-def.h" // EXAMPLE_MAIN
+
 #include <iostream>
 #include <string>
 
 #include <clipp.h>
 
 
-int main()
+int EXAMPLE_MAIN()
 {
     using namespace clipp;
     using std::cout;
@@ -27,4 +30,6 @@ int main()
 
     cout << "flags are " << (cli.flags_are_prefix_free() ? "" : "not ")
          << "prefix free\n";
+
+    return 0;
 }

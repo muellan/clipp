@@ -11,9 +11,10 @@
 #include "testing.h"
 #include <cmath>
 
+namespace {
 
 //-------------------------------------------------------------------
-struct active {
+struct test_active {
     int av = 0;
     int bv = 1;
     float cv = 0.0f, dv = 1.0f;
@@ -22,7 +23,7 @@ struct active {
     bool a = false, b = false, c = false, d = false, e = false, f = false,
          g = false, h = false, i = false;
 
-    friend bool operator == (const active& x, const active& y) noexcept {
+    friend bool operator == (const test_active& x, const test_active& y) noexcept {
         if(x.a != y.a || x.b != y.b || x.c != y.c ||
            x.d != y.d || x.e != y.e || x.f != y.f ||
            x.g != y.g || x.h != y.h || x.i != y.i ||
@@ -40,11 +41,11 @@ struct active {
 //-------------------------------------------------------------------
 void test(int lineNo,
           const std::initializer_list<const char*> args,
-          const active& matches)
+          const test_active& matches)
 {
     using namespace clipp;
 
-    active m;
+    test_active m;
 
     auto cli = (
         required("-a").set(m.a)         & value("A",m.av),
@@ -59,73 +60,74 @@ void test(int lineNo,
     );
 
     run_wrapped_variants({ __FILE__, lineNo }, args, cli,
-              [&]{ m = active{}; },
+              [&]{ m = test_active{}; },
               [&]{ return m == matches; });
 }
 
+} // namespace
 
 //-------------------------------------------------------------------
-int main()
+int TEST_MAIN()
 {
 
     try {
-        active m;
+        test_active m;
         test(__LINE__, {""}, m);
 
-        m = active{}; m.a = true;
+        m = test_active{}; m.a = true;
         test(__LINE__, {"-a"}, m);
-        m = active{}; m.a = true; m.av = 65;
+        m = test_active{}; m.a = true; m.av = 65;
         test(__LINE__, {"-a", "65"}, m);
         test(__LINE__, {"-a65"}, m);
 
-        m = active{}; m.b = true;
+        m = test_active{}; m.b = true;
         test(__LINE__, {"-b"}, m);
-        m = active{}; m.b = true; m.bv = 12;
+        m = test_active{}; m.b = true; m.bv = 12;
         test(__LINE__, {"-b", "12"}, m);
         test(__LINE__, {"-b12"}, m);
 
-        m = active{}; m.c = true;
+        m = test_active{}; m.c = true;
         test(__LINE__, {"-c"}, m);
-        m = active{}; m.c = true; m.cv = 2.3f;
+        m = test_active{}; m.c = true; m.cv = 2.3f;
         test(__LINE__, {"-c", "2.3"}, m);
         test(__LINE__, {"-c2.3"}, m);
         test(__LINE__, {"-c2", ".3"}, m);
         test(__LINE__, {"-c", "+2.3"}, m);
         test(__LINE__, {"-c+2.3"}, m);
         test(__LINE__, {"-c+2", ".3"}, m);
-        m = active{}; m.c = true; m.cv = -2.3f;
+        m = test_active{}; m.c = true; m.cv = -2.3f;
         test(__LINE__, {"-c", "-2.3"}, m);
         test(__LINE__, {"-c-2.3"}, m);
         test(__LINE__, {"-c-2", ".3"}, m);
 
-        m = active{}; m.c = true; m.cv = 1; m.dv = 2;
+        m = test_active{}; m.c = true; m.cv = 1; m.dv = 2;
         test(__LINE__, {"-c", "1", "2"}, m);
         test(__LINE__, {"-c1", "2"}, m);
         test(__LINE__, {"-c1", "2"}, m);
 
-        m = active{}; m.d = true; m.c = true; m.cv = 2;
+        m = test_active{}; m.d = true; m.c = true; m.cv = 2;
         test(__LINE__, {"-c", "2", "-d"}, m);
-        m = active{}; m.a = true; m.av = 1; m.c = true; m.cv = 2;
+        m = test_active{}; m.a = true; m.av = 1; m.c = true; m.cv = 2;
         test(__LINE__, {"-c", "2", "-a", "1"}, m);
 
-        m = active{}; m.d = true;
+        m = test_active{}; m.d = true;
         test(__LINE__, {"-d"}, m);
-        m = active{}; m.d = true; m.dv = 2.3f;
+        m = test_active{}; m.d = true; m.dv = 2.3f;
         test(__LINE__, {"-d", "2.3"}, m);
         test(__LINE__, {"-d2.3"}, m);
         test(__LINE__, {"-d2", ".3"}, m);
 
-        m = active{}; m.e = true;
+        m = test_active{}; m.e = true;
         test(__LINE__, {"-e"}, m);
-        m = active{}; m.e = true; m.ev = 2.3;
+        m = test_active{}; m.e = true; m.ev = 2.3;
         test(__LINE__, {"-e", "2.3"}, m);
         test(__LINE__, {"-e2.3"}, m);
         test(__LINE__, {"-e2", ".3"}, m);
 
-        m = active{}; m.f = true;
+        m = test_active{}; m.f = true;
         test(__LINE__, {"-f"}, m);
         test(__LINE__, {"--ff"}, m);
-        m = active{}; m.f = true; m.fv = 2.3;
+        m = test_active{}; m.f = true; m.fv = 2.3;
         test(__LINE__, {"-f", "2.3"}, m);
         test(__LINE__, {"--ff", "2.3"}, m);
         test(__LINE__, {"-f2.3"}, m);
@@ -133,40 +135,40 @@ int main()
         test(__LINE__, {"-f2", ".3"}, m);
         test(__LINE__, {"--ff2", ".3"}, m);
 
-        m = active{}; m.g = true; m.gv = "xyz";
+        m = test_active{}; m.g = true; m.gv = "xyz";
         test(__LINE__, {"xyz"}, m);
 
-        m = active{}; m.g = true; m.gv = "-h";
+        m = test_active{}; m.g = true; m.gv = "-h";
         test(__LINE__, {"-h"}, m);
-        m = active{}; m.g = true; m.gv = "--hh";
+        m = test_active{}; m.g = true; m.gv = "--hh";
         test(__LINE__, {"--hh"}, m);
-        m = active{}; m.g = true; m.gv = "---hhh";
+        m = test_active{}; m.g = true; m.gv = "---hhh";
         test(__LINE__, {"---hhh"}, m);
 
-        m = active{}; m.g = true; m.gv = "--h";
+        m = test_active{}; m.g = true; m.gv = "--h";
         test(__LINE__, {"--h"}, m);
-        m = active{}; m.g = true; m.gv = "--hh";
+        m = test_active{}; m.g = true; m.gv = "--hh";
         test(__LINE__, {"--hh"}, m);
-        m = active{}; m.g = true; m.gv = "-hh";
+        m = test_active{}; m.g = true; m.gv = "-hh";
         test(__LINE__, {"-hh"}, m);
-        m = active{}; m.g = true; m.gv = "-hhh";
+        m = test_active{}; m.g = true; m.gv = "-hhh";
         test(__LINE__, {"-hhh"}, m);
 
-        m = active{}; m.h = true; m.g = true; m.gv = "x-y.z";
+        m = test_active{}; m.h = true; m.g = true; m.gv = "x-y.z";
         test(__LINE__, {"x-y.z", "-h"}, m);
         test(__LINE__, {"x-y.z", "--hh"}, m);
         test(__LINE__, {"x-y.z", "---hhh"}, m);
 
-        m = active{}; m.i = true; m.g = true; m.gv = "xYz";
+        m = test_active{}; m.i = true; m.g = true; m.gv = "xYz";
         test(__LINE__, {"xYz", "-i"}, m);
         test(__LINE__, {"xYz", "--ii"}, m);
 
-        m = active{}; m.g = true; m.gv = "-ii";
+        m = test_active{}; m.g = true; m.gv = "-ii";
         test(__LINE__, {"-ii"}, m);
-        m = active{}; m.g = true; m.gv = "--i";
+        m = test_active{}; m.g = true; m.gv = "--i";
         test(__LINE__, {"--i"}, m);
 
-        m = active{};
+        m = test_active{};
         m.a = true; m.av = 65;
         m.b = true; m.bv = 12;
         m.c = true; m.cv = -0.12f;
@@ -191,4 +193,5 @@ int main()
         std::cerr << e.what() << std::endl;
         return 1;
     }
+    return 0;
 }
