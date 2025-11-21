@@ -1406,9 +1406,7 @@ public:
     //---------------------------------------------------------------
     /** @brief executes all argument actions */
     void execute_actions(const arg_string& arg) const {
-        int i = 0;
         for(const auto& a : argActions_) {
-            ++i;
             a(arg.c_str());
         }
     }
